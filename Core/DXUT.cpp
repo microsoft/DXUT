@@ -640,7 +640,7 @@ HRESULT WINAPI DXUTInit( bool bParseCommandLine,
 
     // Save the current sticky/toggle/filter key settings so DXUT can restore them later
     STICKYKEYS sk = {sizeof(STICKYKEYS), 0};
-    SystemParametersInfo(SPI_GETSTICKYKEYS, sizeof(STICKYKEYS), &sk, 0);
+    (void)SystemParametersInfo(SPI_GETSTICKYKEYS, sizeof(STICKYKEYS), &sk, 0);
     GetDXUTState().SetStartupStickyKeys( sk );
 
     TOGGLEKEYS tk = {sizeof(TOGGLEKEYS), 0};
@@ -1647,6 +1647,7 @@ HRESULT WINAPI DXUTCreateDevice(D3D_FEATURE_LEVEL reqFL,  bool bWindowed, int nS
         OSVERSIONINFOEX osv;
         memset( &osv, 0, sizeof(osv) );
         osv.dwOSVersionInfoSize = sizeof(osv);
+#pragma warning( suppress : 4996 28159 )
         GetVersionEx( (LPOSVERSIONINFO)&osv );
 
         if ( ( osv.dwMajorVersion > 6 )
@@ -3057,16 +3058,10 @@ void DXUTAllowShortcutKeys( _In_ bool bAllowKeys )
         // Set low level keyboard hook if haven't already
         if( !GetDXUTState().GetKeyboardHook() )
         {
-            // Set the low-level hook procedure.  Only works on Windows 2000 and above
-            OSVERSIONINFO OSVersionInfo;
-            OSVersionInfo.dwOSVersionInfoSize = sizeof( OSVersionInfo );
-            GetVersionEx( &OSVersionInfo );
-            if( OSVersionInfo.dwPlatformId == VER_PLATFORM_WIN32_NT && OSVersionInfo.dwMajorVersion > 4 )
-            {
-                HHOOK hKeyboardHook = SetWindowsHookEx( WH_KEYBOARD_LL, DXUTLowLevelKeyboardProc,
-                                                        GetModuleHandle( nullptr ), 0 );
-                GetDXUTState().SetKeyboardHook( hKeyboardHook );
-            }
+            // Set the low-level hook procedure.
+            HHOOK hKeyboardHook = SetWindowsHookEx( WH_KEYBOARD_LL, DXUTLowLevelKeyboardProc,
+                                                    GetModuleHandle( nullptr ), 0 );
+            GetDXUTState().SetKeyboardHook( hKeyboardHook );
         }
 
         // Disable StickyKeys/etc shortcuts but if the accessibility feature is on, 

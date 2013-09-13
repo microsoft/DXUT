@@ -299,17 +299,10 @@ static UINT                     g_uCodePage = 0;
 static LPTSTR g_aszIndicator[] =
 {
     TEXT( "A" ),
-#ifdef UNICODE
-		L"\x7B80",
-		L"\x7E41",
-		L"\xac00",
-		L"\x3042",
-#else
-    "\xd6\xd0",
-    "\xa4\xa4",
-    "\xb0\xa1",
-    "\x82\xa0",
-#endif
+        L"\x7B80",
+        L"\x7E41",
+        L"\xac00",
+        L"\x3042",
 };
 static LPTSTR                   g_pszIndicatior = g_aszIndicator[0];
 
@@ -364,9 +357,9 @@ protected:
 
         // IUnknown
         STDMETHODIMP    QueryInterface( _In_ REFIID riid, _COM_Outptr_ void** ppvObj );
-		STDMETHODIMP_( ULONG )
+        STDMETHODIMP_( ULONG )
                         AddRef();
-		STDMETHODIMP_( ULONG )
+        STDMETHODIMP_( ULONG )
                         Release();
 
         // ITfUIElementSink
@@ -459,283 +452,8 @@ static unsigned long _strtoul( LPCSTR psz, LPTSTR*, int )
     return ulRet;
 }
 
-#ifdef UNICODE
 #define GetCharCount(psz) (int)wcslen(psz)
 #define GetCharCountFromBytes(psz,iBytes) (iBytes)
-static void AW_SendCompString()
-{
-	int i, iLen;
-	if ( ImeUiCallback_OnChar )
-	{
-		for ( i = 0; g_szCompositionString[i]; i++ )
-		{
-			ImeUiCallback_OnChar( g_szCompositionString[i] );
-		}
-		return;
-	}
-
-	BYTE szCompStr[COUNTOF(g_szCompositionString) * 2];
-	iLen = WideCharToMultiByte(g_uCodePage, 0, g_szCompositionString, -1,
-				(LPSTR)szCompStr, COUNTOF(szCompStr), nullptr, nullptr) - 1; // don't need to send NUL terminator;
-	for (i = 0; i < iLen; i++)
-	{
-		SendKeyMsg(g_hwndCurr, WM_CHAR, szCompStr[i]);
-	}
-}
-
-// The following AW_Imm* functions are there to support Win95/98 first version.
-// They can be deleted if the game doesn't supports them (i.e. games requires Win98 SE or later).
-static DWORD AW_GetCandidateList(HIMC himc, DWORD dwIndex, LPCANDIDATELIST* ppCandList)
-{
-	DWORD dwBufLen = ImmGetCandidateListA( himc, dwIndex, nullptr, 0 );
-	if (dwBufLen)
-	{
-		LPCANDIDATELIST pCandList = (LPCANDIDATELIST)ImeUiCallback_Malloc(dwBufLen);
-		if (pCandList) {
-			dwBufLen = ImmGetCandidateListA( himc, dwIndex, pCandList, dwBufLen );
-			if (dwBufLen) {
-				int i;
-				int wideBufLen = 0;
-				for (i = 0; i < (int)pCandList->dwCount; i++) {
-					wideBufLen += MultiByteToWideChar(g_uCodePage, 0, (LPSTR)pCandList + pCandList->dwOffset[i], -1, nullptr, 0) * sizeof(WCHAR);
-				}
-				wideBufLen += pCandList->dwOffset[0];
-				*ppCandList = (LPCANDIDATELIST)ImeUiCallback_Malloc(wideBufLen);
-				LPCANDIDATELIST pCandListW = *ppCandList;
-				memcpy(pCandListW, pCandList, pCandList->dwOffset[0]);
-				LPWSTR pwz = (LPWSTR)((LPSTR)pCandListW + pCandList->dwOffset[0]);
-				for (i = 0; i < (int)pCandList->dwCount; i++) {
-					pCandListW->dwOffset[i] = (LPSTR)pwz - (LPSTR)pCandListW;
-					pwz += MultiByteToWideChar(g_uCodePage, 0, (LPSTR)pCandList + pCandList->dwOffset[i], -1, pwz, 256);
-				}
-				dwBufLen = wideBufLen;
-			}
-			ImeUiCallback_Free(pCandList);
-		}
-	}
-	return dwBufLen;
-}
-
-static LONG WINAPI AW_ImmGetCompositionString(HIMC himc, DWORD dwIndex, LPVOID lpBuf, DWORD dwBufLen)
-{
-	char pszMb[COUNTOF(g_szCompositionString) * 2];
-	DWORD dwRet = ImmGetCompositionStringA(himc, dwIndex, pszMb, sizeof(pszMb));
-	switch (dwIndex) {
-	case GCS_RESULTSTR:
-	case GCS_COMPSTR:
-		if (dwRet) {
-                        _Analysis_assume_( dwRet < sizeof(pszMb) );
-			pszMb[dwRet] = 0;
-			dwRet = (DWORD)MultiByteToWideChar(g_uCodePage, 0, pszMb, -1, (LPWSTR)lpBuf, dwBufLen);
-			if (dwRet) {
-				// Note that ImmGetCompositionString() returns number of bytes copied, regardless of the width of character.
-				dwRet = (dwRet - 1) * sizeof(WCHAR);
-			}
-		}
-		break;
-	case GCS_CURSORPOS:
-		dwRet /= 2;
-		break;
-	case GCS_COMPATTR: {
-		char pszMb2[COUNTOF(g_szCompositionString) * 2];
-		DWORD dwRet2 = ImmGetCompositionStringA(himc, GCS_COMPSTR, pszMb2, sizeof(pszMb2));
-		if (!dwRet2) {
-			dwRet2 = ImmGetCompositionStringA(himc, GCS_RESULTSTR, pszMb2, sizeof(pszMb2));
-			if (!dwRet2) {
-				return 0;
-			}
-		}
-		char* pOut = (char*)lpBuf;
-		for (DWORD i = 0; i < dwRet; i++) {
-			*pOut++ = pszMb[i];	// copy attribute
-			if (_IsLeadByte(pszMb2[i]))
-				i++;
-		}
-		dwRet = pOut - (char*)lpBuf;
-		}
-		break;
-	}
-	return dwRet;
-}
-
-#else	// !UNICODE
-// returns number of characters from number of bytes
-static int GetCharCountFromBytes( LPCSTR pszString, int iBytes )
-{
-    int iCount = 0;
-    int i;
-    for( i = 0; pszString[i] && i < iBytes; i++ )
-    {
-        iCount++;
-        if( _IsLeadByte(pszString[i]) )
-            i++;
-    }
-    if( i != iBytes )
-        iCount = -iCount;	// indicate error - iBytes specifies wrong boundary (i.e. the last byte is leadbyte)
-    return iCount;
-}
-
-static int GetCharCount( LPTSTR psz )
-{
-    int i = 0;
-    while( *psz )
-    {
-        if( _IsLeadByte(*psz) )
-        {
-            psz++;
-        }
-        psz++;
-        i++;
-    }
-    return i;
-}
-
-static DWORD WA_GetCandidateList( HIMC himc, DWORD dwIndex, LPCANDIDATELIST* ppCandList )
-{
-    DWORD dwBufLen = ImmGetCandidateListW( himc, dwIndex, nullptr, 0 );
-    if( dwBufLen )
-    {
-        LPCANDIDATELIST pCandList = ( LPCANDIDATELIST )ImeUiCallback_Malloc( dwBufLen );
-        if( pCandList )
-        {
-            dwBufLen = ImmGetCandidateListW( himc, dwIndex, pCandList, dwBufLen );
-            if( dwBufLen )
-            {
-                int i;
-                int mbBufLen = 0;
-                for( i = 0; i < ( int )pCandList->dwCount; i++ )
-                {
-                    mbBufLen += WideCharToMultiByte( g_uCodePage, 0, ( LPWSTR )( ( LPSTR )pCandList +
-                                                                                 pCandList->dwOffset[i] ), -1, nullptr, 0,
-                                                     nullptr, nullptr );
-                }
-                mbBufLen += pCandList->dwOffset[0];
-                *ppCandList = ( LPCANDIDATELIST )ImeUiCallback_Malloc( mbBufLen );
-                LPCANDIDATELIST pCandListA = *ppCandList;
-                memcpy( pCandListA, pCandList, pCandList->dwOffset[0] );
-                LPSTR psz = ( LPSTR )pCandListA + pCandList->dwOffset[0];
-                for( i = 0; i < ( int )pCandList->dwCount; i++ )
-                {
-                    pCandListA->dwOffset[i] = ( LPSTR )psz - ( LPSTR )pCandListA;
-                    psz += WideCharToMultiByte( g_uCodePage, 0, ( LPWSTR )( ( LPSTR )pCandList +
-                                                                            pCandList->dwOffset[i] ), -1, psz, 256,
-                                                nullptr, nullptr );
-                }
-                dwBufLen = mbBufLen;
-            }
-            ImeUiCallback_Free( pCandList );
-        }
-    }
-    return dwBufLen;
-}
-
-static LONG WINAPI WA_ImmGetCompositionString( HIMC himc, DWORD dwIndex, LPVOID lpBuf, DWORD dwBufLen )
-{
-    WCHAR pwzUc[COUNTOF(g_szCompositionString)];
-    DWORD dwRet = ImmGetCompositionStringW( himc, dwIndex, pwzUc, sizeof( pwzUc ) );
-    switch( dwIndex )
-    {
-        case GCS_RESULTSTR:
-        case GCS_COMPSTR:
-            if( dwRet )
-            {
-                pwzUc[dwRet / sizeof( WCHAR )] = 0;
-                dwRet = ( DWORD )WideCharToMultiByte( g_uCodePage, 0, pwzUc, -1, ( LPSTR )lpBuf, dwBufLen, nullptr,
-                                                      nullptr );
-                if( dwRet )
-                {
-                    dwRet = dwRet - 1;
-                }
-            }
-            break;
-
-        case GCS_CURSORPOS:
-        {
-            WCHAR pwzUc2[COUNTOF(g_szCompositionString)];
-            DWORD dwRet2 = ImmGetCompositionStringW( himc, GCS_COMPSTR, pwzUc2, sizeof( pwzUc2 ) );
-            if( !dwRet2 )
-            {
-                dwRet2 = ImmGetCompositionStringW( himc, GCS_RESULTSTR, pwzUc2, sizeof( pwzUc2 ) );
-                if( !dwRet2 )
-                {
-                    return 0;
-                }
-            }
-            dwRet2 /= 2;
-            //The return value of WideCharToMultiByte() should probably be checked/asserted for success.
-            //bounds violation (overflow) 'pszMb[iRc]'
-            const int bufSize = COUNTOF(g_szCompositionString) * 2;
-            char pszMb[bufSize];
-            int iRc = WideCharToMultiByte( g_uCodePage, 0, pwzUc2, dwRet2, pszMb, sizeof( pszMb ), nullptr, nullptr );
-            assert( iRc > 0 ); //WideCharToMultiByte returns 0 if it failed, and it should *never* be negative in the first place
-            if( iRc >= bufSize ) //if we wrote more bytes than the length of the buffer, we need to terminate it
-            {
-                pszMb[ bufSize - 1] = 0; //0 terminate the end of the buffer
-            }
-            else
-            {
-                pszMb[ iRc ] = 0;
-            }
-            char* psz = pszMb;
-            for( dwRet2 = 0; dwRet2 != dwRet; dwRet2++ )
-            {
-                if( _IsLeadByte( *psz ) )
-                    psz++;
-                psz++;
-            }
-            dwRet = psz - pszMb;
-        }
-            break;
-
-        case GCS_COMPATTR:
-        {
-            WCHAR pwzUc2[COUNTOF(g_szCompositionString)];
-            DWORD dwRet2 = ImmGetCompositionStringW( himc, GCS_COMPSTR, pwzUc2, sizeof( pwzUc2 ) );
-            if( !dwRet2 )
-            {
-                dwRet2 = ImmGetCompositionStringW( himc, GCS_RESULTSTR, pwzUc2, sizeof( pwzUc2 ) );
-                if( !dwRet2 )
-                {
-                    return 0;
-                }
-            }
-            dwRet2 /= 2;
-            const int bufSize = COUNTOF(g_szCompositionString) * 2;
-            char pszMb[bufSize];
-            int iRc = WideCharToMultiByte( g_uCodePage, 0, pwzUc2, dwRet2, pszMb, sizeof( pszMb ), nullptr, nullptr );
-            assert( iRc > 0 ); //WideCharToMultiByte returns 0 if it failed, and it should *never* be negative in the first place
-            if( iRc >= bufSize ) //if we wrote more bytes than the length of the buffer, we need to terminate it
-            {
-                pszMb[ bufSize - 1] = 0; //0 terminate the end of the buffer
-            }
-            else
-            {
-                pszMb[ iRc ] = 0;
-            }
-            char* pSrc = ( char* )pwzUc;
-            char* pOut = ( char* )lpBuf;
-            for( char* psz = pszMb; *psz; psz++, pSrc++ )
-            {
-                *pOut++ = *pSrc;	// copy attribute
-                if( _IsLeadByte( *psz ) )
-                {
-                    *pOut++ = *pSrc;
-                    psz++;
-                }
-                // buffer overrun protection, pOut is incremented in the loop, but not part	of the 
-                // loop	invariant test.	To make	the	code more readable we have a test rather than
-                // rolling this	into the for stmt.
-                if( ( DWORD )( pOut - ( char* )lpBuf ) >= dwBufLen )
-                    break;
-            }
-            dwRet = pOut - ( char* )lpBuf;
-        }
-            break;
-    }
-    return dwRet;
-}
-
-#endif	// UNICODE
 
 static void ComposeCandidateLine( int index, LPCTSTR pszCandidate )
 {
@@ -758,13 +476,7 @@ static void SendCompString()
     if( ImeUiCallback_OnChar )
     {
         LPCWSTR pwz;
-#ifdef UNICODE
-		pwz = g_szCompositionString;
-#else
-        WCHAR szUnicode[COUNTOF( g_szCompositionString ) ];
-        pwz = szUnicode;
-        iLen = MultiByteToWideChar( g_uCodePage, 0, g_szCompositionString, -1, szUnicode, COUNTOF(szUnicode) ) - 1;
-#endif
+        pwz = g_szCompositionString;
         for( i = 0; i < iLen; i++ )
         {
             ImeUiCallback_OnChar( pwz[i] );
@@ -774,11 +486,7 @@ static void SendCompString()
     for( i = 0; i < iLen; i++ )
     {
         SendKeyMsg( g_hwndCurr, WM_CHAR,
-#ifdef UNICODE
-			(WPARAM)g_szCompositionString[i]
-#else
-                    ( WPARAM )( BYTE )g_szCompositionString[i]
-#endif
+       (WPARAM)g_szCompositionString[i]
                     );
     }
 }
@@ -995,9 +703,9 @@ static void DrawImeIndicator()
     if( gSkinIME.symbolFont )
     {
 #ifdef DS2
-		// save the font height here since DS2 shares editbox font and indicator font
-		DWORD _w, _h;
-		g_CaretInfo.pFont->GetTextExtent( TEXT(" "), &_w, &_h );
+        // save the font height here since DS2 shares editbox font and indicator font
+        DWORD _w, _h;
+        g_CaretInfo.pFont->GetTextExtent( TEXT(" "), &_w, &_h );
 #endif //DS2
 
         // GOS deals height in points that is 1/72nd inch and assumes display device is 96dpi.
@@ -1016,28 +724,28 @@ static void DrawImeIndicator()
         gSkinIME.symbolFont->DrawText( cszSymbol );
 
 #ifdef DS2
-		// revert the height.
-		g_CaretInfo.pFont->SetHeight( _h );
-		
-		// Double-check: Confirm match by testing a range of font heights to find best fit
-		DWORD _h2;
-		g_CaretInfo.pFont->GetTextExtent( TEXT(" "), &_w, &_h2 );
-		if ( _h2 < _h )
-		{
-			for ( int i=1; _h2<_h && i<10; i++ )
-			{
-				g_CaretInfo.pFont->SetHeight( _h+i );
-				g_CaretInfo.pFont->GetTextExtent( TEXT(" "), &_w, &_h2 );
-			}
-		}
-		else if ( _h2 > _h )
-		{
-			for ( int i=1; _h2>_h && i<10; i++ )
-			{
-				g_CaretInfo.pFont->SetHeight( _h-i );
-				g_CaretInfo.pFont->GetTextExtent( TEXT(" "), &_w, &_h2 );
-			}
-		}
+        // revert the height.
+        g_CaretInfo.pFont->SetHeight( _h );
+        
+        // Double-check: Confirm match by testing a range of font heights to find best fit
+        DWORD _h2;
+        g_CaretInfo.pFont->GetTextExtent( TEXT(" "), &_w, &_h2 );
+        if ( _h2 < _h )
+        {
+            for ( int i=1; _h2<_h && i<10; i++ )
+            {
+                g_CaretInfo.pFont->SetHeight( _h+i );
+                g_CaretInfo.pFont->GetTextExtent( TEXT(" "), &_w, &_h2 );
+            }
+        }
+        else if ( _h2 > _h )
+        {
+            for ( int i=1; _h2>_h && i<10; i++ )
+            {
+                g_CaretInfo.pFont->SetHeight( _h-i );
+                g_CaretInfo.pFont->GetTextExtent( TEXT(" "), &_w, &_h2 );
+            }
+        }
 #endif //DS2
     }
 }
@@ -1097,11 +805,6 @@ static void DrawCompositionString( _In_ bool bDrawCompAttr )
             TCHAR szChar[3];
             szChar[0] = g_szCompositionString[i];
             szChar[1] = szChar[2] = 0;
-#ifndef UNICODE
-            cType = 1 + ( ( _IsLeadByte(g_szCompositionString[i]) ) ? 1 : 0 );
-            if( cType == 2 && g_szCompositionString[i + 1] )	// in case we have 0 in trailbyte, we don't count it.
-                szChar[1] = g_szCompositionString[i + 1];
-#endif
             bgX = bgXnext;
             TCHAR cSave = g_szCompositionString[i + cType];
             g_szCompositionString[i + cType] = 0;
@@ -1177,10 +880,6 @@ static void DrawCompositionString( _In_ bool bDrawCompAttr )
                 if( bWrite )
                 {
                     *pszMlcs++ = g_szCompositionString[i];
-#ifndef UNICODE
-                    if( cType == 2 )
-                        *pszMlcs++ = g_szCompositionString[i + 1];
-#endif
                 }
                 if( ( DWORD )i == g_IMECursorBytes )
                 {
@@ -1418,11 +1117,7 @@ static void DrawCandidateList()
         {
             wcscpy_s( szTemp, COUNTOF(szTemp), g_szReadingString );
             LPTSTR psz = szTemp + g_iReadingError;
-#ifdef UNICODE
-			psz++;
-#else
-            psz += ( _IsLeadByte( szTemp[g_iReadingError] ) ) ? 2 : 1;
-#endif
+            psz++;
             *psz = 0;
             g_CaretInfo.pFont->GetTextExtent( szTemp, ( DWORD* )&iEnd, ( DWORD* )&iDummy );
             TCHAR cSave = szTemp[ g_iReadingError ];
@@ -1487,7 +1182,7 @@ static void DrawCandidateList()
 
                     int dx = candX + ( seperateLineX - candX - uDigitWidthList[nOneDigit] ) / 2;
                     int dy = candY + largest.cy * i;
-					
+                    
                     g_CaretInfo.pFont->SetPosition( dx, dy );
                     g_CaretInfo.pFont->DrawText( szOneDigit );
                     g_CaretInfo.pFont->SetPosition( seperateLineX + dwMarginX, dy );
@@ -1623,14 +1318,8 @@ LPARAM ImeUi_ProcessMessage( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM& lParam
                                 g_szCandidate[i][0] = 0;
                             else
                             {
-#ifdef UNICODE
-									g_szCandidate[i][0] = g_szCompositionString[i];
-									g_szCandidate[i][1] = 0;
-#else
-                                g_szCandidate[i][0] = g_szCompositionString[i * 2];
-                                g_szCandidate[i][1] = g_szCompositionString[i * 2 + 1];
-                                g_szCandidate[i][2] = 0;
-#endif
+                                g_szCandidate[i][0] = g_szCompositionString[i];
+                                g_szCandidate[i][1] = 0;
                             }
                         }
                         g_uCandPageSize = MAX_CANDLIST;
@@ -1700,7 +1389,7 @@ LPARAM ImeUi_ProcessMessage( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM& lParam
                         break;
                     CheckToggleState();
                     break;
-			
+            
                 case IMN_OPENCANDIDATE:
                 case IMN_CHANGECANDIDATE:
                     if( g_bUILessMode )
@@ -1713,7 +1402,7 @@ LPARAM ImeUi_ProcessMessage( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM& lParam
                         himc = _ImmGetContext( hWnd );
                         if( !himc )
                             break;
-					
+                    
                         LPCANDIDATELIST lpCandList;
                         DWORD dwIndex, dwBufLen;
 
@@ -1783,7 +1472,7 @@ LPARAM ImeUi_ProcessMessage( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM& lParam
                         }
                         break;
                     }
-			
+            
                 case IMN_CLOSECANDIDATE:
                     if( g_bUILessMode )
                     {
@@ -2004,18 +1693,6 @@ bool ImeUi_Initialize(_In_  HWND hwnd, _In_ bool bDisable )
     g_hwndMain = hwnd;
     g_disableCicero.Initialize();
 
-    g_osi.dwOSVersionInfoSize = sizeof( OSVERSIONINFOA );
-    GetVersionExA( &g_osi );
-
-    bool bUnicodeImm = false;
-    // IMM in NT or Win98 supports Unicode
-    if( g_osi.dwPlatformId == VER_PLATFORM_WIN32_NT ||
-        ( g_osi.dwMajorVersion > 4 ) ||
-        ( g_osi.dwMajorVersion == 4 ) && ( g_osi.dwMinorVersion > 0 ) )
-    {
-        bUnicodeImm = true;
-    }
-
     g_hImmDll = LoadLibraryA( "imm32.dll" );
     g_bDisableImeCompletely = false;
 
@@ -2037,52 +1714,11 @@ bool ImeUi_Initialize(_In_  HWND hwnd, _In_ bool bDisable )
         g_bDisableImeCompletely = true;
         return false;
     }
-#ifdef UNICODE
-	if ( bUnicodeImm )
-	{
-		_ImmGetCompositionString =	ImmGetCompositionStringW;
-		_ImmGetCandidateList =		ImmGetCandidateListW;
-		_GetCandidateList =			GetCandidateList;
-	}
-	else
-	{
-		_ImmGetCandidateList =		ImmGetCandidateListA;
-		_ImmGetCompositionString =	AW_ImmGetCompositionString;
-		_GetCandidateList =			AW_GetCandidateList;
-	}
-#else
-    if( bUnicodeImm )
-    {
-        _ImmGetCompositionString = WA_ImmGetCompositionString;
-        _ImmGetCandidateList = ImmGetCandidateListA;
-        _GetCandidateList = WA_GetCandidateList;
-    }
-    else
-    {
-        _ImmGetCompositionString = ImmGetCompositionStringA;
-        _ImmGetCandidateList = ImmGetCandidateListA;
-        _GetCandidateList = GetCandidateList;
-    }
-#endif
-
-    // There are the following combinations of code config, window type, and the method of sending characters.
-    // Wnd: Unicode, Code: Unicode, Method: SendMessageW (SendMessageW must be supported since RegisterClassW is successful)
-    // Wnd: non Uni, Code: Unicode, Method: AW_SendCompString (Send characters in multibyte after W->A conversion)
-    // Wnd: Unicode, Code: non Uni, Method: SendMessageA (System does A->W conversion) - possible, but unlikely to be used.
-    // Wnd: non Uni, Code: non Uni, Method: SendMessageA
-#ifdef UNICODE
-	if ( !IsWindowUnicode( hwnd ) )
-	{
-		_SendCompString = AW_SendCompString;
-	}
-	else
-#endif
-    {
-        _SendCompString = SendCompString;
-#ifdef UNICODE
-		_SendMessage = SendMessageW;
-#endif
-    }
+    _ImmGetCompositionString = ImmGetCompositionStringW;
+    _ImmGetCandidateList = ImmGetCandidateListW;
+    _GetCandidateList = GetCandidateList;
+    _SendCompString = SendCompString;
+    _SendMessage = SendMessageW;
 
     // turn init flag on so that subsequent calls to ImeUi functions work. 
     g_bInitialized = true;
@@ -2109,19 +1745,6 @@ bool ImeUi_Initialize(_In_  HWND hwnd, _In_ bool bDisable )
     }
 
     g_uCaretBlinkTime = GetCaretBlinkTime();
-
-#ifndef UNICODE
-    // Check if system is SBCS system
-    CPINFO cpi;
-    BOOL bRc = GetCPInfo( CP_ACP, &cpi );
-    if( bRc )
-    {
-        if( cpi.MaxCharSize == 1 )
-        {
-            g_bDisableImeCompletely = true;	// SBCS system. Disable IME.
-        }
-    }
-#endif
 
     g_CaretInfo.caretX = 0;
     g_CaretInfo.caretY = 0;
@@ -2198,7 +1821,7 @@ static DWORD GetImeId( _In_ UINT uIndex )
     {
         0, 0
     };
-	
+    
     DWORD dwVerSize;
     DWORD dwVerHandle;
     LPVOID lpVerBuffer;
@@ -2230,7 +1853,7 @@ static DWORD GetImeId( _In_ UINT uIndex )
     {
         goto error;
     }
-	
+    
     if( _ImmGetIMEFileNameA( kl, szTmp, sizeof( szTmp ) - 1 ) <= 0 )
     {
         goto error;
@@ -2309,7 +1932,7 @@ static void GetReadingString( _In_ HWND hWnd )
     {
         return;
     }
-	
+    
     HIMC himc;
     himc = _ImmGetContext( hWnd );
     if( !himc )
@@ -2342,18 +1965,18 @@ static void GetReadingString( _In_ HWND hWnd )
     else //	IMEs that doesn't implement Reading String API
     {
         lpIMC = _ImmLockIMC( himc );
-		
+        
         // *** hacking code from Michael Yang ***
-		
+        
         LPBYTE p = 0;
-		
+        
         switch( dwId )
         {
-		
+        
             case IMEID_CHT_VER42: // New(Phonetic/ChanJie)IME98  : 4.2.x.x // Win98
             case IMEID_CHT_VER43: // New(Phonetic/ChanJie)IME98a : 4.3.x.x // WinMe, Win2k
             case IMEID_CHT_VER44: // New ChanJie IME98b          : 4.4.x.x // WinXP
-			
+            
                 p = *( LPBYTE* )( ( LPBYTE )_ImmLockIMCC( lpIMC->hPrivate ) + 24 );
                 if( !p ) break;
                 dwlen = *( DWORD* )( p + 7 * 4 + 32 * 4 );	//m_dwInputReadStrLen
@@ -2361,9 +1984,9 @@ static void GetReadingString( _In_ HWND hWnd )
                 wstr = ( WCHAR* )( p + 56 );
                 unicode = TRUE;
                 break;
-		
+        
             case IMEID_CHT_VER50: // 5.0.x.x // WinME
-			
+            
                 p = *( LPBYTE* )( ( LPBYTE )_ImmLockIMCC( lpIMC->hPrivate ) + 3 * 4 ); // PCKeyCtrlManager
                 if( !p ) break;
                 p = *( LPBYTE* )( ( LPBYTE )p + 1 * 4 + 5 * 4 + 4 * 2 ); // = PCReading = &STypingInfo
@@ -2415,7 +2038,7 @@ static void GetReadingString( _In_ HWND hWnd )
                 unicode = IsNT() ? TRUE : FALSE;
             }
         }	// switch
-		
+        
         g_szCandidate[0][0] = 0;
         g_szCandidate[1][0] = 0;
         g_szCandidate[2][0] = 0;
@@ -2432,19 +2055,8 @@ static void GetReadingString( _In_ HWND hWnd )
             { // select error char
                 g_dwSelection = i;
             }
-#ifdef UNICODE
-			g_szCandidate[i][0] = wstr[i];
-			g_szCandidate[i][1] = 0;
-#else
-            char mbc[3];
-            mbc[1] = 0;
-            mbc[2] = 0;
-            WideCharToMultiByte( g_uCodePage, 0, wstr + i, 1, mbc, sizeof( mbc ), nullptr, nullptr );
-
-            g_szCandidate[i][0] = mbc[0];
-            g_szCandidate[i][1] = mbc[1];
-            g_szCandidate[i][2] = 0;
-#endif
+            g_szCandidate[i][0] = wstr[i];
+            g_szCandidate[i][1] = 0;
         }
         g_szCandidate[i][0] = 0;
     }
@@ -2458,23 +2070,12 @@ static void GetReadingString( _In_ HWND hWnd )
             {
                 g_dwSelection = ( DWORD )j;
             }
-#ifdef UNICODE
-			MultiByteToWideChar( g_uCodePage, 0, p + i, 1 + ( _IsLeadByte( p[i] ) ? 1 : 0 ),
-				g_szCandidate[j], 1 );
-			if ( _IsLeadByte( p[i] ) )
-			{
-				i++;
-			}
-#else
-            g_szCandidate[j][0] = p[i];
-            g_szCandidate[j][1] = 0;
-            g_szCandidate[j][2] = 0;
-            if( _IsLeadByte(p[i]) )
+            MultiByteToWideChar( g_uCodePage, 0, p + i, 1 + ( _IsLeadByte( p[i] ) ? 1 : 0 ),
+                g_szCandidate[j], 1 );
+            if ( _IsLeadByte( p[i] ) )
             {
                 i++;
-                g_szCandidate[j][1] = p[i];
             }
-#endif
         }
         g_szCandidate[j][0] = 0;
         g_dwCount = j;
@@ -2603,20 +2204,11 @@ void ImeUi_FinalizeString( _In_ bool bSend )
         LONG lRet = (int)wcslen( g_szCompositionString );
         assert( lRet >= 2 );
         // In case of CHT IME, don't send the trailing double byte space, if it exists.
-#ifdef UNICODE
-		if ( GETLANG() == LANG_CHT && (lRet >= 1)
-			&& g_szCompositionString[lRet - 1] == 0x3000 )
-		{
-			lRet--;
-		}
-#else
-        if( GETLANG() == LANG_CHT && ( lRet >= 2 )
-            && ( BYTE )( g_szCompositionString[lRet - 2] ) == 0xa1
-            && ( BYTE )( g_szCompositionString[lRet - 1] ) == 0x40 )
+        if ( GETLANG() == LANG_CHT && (lRet >= 1)
+            && g_szCompositionString[lRet - 1] == 0x3000 )
         {
-            lRet -= 2;
+            lRet--;
         }
-#endif
         _SendCompString();
     }
 
@@ -3316,39 +2908,13 @@ void CTsfUiLessMode::MakeReadingInformationString( ITfReadingInformationUIElemen
     g_uCandPageSize = MAX_CANDLIST;
     g_dwSelection = g_iReadingError ? g_iReadingError - 1 : ( DWORD )-1;
     g_iReadingError--;	// g_iReadingError is used only in horizontal window, and has to be -1 if there's no error.
-#ifndef UNICODE
-    if( g_iReadingError > 0 )
-    {
-        // convert g_iReadingError to byte based
-        LPCSTR pszNext = g_szReadingString;
-        for( int i = 0; i < g_iReadingError && pszNext && *pszNext; ++i )
-        {
-            pszNext = CharNext( pszNext );
-        }
-        if( pszNext )	// should be non-NULL, but just in case
-        {
-            g_iReadingError = pszNext - g_szReadingString;
-        }
-    }
-#endif
 
     BSTR bstr;
     if( SUCCEEDED( preading->GetString( &bstr ) ) )
     {
         if( bstr )
         {
-#ifndef UNICODE
-            char szStr[COUNTOF(g_szReadingString)*2];
-            szStr[0] = 0;
-            int iRc = WideCharToMultiByte( CP_ACP, 0, bstr, -1, szStr, sizeof( szStr ), nullptr, nullptr );
-            if( iRc >= sizeof( szStr ) )
-            {
-                szStr[sizeof( szStr ) - 1] = 0;
-            }
-            wcscpy_s( g_szReadingString, COUNTOF(g_szReadingString), szStr );
-#else
             wcscpy_s( g_szReadingString, COUNTOF(g_szReadingString), bstr );
-#endif
             g_dwCount = cchMax;
             LPCTSTR pszSource = g_szReadingString;
             if( fVertical )
@@ -3420,18 +2986,7 @@ void CTsfUiLessMode::MakeCandidateStrings( ITfCandidateListUIElement* pcandidate
         {
             if( bstr )
             {
-#ifndef UNICODE
-                char szStr[COUNTOF(g_szCandidate[0])*2];
-                szStr[0] = 0;
-                int iRc = WideCharToMultiByte( CP_ACP, 0, bstr, -1, szStr, sizeof( szStr ), nullptr, nullptr );
-                if( iRc >= sizeof( szStr ) )
-                {
-                    szStr[sizeof( szStr ) - 1] = 0;
-                }
-                ComposeCandidateLine( j, szStr );
-#else
-				ComposeCandidateLine( j, bstr );
-#endif
+                ComposeCandidateLine( j, bstr );
                 SysFreeString( bstr );
             }
         }

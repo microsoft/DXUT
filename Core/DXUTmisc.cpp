@@ -787,14 +787,7 @@ BOOL WINAPI DXUTGetMonitorInfo( HMONITOR hMonitor, LPMONITORINFO lpMonitorInfo )
         HMODULE hUser32 = GetModuleHandle( L"USER32" );
         if( hUser32 )
         {
-            OSVERSIONINFOA osvi =
-            {
-                0
-            }; osvi.dwOSVersionInfoSize = sizeof( osvi ); GetVersionExA( ( OSVERSIONINFOA* )&osvi );
-            bool bNT = ( VER_PLATFORM_WIN32_NT == osvi.dwPlatformId );
-            s_pFnGetMonitorInfo = ( LPGETMONITORINFO )( bNT ? GetProcAddress( hUser32,
-                                                                              "GetMonitorInfoW" ) :
-                                                        GetProcAddress( hUser32, "GetMonitorInfoA" ) );
+            s_pFnGetMonitorInfo = ( LPGETMONITORINFO )GetProcAddress( hUser32, "GetMonitorInfoW" );
         }
     }
 
