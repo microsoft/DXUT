@@ -2832,22 +2832,26 @@ void CTsfUiLessMode::UpdateImeState( BOOL bResetCompartmentEventSink )
     if( GetCompartments( &pcm, &pTfOpenMode, &pTfConvMode ) )
     {
         VARIANT valOpenMode;
-        VARIANT valConvMode;
-        pTfOpenMode->GetValue( &valOpenMode );
-        pTfConvMode->GetValue( &valConvMode );
-        if( valOpenMode.vt == VT_I4 )
+        if ( SUCCEEDED(pTfOpenMode->GetValue(&valOpenMode)) )
         {
-            if( g_bChineseIME )
+            VARIANT valConvMode;
+            if (SUCCEEDED(pTfConvMode->GetValue(&valConvMode)))
             {
-                g_dwState = valOpenMode.lVal != 0 && valConvMode.lVal != 0 ? IMEUI_STATE_ON : IMEUI_STATE_ENGLISH;
+                if (valOpenMode.vt == VT_I4)
+                {
+                    if (g_bChineseIME)
+                    {
+                        g_dwState = valOpenMode.lVal != 0 && valConvMode.lVal != 0 ? IMEUI_STATE_ON : IMEUI_STATE_ENGLISH;
+                    }
+                    else
+                    {
+                        g_dwState = valOpenMode.lVal != 0 ? IMEUI_STATE_ON : IMEUI_STATE_OFF;
+                    }
+                }
+                VariantClear(&valConvMode);
             }
-            else
-            {
-                g_dwState = valOpenMode.lVal != 0 ? IMEUI_STATE_ON : IMEUI_STATE_OFF;
-            }
+            VariantClear(&valOpenMode);
         }
-        VariantClear( &valOpenMode );
-        VariantClear( &valConvMode );
 
         if( bResetCompartmentEventSink )
         {

@@ -197,16 +197,16 @@ void CD3DSettingsDlg::CreateControls()
 
         // Title
         CDXUTStatic* pStatic = nullptr;
-        m_RevertModeDialog.AddStatic( DXUTSETTINGSDLG_STATIC, L"Do you want to keep these display settings?", 10, 5,
-                                      640, 50, false, &pStatic );
-        pElement = pStatic->GetElement( 0 );
+        if ( SUCCEEDED(m_RevertModeDialog.AddStatic( DXUTSETTINGSDLG_STATIC, L"Do you want to keep these display settings?", 10, 5,
+                                      640, 50, false, &pStatic ) ) )
+            pElement = pStatic->GetElement( 0 );
         pElement->iFont = 1;
         pElement->dwTextFormat = DT_TOP | DT_LEFT;
 
         // Timeout static text control
-        m_RevertModeDialog.AddStatic( DXUTSETTINGSDLG_STATIC_MODE_CHANGE_TIMEOUT, L"", 10, 90, 640, 30,
-                                      false, &pStatic );
-        pElement = pStatic->GetElement( 0 );
+        if ( SUCCEEDED(m_RevertModeDialog.AddStatic( DXUTSETTINGSDLG_STATIC_MODE_CHANGE_TIMEOUT, L"", 10, 90, 640, 30,
+                                      false, &pStatic ) ) )
+            pElement = pStatic->GetElement( 0 );
         pElement->iFont = 0;
         pElement->dwTextFormat = DT_TOP | DT_LEFT;
     }

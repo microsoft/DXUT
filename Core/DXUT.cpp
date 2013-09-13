@@ -640,15 +640,18 @@ HRESULT WINAPI DXUTInit( bool bParseCommandLine,
 
     // Save the current sticky/toggle/filter key settings so DXUT can restore them later
     STICKYKEYS sk = {sizeof(STICKYKEYS), 0};
-    (void)SystemParametersInfo(SPI_GETSTICKYKEYS, sizeof(STICKYKEYS), &sk, 0);
+    if ( !SystemParametersInfo(SPI_GETSTICKYKEYS, sizeof(STICKYKEYS), &sk, 0) )
+        memset( &sk, 0, sizeof(sk) );
     GetDXUTState().SetStartupStickyKeys( sk );
 
     TOGGLEKEYS tk = {sizeof(TOGGLEKEYS), 0};
-    SystemParametersInfo(SPI_GETTOGGLEKEYS, sizeof(TOGGLEKEYS), &tk, 0);
+   if ( !SystemParametersInfo(SPI_GETTOGGLEKEYS, sizeof(TOGGLEKEYS), &tk, 0) )
+        memset( &tk, 0, sizeof(tk) );
     GetDXUTState().SetStartupToggleKeys( tk );
 
     FILTERKEYS fk = {sizeof(FILTERKEYS), 0};
-    SystemParametersInfo(SPI_GETFILTERKEYS, sizeof(FILTERKEYS), &fk, 0);
+    if ( !SystemParametersInfo(SPI_GETFILTERKEYS, sizeof(FILTERKEYS), &fk, 0) )
+        memset( &fk, 0, sizeof(fk) );
     GetDXUTState().SetStartupFilterKeys( fk );
 
     GetDXUTState().SetShowMsgBoxOnError( bShowMsgBoxOnError );
@@ -2122,7 +2125,10 @@ HRESULT DXUTDelayLoadDXGI()
     IDXGIFactory1* pDXGIFactory = GetDXUTState().GetDXGIFactory();
     if( !pDXGIFactory )
     {
-        DXUT_Dynamic_CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), ( LPVOID* )&pDXGIFactory );
+        HRESULT hr = DXUT_Dynamic_CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), ( LPVOID* )&pDXGIFactory );
+        if ( FAILED(hr) )
+            return hr;
+
         GetDXUTState().SetDXGIFactory( pDXGIFactory );
         if( !pDXGIFactory )
         {
@@ -2596,7 +2602,8 @@ HRESULT DXUTReset3DEnvironment11()
     _Analysis_assume_( pSwapChain );
     
     DXGI_SWAP_CHAIN_DESC SCDesc;
-    pSwapChain->GetDesc( &SCDesc );
+    if ( FAILED( pSwapChain->GetDesc(&SCDesc)) )
+        memset( &SCDesc, 0, sizeof(SCDesc) );
 
     // Resize backbuffer and target of the swapchain in case they have changed.
     // For windowed mode, use the client rect as the desired size. Unlike D3D9,
@@ -3322,16 +3329,23 @@ HRESULT WINAPI DXUTToggleFullScreen()
     DXUTDeviceSettings orginalDeviceSettings = DXUTGetDeviceSettings();
     
     deviceSettings.d3d11.sd.Windowed = !deviceSettings.d3d11.sd.Windowed; // datut
-    if (!deviceSettings.d3d11.sd.Windowed) {
-        DXGI_MODE_DESC adapterDesktopDisplayMode =
+    if ( !deviceSettings.d3d11.sd.Windowed )
+    {
+        DXGI_MODE_DESC adapterDesktopDisplayMode;
+        hr = DXUTGetD3D11AdapterDisplayMode( deviceSettings.d3d11.AdapterOrdinal, 0, &adapterDesktopDisplayMode );
+        if ( FAILED(hr) )
         {
-            800, 600, { 60, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
-        };
-        DXUTGetD3D11AdapterDisplayMode( deviceSettings.d3d11.AdapterOrdinal, 0, &adapterDesktopDisplayMode );
-            
-            
+            static const DXGI_MODE_DESC s_adapterDesktopDisplayMode =
+            {
+                800, 600, { 60, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
+            };
+            memcpy(&adapterDesktopDisplayMode, &s_adapterDesktopDisplayMode, sizeof(DXGI_MODE_DESC));
+        }
+           
         deviceSettings.d3d11.sd.BufferDesc = adapterDesktopDisplayMode;
-    }else {
+    }
+    else
+    {
         RECT r = DXUTGetWindowClientRectAtModeChange();
         deviceSettings.d3d11.sd.BufferDesc.Height = r.bottom;
         deviceSettings.d3d11.sd.BufferDesc.Width = r.right;
@@ -3442,7 +3456,8 @@ void DXUTCheckForDXGIFullScreenSwitch()
     assert( pSwapChain );
     _Analysis_assume_( pSwapChain );
     DXGI_SWAP_CHAIN_DESC SCDesc;
-    pSwapChain->GetDesc( &SCDesc );
+    if ( FAILED(pSwapChain->GetDesc(&SCDesc)) )
+        memset( &SCDesc, 0, sizeof(SCDesc) );
 
     BOOL bIsWindowed = ( BOOL )DXUTIsWindowed();
     if( bIsWindowed != SCDesc.Windowed )
@@ -3597,7 +3612,8 @@ void DXUTCheckForDXGIBufferChange()
 #pragma warning( disable:4616 6309 6387 )
         // Determine if we're fullscreen
         BOOL bFullScreen;
-        pSwapChain->GetFullscreenState( &bFullScreen, nullptr );
+        if ( FAILED(pSwapChain->GetFullscreenState(&bFullScreen, nullptr)) )
+            bFullScreen = FALSE;
 #pragma warning(pop)
 
         DXUTResizeDXGIBuffers( 0, 0, bFullScreen );
@@ -3743,7 +3759,8 @@ HRESULT DXUTGetOutputOrdinalFromMonitor( HMONITOR hMonitor, UINT* pOutputOrdinal
         {
             CD3D11EnumOutputInfo* pOutputInfo = *jit;
             DXGI_OUTPUT_DESC Desc;
-            pOutputInfo->m_pOutput->GetDesc( &Desc );
+            if ( FAILED(pOutputInfo->m_pOutput->GetDesc(&Desc)) )
+                memset( &Desc, 0, sizeof(Desc) );
 
             if( hMonitor == Desc.Monitor )
             {

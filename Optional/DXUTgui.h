@@ -1024,8 +1024,8 @@ public:
     bool SetText( _In_z_ LPCWSTR wszText );
 
     // Uniscribe
-    HRESULT CPtoX( _In_ int nCP, _In_ bool bTrail, _Out_ int* pX );
-    HRESULT XtoCP( _In_ int nX, _Out_ int* pCP, _Out_ int* pnTrail );
+    bool CPtoX( _In_ int nCP, _In_ bool bTrail, _Out_ int* pX );
+    bool XtoCP( _In_ int nX, _Out_ int* pCP, _Out_ int* pnTrail );
     void GetPriorItemPos( _In_ int nCP, _Out_ int* pPrior );
     void GetNextItemPos( _In_ int nCP, _Out_ int* pPrior );
 

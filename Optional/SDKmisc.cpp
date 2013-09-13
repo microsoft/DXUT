@@ -67,13 +67,15 @@ void WINAPI DXUTDisplaySwitchingToREFWarning()
 
         // Read previous user settings
         WCHAR strPath[MAX_PATH];
-        SHGetFolderPath( DXUTGetHWND(), CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, strPath );
-        wcscat_s( strPath, MAX_PATH, L"\\DXUT\\SkipRefWarning.dat" );
-        if( ( hFile = CreateFile( strPath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0,
-                                  nullptr ) ) != INVALID_HANDLE_VALUE )
+        if ( SUCCEEDED(SHGetFolderPath(DXUTGetHWND(), CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, strPath)) )
         {
-            (void)ReadFile( hFile, &dwSkipWarning, sizeof( DWORD ), &dwRead, nullptr );
-            CloseHandle( hFile );
+            wcscat_s( strPath, MAX_PATH, L"\\DXUT\\SkipRefWarning.dat" );
+            if( ( hFile = CreateFile( strPath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0,
+                                      nullptr ) ) != INVALID_HANDLE_VALUE )
+            {
+                (void)ReadFile( hFile, &dwSkipWarning, sizeof( DWORD ), &dwRead, nullptr );
+                CloseHandle( hFile );
+            }
         }
 
         if( dwSkipWarning == 0 )
@@ -126,15 +128,17 @@ void WINAPI DXUTDisplaySwitchingToREFWarning()
             {
                 // Save user settings
                 dwSkipWarning = 1;
-                SHGetFolderPath( DXUTGetHWND(), CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, strPath );
-                wcscat_s( strPath, MAX_PATH, L"\\DXUT" );
-                CreateDirectory( strPath, nullptr );
-                wcscat_s( strPath, MAX_PATH, L"\\SkipRefWarning.dat" );
-                if( ( hFile = CreateFile( strPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, 0,
-                                          nullptr ) ) != INVALID_HANDLE_VALUE )
+                if ( SUCCEEDED(SHGetFolderPath(DXUTGetHWND(), CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, strPath)) )
                 {
-                    WriteFile( hFile, &dwSkipWarning, sizeof( DWORD ), &dwWritten, nullptr );
-                    CloseHandle( hFile );
+                    wcscat_s( strPath, MAX_PATH, L"\\DXUT" );
+                    CreateDirectory( strPath, nullptr );
+                    wcscat_s( strPath, MAX_PATH, L"\\SkipRefWarning.dat" );
+                    if( ( hFile = CreateFile( strPath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, 0,
+                                              nullptr ) ) != INVALID_HANDLE_VALUE )
+                    {
+                        WriteFile( hFile, &dwSkipWarning, sizeof( DWORD ), &dwWritten, nullptr );
+                        CloseHandle( hFile );
+                    }
                 }
             }
 
@@ -428,10 +432,10 @@ bool DXUTFindMediaSearchParentDirs( WCHAR* strSearchPath, int cchSearch, const W
     };
     WCHAR* strFilePart = nullptr;
 
-    GetFullPathName( strStartAt, MAX_PATH, strFullPath, &strFilePart );
-    if( !strFilePart )
+    if ( !GetFullPathName( strStartAt, MAX_PATH, strFullPath, &strFilePart ) )
         return false;
 
+#pragma warning( disable : 6102 )
     while( strFilePart && *strFilePart != '\0' )
     {
         swprintf_s( strFullFileName, MAX_PATH, L"%s\\%s", strFullPath, strLeafName );
@@ -442,7 +446,8 @@ bool DXUTFindMediaSearchParentDirs( WCHAR* strSearchPath, int cchSearch, const W
         }
 
         swprintf_s( strSearch, MAX_PATH, L"%s\\..", strFullPath );
-        GetFullPathName( strSearch, MAX_PATH, strFullPath, &strFilePart );
+        if ( !GetFullPathName( strSearch, MAX_PATH, strFullPath, &strFilePart ) )
+            return false;
     }
 
     return false;
@@ -672,6 +677,7 @@ HRESULT WINAPI DXUTCompileFromFile( LPCWSTR pFileName,
 
 #endif
 
+#pragma warning( suppress : 6102 )
     if ( pErrorBlob )
     {
         OutputDebugStringA( reinterpret_cast<const char*>( pErrorBlob->GetBufferPointer() ) );

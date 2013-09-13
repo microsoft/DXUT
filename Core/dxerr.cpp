@@ -3320,9 +3320,6 @@ void WINAPI DXGetErrorDescriptionW( _In_ HRESULT hr, _Out_cap_(count) WCHAR* des
         return;
     }
 
-    if ( errorText )
-        LocalFree( errorText );
-
     switch (hr)
     {
 // Commmented out codes are actually alises for other codes

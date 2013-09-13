@@ -8303,6 +8303,8 @@ HRESULT WINAPI DXUTCreateGUITextureFromInternalArray(ID3D11Device* pd3dDevice, I
     HRESULT hr = DirectX::CreateDDSTextureFromMemory( pd3dDevice,
                                     reinterpret_cast<const uint8_t*>(g_DXUTGUITextureSrcData), g_DXUTGUITextureSrcDataSizeInBytes,
                                     &pRes, nullptr ); 
+    if ( FAILED(hr) )
+        return hr;
 
     DXUT_SetDebugName( pRes, "DXUT" );
 

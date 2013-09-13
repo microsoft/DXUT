@@ -1146,7 +1146,8 @@ HRESULT WINAPI DXUTGetD3D11AdapterDisplayMode( UINT AdapterOrdinal, UINT nOutput
         pModeDesc->ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 
         DXGI_OUTPUT_DESC Desc;
-        pOutputInfo->m_pOutput->GetDesc( &Desc );
+        if ( FAILED(pOutputInfo->m_pOutput->GetDesc(&Desc)))
+            memset( &Desc, 0, sizeof(Desc) );
         pModeDesc->Width = Desc.DesktopCoordinates.right - Desc.DesktopCoordinates.left;
         pModeDesc->Height = Desc.DesktopCoordinates.bottom - Desc.DesktopCoordinates.top;
 

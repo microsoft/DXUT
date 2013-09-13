@@ -341,7 +341,6 @@ void DrawText11DXUT( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3d11Device
 _Use_decl_annotations_
 void EndText11( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3d11DeviceContext )
 {
-
     // ensure our buffer size can hold our sprites
     UINT FontDataBytes = static_cast<UINT>( g_FontVertices.size() * sizeof( DXUTSpriteVertex ) );
     if( g_FontBufferBytes11 < FontDataBytes )
@@ -356,7 +355,12 @@ void EndText11( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3d11DeviceConte
         BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
         BufferDesc.MiscFlags = 0;
 
-        pd3dDevice->CreateBuffer( &BufferDesc, nullptr, &g_pFontBuffer11 );
+        if (FAILED(pd3dDevice->CreateBuffer(&BufferDesc, nullptr, &g_pFontBuffer11)))
+        {
+            g_pFontBuffer11 = nullptr;
+            g_FontBufferBytes11 = 0;
+            return;
+        }
         DXUT_SetDebugName( g_pFontBuffer11, "DXUT Text11" );
     }
 
@@ -2559,7 +2563,12 @@ void CDXUTDialogResourceManager::EndSprites11( ID3D11Device* pd3dDevice, ID3D11D
         BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
         BufferDesc.MiscFlags = 0;
 
-        pd3dDevice->CreateBuffer( &BufferDesc, nullptr, &m_pSpriteBuffer11 );
+        if ( FAILED(pd3dDevice->CreateBuffer(&BufferDesc, nullptr, &m_pSpriteBuffer11)) )
+        {
+            m_pSpriteBuffer11 = nullptr;
+            m_SpriteBufferBytes11 = 0;
+            return;
+        }
         DXUT_SetDebugName( m_pSpriteBuffer11, "CDXUTDialogResourceManager" );
     }
 
@@ -2809,6 +2818,9 @@ HRESULT CDXUTDialogResourceManager::CreateTexture11( _In_ UINT iTexture )
     SRVDesc.Texture2D.MipLevels = 1;
     SRVDesc.Texture2D.MostDetailedMip = 0;
     hr = m_pd3d11Device->CreateShaderResourceView( pTextureNode->pTexture11, &SRVDesc, &pTextureNode->pTexResView11 );
+    if ( FAILED(hr) )
+        return hr;
+
     DXUT_SetDebugName( pTextureNode->pTexResView11, "DXUT GUI Texture" );
 
     return hr;
@@ -3750,7 +3762,8 @@ bool CDXUTComboBox::HandleMouse( UINT uMsg, const POINT& pt, WPARAM wParam, LPAR
             if( m_bOpened )
             {
                 UINT uLines = 0;
-                SystemParametersInfo( SPI_GETWHEELSCROLLLINES, 0, &uLines, 0 );
+                if ( !SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &uLines, 0) )
+                    uLines = 0;
                 m_ScrollBar.Scroll( -zDelta * uLines );
             }
             else
@@ -5332,7 +5345,8 @@ bool CDXUTListBox::HandleMouse( UINT uMsg, const POINT& pt, WPARAM wParam, LPARA
         case WM_MOUSEWHEEL:
         {
             UINT uLines = 0;
-            SystemParametersInfo( SPI_GETWHEELSCROLLLINES, 0, &uLines, 0 );
+            if ( !SystemParametersInfo( SPI_GETWHEELSCROLLLINES, 0, &uLines, 0 ) )
+                uLines = 0;
             int nScrollAmount = int( ( short )HIWORD( wParam ) ) / WHEEL_DELTA * uLines;
             m_ScrollBar.Scroll( -nScrollAmount );
             return true;
@@ -5825,7 +5839,7 @@ bool CDXUTEditBox::HandleMouse( UINT uMsg, const POINT& pt, WPARAM wParam, LPARA
                 // Determine the character corresponding to the coordinates.
                 int nCP, nTrail, nX1st;
                 m_Buffer.CPtoX( m_nFirstVisible, FALSE, &nX1st );  // X offset of the 1st visible char
-                if( SUCCEEDED( m_Buffer.XtoCP( pt.x - m_rcText.left + nX1st, &nCP, &nTrail ) ) )
+                if( m_Buffer.XtoCP( pt.x - m_rcText.left + nX1st, &nCP, &nTrail ) )
                 {
                     // Cap at the nul character.
                     if( nTrail && nCP < m_Buffer.GetTextSize() )
@@ -5849,7 +5863,7 @@ bool CDXUTEditBox::HandleMouse( UINT uMsg, const POINT& pt, WPARAM wParam, LPARA
                 // Determine the character corresponding to the coordinates.
                 int nCP, nTrail, nX1st;
                 m_Buffer.CPtoX( m_nFirstVisible, FALSE, &nX1st );  // X offset of the 1st visible char
-                if( SUCCEEDED( m_Buffer.XtoCP( pt.x - m_rcText.left + nX1st, &nCP, &nTrail ) ) )
+                if( m_Buffer.XtoCP( pt.x - m_rcText.left + nX1st, &nCP, &nTrail ) )
                 {
                     // Cap at the nul character.
                     if( nTrail && nCP < m_Buffer.GetTextSize() )
@@ -6023,7 +6037,6 @@ void CDXUTEditBox::Render( _In_ float fElapsedTime )
     if( m_bVisible == false )
         return;
 
-    HRESULT hr;
     int nSelStartX = 0, nCaretX = 0;  // Left and right X cordinates of the selection region
 
     CDXUTElement* pElement = GetElement( 0 );
@@ -6052,9 +6065,9 @@ void CDXUTEditBox::Render( _In_ float fElapsedTime )
     //
     // Compute the X coordinates of the selection rectangle
     //
-    hr = m_Buffer.CPtoX( m_nCaret, FALSE, &nCaretX );
+    m_Buffer.CPtoX( m_nCaret, FALSE, &nCaretX );
     if( m_nCaret != m_nSelStart )
-        hr = m_Buffer.CPtoX( m_nSelStart, FALSE, &nSelStartX );
+        m_Buffer.CPtoX( m_nSelStart, FALSE, &nSelStartX );
     else
         nSelStartX = nCaretX;
 
@@ -6253,26 +6266,28 @@ HRESULT CUniBuffer::Analyse()
 
 #pragma warning(push)
 #pragma warning(disable : 4616 6309 6387 )
-    (void)ScriptApplyDigitSubstitution( nullptr, &ScriptControl, &ScriptState );
+    HRESULT hr = ScriptApplyDigitSubstitution( nullptr, &ScriptControl, &ScriptState );
+    if ( FAILED(hr)  )
+        return hr;
 #pragma warning(pop)
 
     if( !m_pFontNode )
         return E_FAIL;
 
     HDC hDC = nullptr;
-    HRESULT hr = ScriptStringAnalyse( hDC,
-                                       m_pwszBuffer,
-                                       (int)wcslen( m_pwszBuffer ) + 1,  // nul is also analyzed.
-                                       (int)wcslen( m_pwszBuffer ) * 3 / 2 + 16,
-                                       -1,
-                                       SSA_BREAK | SSA_GLYPHS | SSA_FALLBACK | SSA_LINK,
-                                       0,
-                                       &ScriptControl,
-                                       &ScriptState,
-                                       nullptr,
-                                       nullptr,
-                                       nullptr,
-                                       &m_Analysis );
+    hr = ScriptStringAnalyse( hDC,
+                                m_pwszBuffer,
+                                (int)wcslen( m_pwszBuffer ) + 1,  // nul is also analyzed.
+                                (int)wcslen( m_pwszBuffer ) * 3 / 2 + 16,
+                                -1,
+                                SSA_BREAK | SSA_GLYPHS | SSA_FALLBACK | SSA_LINK,
+                                0,
+                                &ScriptControl,
+                                &ScriptState,
+                                nullptr,
+                                nullptr,
+                                nullptr,
+                                &m_Analysis );
     if( SUCCEEDED( hr ) )
         m_bAnalyseRequired = false;  // Analysis is up-to-date
     return hr;
@@ -6443,7 +6458,7 @@ bool CUniBuffer::SetText( _In_z_ LPCWSTR wszText )
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-HRESULT CUniBuffer::CPtoX( int nCP, bool bTrail, int* pX )
+bool CUniBuffer::CPtoX( int nCP, bool bTrail, int* pX )
 {
     assert( pX );
     *pX = 0;  // Default
@@ -6455,13 +6470,19 @@ HRESULT CUniBuffer::CPtoX( int nCP, bool bTrail, int* pX )
     if( SUCCEEDED( hr ) )
         hr = ScriptStringCPtoX( m_Analysis, nCP, bTrail, pX );
 
-    return hr;
+    if ( FAILED(hr) )
+    {
+        *pX = 0;
+        return false;
+    }
+
+    return true;
 }
 
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-HRESULT CUniBuffer::XtoCP( int nX, int* pCP, int* pnTrail )
+bool CUniBuffer::XtoCP( int nX, int* pCP, int* pnTrail )
 {
     assert( pCP && pnTrail );
     *pCP = 0; *pnTrail = FALSE;  // Default
@@ -6470,8 +6491,15 @@ HRESULT CUniBuffer::XtoCP( int nX, int* pCP, int* pnTrail )
     if( m_bAnalyseRequired )
         hr = Analyse();
 
-    if( SUCCEEDED( hr ) )
+    if (SUCCEEDED(hr))
+    {
         hr = ScriptStringXtoCP( m_Analysis, nX, pCP, pnTrail );
+        if (FAILED(hr))
+        {
+            *pCP = 0; *pnTrail = FALSE;
+            return false;
+        }
+    }
 
     // If the coordinate falls outside the text region, we
     // can get character positions that don't exist.  We must
@@ -6485,7 +6513,12 @@ HRESULT CUniBuffer::XtoCP( int nX, int* pCP, int* pnTrail )
         *pCP = (int)wcslen( m_pwszBuffer ); *pnTrail = TRUE;
     }
 
-    return hr;
+    if (FAILED(hr))
+    {
+        *pCP = 0; *pnTrail = FALSE;
+        return false;
+    }
+    return true;
 }
 
 
