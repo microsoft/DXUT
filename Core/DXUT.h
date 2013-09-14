@@ -67,7 +67,7 @@
 // Direct3D11 includes
 #include <d3dcommon.h>
 #include <dxgi.h>
-#include <d3d11.h>
+#include <d3d11_1.h>
 #include <d3dcompiler.h>
 
 // DirectXMath includes
@@ -122,6 +122,7 @@
     ((DWORD)((((a)&0xff)<<24)|(((r)&0xff)<<16)|(((g)&0xff)<<8)|((b)&0xff)))
 #endif
 
+#define DXUT_VERSION 1103
 
 //--------------------------------------------------------------------------------------
 // SAL2 fixups for VS 2010

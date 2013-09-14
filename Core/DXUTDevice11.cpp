@@ -139,6 +139,22 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
         if( FAILED( hr ) ) // DXGIERR_NOT_FOUND is expected when the end of the list is hit
             break;
 
+        IDXGIAdapter2* pAdapter2 = nullptr;
+        if ( SUCCEEDED( pAdapter->QueryInterface( __uuidof(IDXGIAdapter2), ( LPVOID* )&pAdapter2 ) ) )
+        {
+            // Succeeds on Directx 11.1 Runtime systems
+            DXGI_ADAPTER_DESC2 desc;
+            hr = pAdapter2->GetDesc2( &desc );
+            pAdapter2->Release();
+
+            if ( SUCCEEDED(hr) && ( desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE ) )
+            {
+                // Skip "always there" Microsoft Basics Display Driver
+                pAdapter->Release();
+                continue;
+            }
+        }
+
         CD3D11EnumAdapterInfo* pAdapterInfo = new (std::nothrow) CD3D11EnumAdapterInfo;
         if( !pAdapterInfo )
         {
