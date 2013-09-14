@@ -655,36 +655,39 @@ HRESULT CD3DSettingsDlg::OnDeviceTypeChanged()
 
     SetWindowed( g_DeviceSettings.d3d11.sd.Windowed != 0 );
 
-    // TODO - Check to see if WARP supports FL 11.0 or FL 11.1 before clamping to 10.1
-    if ( ( g_DeviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
-            && ( g_DeviceSettings.d3d11.DeviceFeatureLevel >= D3D_FEATURE_LEVEL_10_1 ) )
+    if ( g_DeviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
     {
-        g_DeviceSettings.d3d11.DeviceFeatureLevel = D3D_FEATURE_LEVEL_10_1;
+        D3D_FEATURE_LEVEL maxWarpFL = DXUTGetD3D11Enumeration()->GetWarpFeaturevel();
 
-        CD3D11EnumDeviceSettingsCombo* pBestDeviceSettingsCombo = DXUTGetD3D11Enumeration()->GetDeviceSettingsCombo(
-            g_DeviceSettings.d3d11.AdapterOrdinal, g_DeviceSettings.d3d11.sd.BufferDesc.Format,
-            ( g_DeviceSettings.d3d11.sd.Windowed != 0 ) );
-
-        if( !pBestDeviceSettingsCombo )
-            return DXUT_ERR_MSGBOX( L"GetDeviceSettingsCombo", E_INVALIDARG );
-                
-        CDXUTComboBox *pFeatureLevelBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
-        pFeatureLevelBox->RemoveAllItems();
-        for (int fli = 0; fli < TOTAL_FEATURE_LEVELS; fli++)
+        if ( g_DeviceSettings.d3d11.DeviceFeatureLevel > maxWarpFL )
         {
-            if (m_Levels[fli] >= g_DeviceSettings.MinimumFeatureLevel 
-                && m_Levels[fli] <=pBestDeviceSettingsCombo->pDeviceInfo->MaxLevel)
-            {
-                AddD3D11FeatureLevel( m_Levels[fli] );
-            }
-        } 
-        pFeatureLevelBox->SetSelectedByData( ULongToPtr( g_DeviceSettings.d3d11.DeviceFeatureLevel ) );
+            g_DeviceSettings.d3d11.DeviceFeatureLevel = maxWarpFL;
 
-        hr = OnFeatureLevelChanged();
-        if( FAILED( hr ) )
-            return hr;
+            CD3D11EnumDeviceSettingsCombo* pBestDeviceSettingsCombo = DXUTGetD3D11Enumeration()->GetDeviceSettingsCombo(
+                g_DeviceSettings.d3d11.AdapterOrdinal, g_DeviceSettings.d3d11.sd.BufferDesc.Format,
+                ( g_DeviceSettings.d3d11.sd.Windowed != 0 ) );
+
+            if( !pBestDeviceSettingsCombo )
+                return DXUT_ERR_MSGBOX( L"GetDeviceSettingsCombo", E_INVALIDARG );
+                
+            CDXUTComboBox *pFeatureLevelBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
+            pFeatureLevelBox->RemoveAllItems();
+            for (int fli = 0; fli < TOTAL_FEATURE_LEVELS; fli++)
+            {
+                if (m_Levels[fli] >= g_DeviceSettings.MinimumFeatureLevel 
+                    && m_Levels[fli] <=pBestDeviceSettingsCombo->pDeviceInfo->MaxLevel)
+                {
+                    AddD3D11FeatureLevel( m_Levels[fli] );
+                }
+            } 
+            pFeatureLevelBox->SetSelectedByData( ULongToPtr( g_DeviceSettings.d3d11.DeviceFeatureLevel ) );
+
+            hr = OnFeatureLevelChanged();
+            if( FAILED( hr ) )
+                return hr;
+        }
     }
-            
+
     hr = OnWindowedFullScreenChanged();
     if( FAILED( hr ) )
         return hr;

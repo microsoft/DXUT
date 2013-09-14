@@ -1188,7 +1188,7 @@ LRESULT CALLBACK DXUTStaticWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
                             xPos, yPos, GetDXUTState().GetMouseFuncUserContext() );
     }
 
-    // TODO - WM_POINTER for touch when on Windows 8.x
+    // TODO - WM_POINTER for touch when on Windows 8.0
 
     // Pass all messages to the app's MsgProc callback, and don't 
     // process further messages if the apps says not to.
@@ -4256,7 +4256,6 @@ HRESULT DXUTSnapDeviceSettingsToEnumDevice( DXUTDeviceSettings* pDeviceSettings,
         bestDisplayMode = pDeviceSettingsCombo->pOutputInfo->displayModeList[ bestModeIndex ];
         if (!pDeviceSettingsCombo->Windowed)
         {
-
             pDeviceSettings->d3d11.sd.BufferDesc.Height = bestDisplayMode.Height;
             pDeviceSettings->d3d11.sd.BufferDesc.Width = bestDisplayMode.Width;
             pDeviceSettings->d3d11.sd.BufferDesc.RefreshRate.Numerator = bestDisplayMode.RefreshRate.Numerator;
@@ -4268,11 +4267,14 @@ HRESULT DXUTSnapDeviceSettingsToEnumDevice( DXUTDeviceSettings* pDeviceSettings,
     if (pDeviceSettings->d3d11.DeviceFeatureLevel == 0)
         pDeviceSettings->d3d11.DeviceFeatureLevel = pDeviceSettingsCombo->pDeviceInfo->SelectedLevel;
 
-    // TODO - Check to see if WARP supports FL 11.0 or FL 11.1 before clamping to 10.1
-    if ( ( pDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
-            && ( pDeviceSettings->d3d11.DeviceFeatureLevel >= D3D_FEATURE_LEVEL_10_1 ) )
-        pDeviceSettings->d3d11.DeviceFeatureLevel = D3D_FEATURE_LEVEL_10_1;
-        
+    if ( pDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
+    {
+        D3D_FEATURE_LEVEL maxWarpFL = pEnum->GetWarpFeaturevel();
+
+        if ( pDeviceSettings->d3d11.DeviceFeatureLevel > maxWarpFL )
+            pDeviceSettings->d3d11.DeviceFeatureLevel = maxWarpFL;
+    }
+
     pDeviceSettings->d3d11.sd.SampleDesc.Count = pDeviceSettingsCombo->multiSampleCountList[ bestMSAAIndex ];
     if (pDeviceSettings->d3d11.sd.SampleDesc.Quality > pDeviceSettingsCombo->multiSampleQualityList[ bestMSAAIndex ] - 1)
         pDeviceSettings->d3d11.sd.SampleDesc.Quality = pDeviceSettingsCombo->multiSampleQualityList[ bestMSAAIndex ] - 1;

@@ -170,7 +170,7 @@ HRESULT WINAPI DXUT_Dynamic_D3D11CreateDevice( _In_opt_ IDXGIAdapter* pAdapter,
                                                _In_ UINT32 SDKVersion,
                                                _Deref_out_ ID3D11Device** ppDevice,
                                                _Out_opt_ D3D_FEATURE_LEVEL* pFeatureLevel,
-                                               _Deref_out_opt_ ID3D11DeviceContext** ppImmediateContext );
+                                               _Out_opt_ ID3D11DeviceContext** ppImmediateContext );
 
 bool DXUT_EnsureD3D11APIs();
 

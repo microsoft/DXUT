@@ -23,9 +23,6 @@ static int __cdecl SortModesCallback( const void* arg1, const void* arg2 );
 
 CD3D11Enumeration*  g_pDXUTD3D11Enumeration = nullptr;
 
-
-
-
 HRESULT WINAPI DXUTCreateD3D11Enumeration()
 {
     if( !g_pDXUTD3D11Enumeration )
@@ -45,14 +42,8 @@ void WINAPI DXUTDestroyD3D11Enumeration()
 class DXUTMemoryHelperD3D11Enum
 {
 public:
-DXUTMemoryHelperD3D11Enum()
-{
-    DXUTCreateD3D11Enumeration();
-}
-~DXUTMemoryHelperD3D11Enum()
-{
-    DXUTDestroyD3D11Enumeration();
-}
+DXUTMemoryHelperD3D11Enum() { DXUTCreateD3D11Enumeration(); }
+~DXUTMemoryHelperD3D11Enum() { DXUTDestroyD3D11Enumeration(); }
 };
 
 
@@ -78,21 +69,15 @@ CD3D11Enumeration* WINAPI DXUTGetD3D11Enumeration( bool bForceEnumerate, bool bE
 
 
 //--------------------------------------------------------------------------------------
-CD3D11Enumeration::CD3D11Enumeration()
+CD3D11Enumeration::CD3D11Enumeration() :
+    m_bHasEnumerated(false),
+    m_IsD3D11DeviceAcceptableFunc(nullptr),
+    m_pIsD3D11DeviceAcceptableFuncUserContext(nullptr),
+    m_bEnumerateAllAdapterFormats(false),
+    m_forceFL(D3D_FEATURE_LEVEL(0)),
+    m_warpFL(D3D_FEATURE_LEVEL_10_1)
+
 {
-    m_bHasEnumerated = false;
-    m_IsD3D11DeviceAcceptableFunc = nullptr;
-    m_pIsD3D11DeviceAcceptableFuncUserContext = nullptr;
-
-    m_nMinWidth = 640;
-    m_nMinHeight = 480;
-    m_nMaxWidth = UINT_MAX;
-    m_nMaxHeight = UINT_MAX;
-    m_bEnumerateAllAdapterFormats = false;
-
-    m_nRefreshMin = 0;
-    m_nRefreshMax = UINT_MAX;
-
     ResetPossibleDepthStencilFormats();
 }
 
@@ -192,9 +177,8 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
 
 
     //  If we did not get an adapter then we should still enumerate WARP and Ref.
-    if (m_AdapterInfoList.size() == 0) {
-
-
+    if (m_AdapterInfoList.size() == 0)
+    {
         CD3D11EnumAdapterInfo* pAdapterInfo = new (std::nothrow) CD3D11EnumAdapterInfo;
         if( !pAdapterInfo )
         {
@@ -210,7 +194,7 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
             delete pAdapterInfo;
         }
 
-        if (!FAILED(hr)) m_AdapterInfoList.push_back( pAdapterInfo );
+        if (SUCCEEDED(hr)) m_AdapterInfoList.push_back( pAdapterInfo );
     }
 
     //
@@ -248,6 +232,18 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
             wcscat_s( (*it)->szUniqueDescription, DXGI_MAX_DEVICE_IDENTIFIER_STRING, sz );
         }
     }
+
+    // TODO - Add FL 11.1 for WARP test, handle E_INVALIDARG on DX11.0
+    D3D_FEATURE_LEVEL fLvl[] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1 };
+    ID3D11Device* pDeviceWARP = nullptr;
+    hr = DXUT_Dynamic_D3D11CreateDevice( nullptr, D3D_DRIVER_TYPE_WARP, 0, 0, fLvl, _countof(fLvl),
+                                         D3D11_SDK_VERSION, &pDeviceWARP, &m_warpFL, nullptr );
+    if ( SUCCEEDED(hr) )
+    {
+        pDeviceWARP->Release();
+    }
+    else
+        m_warpFL = D3D_FEATURE_LEVEL_10_1;
 
     return S_OK;
 }
@@ -486,15 +482,19 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
             continue;
         }
         
-        if (g_forceFL == 0 || g_forceFL == pDeviceInfo->MaxLevel) { 
+        if (m_forceFL == 0 || m_forceFL == pDeviceInfo->MaxLevel)
+        { 
             pDeviceInfo->SelectedLevel = pDeviceInfo->MaxLevel;
         }
-        else if (g_forceFL > pDeviceInfo->MaxLevel) {
+        else if (m_forceFL > pDeviceInfo->MaxLevel)
+        {
             delete pDeviceInfo;
             SAFE_RELEASE( pd3dDevice );
             SAFE_RELEASE( pd3dDeviceContext );        
             continue;
-        } else {
+        }
+        else
+        {
             // A device was created with a higher feature level that the user-specified feature level.
             SAFE_RELEASE( pd3dDevice );
             SAFE_RELEASE( pd3dDeviceContext );
@@ -503,17 +503,19 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
                                              devTypeArray[iDeviceType],
                                              ( HMODULE )0,
                                              0,
-                                             &g_forceFL,
+                                             &m_forceFL,
                                              1,
                                              D3D11_SDK_VERSION,
                                              &pd3dDevice,
                                              &rtFL,
                                              &pd3dDeviceContext );
 
-            if( !FAILED( hr ) && rtFL == g_forceFL ) {
-                
-                pDeviceInfo->SelectedLevel = g_forceFL;
-            }else {
+            if( SUCCEEDED( hr ) && rtFL == m_forceFL )
+            {
+                pDeviceInfo->SelectedLevel = m_forceFL;
+            }
+            else
+            {
                 delete pDeviceInfo;
                 SAFE_RELEASE( pd3dDevice );
                 SAFE_RELEASE( pd3dDeviceContext );        
@@ -529,7 +531,6 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
             pDXGIDev->GetAdapter( &pAdapterInfo->m_pAdapter );
         }
         SAFE_RELEASE( pDXGIDev );
-
 
         D3D11_FEATURE_DATA_D3D10_X_HARDWARE_OPTIONS ho;
         pd3dDevice->CheckFeatureSupport(D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS, &ho, sizeof(ho));
