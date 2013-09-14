@@ -89,6 +89,10 @@ protected:
         ID3D11RenderTargetView* m_D3D11RenderTargetView;   // the D3D11 render target view
         ID3D11RasterizerState*  m_D3D11RasterizerState;    // the D3D11 Rasterizer state
 
+        // D3D11.1 specific
+        ID3D11Device1*          m_D3D11Device1;            // the D3D11.1 rendering device
+        ID3D11DeviceContext1*	m_D3D11DeviceContext1;	   // the D3D11.1 immediate device context
+
         // General
         HWND  m_HWNDFocus;                  // the main app focus window
         HWND  m_HWNDDeviceFullScreen;       // the main app device window in fullscreen mode
@@ -289,6 +293,9 @@ public:
     GET_SET_ACCESSOR( ID3D11DepthStencilView*, D3D11DepthStencilView );   
     GET_SET_ACCESSOR( ID3D11RenderTargetView*, D3D11RenderTargetView );
     GET_SET_ACCESSOR( ID3D11RasterizerState*, D3D11RasterizerState );
+
+    GET_SET_ACCESSOR( ID3D11Device1*, D3D11Device1 );
+    GET_SET_ACCESSOR( ID3D11DeviceContext1*, D3D11DeviceContext1 );
 
     GET_SET_ACCESSOR( HWND, HWNDFocus );
     GET_SET_ACCESSOR( HWND, HWNDDeviceFullScreen );
@@ -544,8 +551,10 @@ bool WINAPI DXUTGetMSAASwapChainCreated()
     return (psettings->d3d11.sd.SampleDesc.Count > 1);
 }
 ID3D11Device* WINAPI DXUTGetD3D11Device()                  { return GetDXUTState().GetD3D11Device(); }
+ID3D11Device1* WINAPI DXUTGetD3D11Device1()                { return GetDXUTState().GetD3D11Device1(); }
 D3D_FEATURE_LEVEL	 WINAPI DXUTGetD3D11DeviceFeatureLevel() { return GetDXUTState().GetD3D11FeatureLevel(); }
 ID3D11DeviceContext* WINAPI DXUTGetD3D11DeviceContext()    { return GetDXUTState().GetD3D11DeviceContext(); }
+ID3D11DeviceContext1* WINAPI DXUTGetD3D11DeviceContext1()  { return GetDXUTState().GetD3D11DeviceContext1(); }
 IDXGISwapChain* WINAPI DXUTGetDXGISwapChain()              { return GetDXUTState().GetDXGISwapChain(); }
 ID3D11RenderTargetView* WINAPI DXUTGetD3D11RenderTargetView() { return GetDXUTState().GetD3D11RenderTargetView(); }
 ID3D11DepthStencilView* WINAPI DXUTGetD3D11DepthStencilView() { return GetDXUTState().GetD3D11DepthStencilView(); }
@@ -698,7 +707,9 @@ void DXUTParseCommandLine(WCHAR* strCommandLine,
             {
                 if( DXUTGetCmdParam( strCmdLine, strFlag, MAX_PATH ) )
                 {
-                    if (_wcsnicmp( strFlag, L"D3D_FEATURE_LEVEL_11_0", MAX_PATH) == 0 ) {
+                    if (_wcsnicmp( strFlag, L"D3D_FEATURE_LEVEL_11_1", MAX_PATH) == 0 ) {
+                        GetDXUTState().SetOverrideForceFeatureLevel(D3D_FEATURE_LEVEL_11_1);
+                    }else if (_wcsnicmp( strFlag, L"D3D_FEATURE_LEVEL_11_0", MAX_PATH) == 0 ) {
                         GetDXUTState().SetOverrideForceFeatureLevel(D3D_FEATURE_LEVEL_11_0);
                     }else if (_wcsnicmp( strFlag, L"D3D_FEATURE_LEVEL_10_1", MAX_PATH) == 0 ) {
                         GetDXUTState().SetOverrideForceFeatureLevel(D3D_FEATURE_LEVEL_10_1);
@@ -711,9 +722,6 @@ void DXUTParseCommandLine(WCHAR* strCommandLine,
                     }else if (_wcsnicmp( strFlag, L"D3D_FEATURE_LEVEL_9_1", MAX_PATH) == 0 ) {
                         GetDXUTState().SetOverrideForceFeatureLevel(D3D_FEATURE_LEVEL_9_1);
                     }
-
-                    // TODO - D3D_FEATURE_LEVEL_11_1
-
                     continue;
                 }
             }
@@ -2310,7 +2318,7 @@ HRESULT DXUTCreate3DEnvironment11( _In_ ID3D11Device* pd3d11DeviceFromApp )
 
     ID3D11Device* pd3d11Device = nullptr;
     ID3D11DeviceContext* pd3dImmediateContext = nullptr;
-    D3D_FEATURE_LEVEL FeatureLevel = D3D_FEATURE_LEVEL_11_0;
+    D3D_FEATURE_LEVEL FeatureLevel = D3D_FEATURE_LEVEL_11_1;
 
     IDXGISwapChain* pSwapChain = nullptr;
     DXUTDeviceSettings* pNewDeviceSettings = GetDXUTState().GetCurrentDeviceSettings();
@@ -2417,8 +2425,6 @@ HRESULT DXUTCreate3DEnvironment11( _In_ ID3D11Device* pd3d11DeviceFromApp )
         }
 #endif
 
-        // TODO - QI for Direct3D 11.1 / 11.2
-
         if( SUCCEEDED( hr ) )
         {
             IDXGIDevice1* pDXGIDev = nullptr;
@@ -2510,6 +2516,23 @@ HRESULT DXUTCreate3DEnvironment11( _In_ ID3D11Device* pd3d11DeviceFromApp )
 
     assert( pd3dImmediateContext );
     _Analysis_assume_( pd3dImmediateContext );
+
+    // Direct3D 11.1
+    {
+        ID3D11Device1* pd3d11Device1 = nullptr;
+        hr = pd3d11Device->QueryInterface( __uuidof( ID3D11Device1 ), ( LPVOID* )&pd3d11Device1 );
+        if( SUCCEEDED( hr ) && pd3d11Device1 )
+        {
+            GetDXUTState().SetD3D11Device1( pd3d11Device1 );
+
+            ID3D11DeviceContext1* pd3dImmediateContext1 = nullptr;
+            hr = pd3dImmediateContext->QueryInterface( __uuidof( ID3D11DeviceContext1 ), ( LPVOID* )&pd3dImmediateContext1 );
+            if( SUCCEEDED( hr ) && pd3dImmediateContext1 )
+            {
+                GetDXUTState().SetD3D11DeviceContext1( pd3dImmediateContext1 ); 
+            }
+        }
+    }
 
     // If switching to REF, set the exit code to 11.  If switching to HAL and exit code was 11, then set it back to 0.
     if( pNewDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE && GetDXUTState().GetExitCode() == 0 )
@@ -2944,8 +2967,12 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
         pImmediateContext->Flush();
 
         // Release the D3D11 immediate context (if it exists) because it has a extra ref count on it
+        ID3D11DeviceContext* pImmediateContext1 = DXUTGetD3D11DeviceContext1();
         SAFE_RELEASE( pImmediateContext );
+        SAFE_RELEASE( pImmediateContext1 );
+
         GetDXUTState().SetD3D11DeviceContext( nullptr );
+        GetDXUTState().SetD3D11DeviceContext1( nullptr );
 
         // Report live objects
         if ( pd3dDevice )
@@ -2959,6 +2986,9 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
             }
 #endif
 
+            ID3D11Device1* pd3dDevice1 = DXUTGetD3D11Device1();
+            SAFE_RELEASE( pd3dDevice1 );
+
             // Release the D3D device and in debug configs, displays a message box if there 
             // are unrelease objects.
             UINT references = pd3dDevice->Release();
@@ -2969,6 +2999,7 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
             }
         }
         GetDXUTState().SetD3D11Device( nullptr );
+        GetDXUTState().SetD3D11Device1( nullptr );
 
         if( bReleaseSettings )
         {
@@ -4002,8 +4033,9 @@ void DXUTUpdateD3D11DeviceStats( D3D_DRIVER_TYPE DeviceType, D3D_FEATURE_LEVEL f
     case D3D_FEATURE_LEVEL_11_0:
         wcscat_s( pstrDeviceStats, 256, L" (FL 11.0)" );
         break;
-
-    // TODO - D3D_FEATURE_LEVEL_11_1
+    case D3D_FEATURE_LEVEL_11_1:
+        wcscat_s( pstrDeviceStats, 256, L" (FL 11.1)" );
+        break;
     }
 }
 
@@ -4269,10 +4301,18 @@ HRESULT DXUTSnapDeviceSettingsToEnumDevice( DXUTDeviceSettings* pDeviceSettings,
 
     if ( pDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
     {
-        D3D_FEATURE_LEVEL maxWarpFL = pEnum->GetWarpFeaturevel();
+        D3D_FEATURE_LEVEL maxWarpFL = pEnum->GetWARPFeaturevel();
 
         if ( pDeviceSettings->d3d11.DeviceFeatureLevel > maxWarpFL )
             pDeviceSettings->d3d11.DeviceFeatureLevel = maxWarpFL;
+    }
+
+    if ( pDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE )
+    {
+        D3D_FEATURE_LEVEL maxRefFL = pEnum->GetREFFeaturevel();
+
+        if ( pDeviceSettings->d3d11.DeviceFeatureLevel > maxRefFL )
+            pDeviceSettings->d3d11.DeviceFeatureLevel = maxRefFL;
     }
 
     pDeviceSettings->d3d11.sd.SampleDesc.Count = pDeviceSettingsCombo->multiSampleCountList[ bestMSAAIndex ];

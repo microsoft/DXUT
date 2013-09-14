@@ -75,8 +75,8 @@ CD3D11Enumeration::CD3D11Enumeration() :
     m_pIsD3D11DeviceAcceptableFuncUserContext(nullptr),
     m_bEnumerateAllAdapterFormats(false),
     m_forceFL(D3D_FEATURE_LEVEL(0)),
-    m_warpFL(D3D_FEATURE_LEVEL_10_1)
-
+    m_warpFL(D3D_FEATURE_LEVEL_10_1),
+    m_refFL(D3D_FEATURE_LEVEL_11_0)
 {
     ResetPossibleDepthStencilFormats();
 }
@@ -127,7 +127,7 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
         IDXGIAdapter2* pAdapter2 = nullptr;
         if ( SUCCEEDED( pAdapter->QueryInterface( __uuidof(IDXGIAdapter2), ( LPVOID* )&pAdapter2 ) ) )
         {
-            // Succeeds on Directx 11.1 Runtime systems
+            // Succeeds on DirectX 11.1 Runtime systems
             DXGI_ADAPTER_DESC2 desc;
             hr = pAdapter2->GetDesc2( &desc );
             pAdapter2->Release();
@@ -174,7 +174,6 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
 
         m_AdapterInfoList.push_back( pAdapterInfo );
     }
-
 
     //  If we did not get an adapter then we should still enumerate WARP and Ref.
     if (m_AdapterInfoList.size() == 0)
@@ -233,17 +232,47 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
         }
     }
 
-    // TODO - Add FL 11.1 for WARP test, handle E_INVALIDARG on DX11.0
-    D3D_FEATURE_LEVEL fLvl[] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1 };
-    ID3D11Device* pDeviceWARP = nullptr;
-    hr = DXUT_Dynamic_D3D11CreateDevice( nullptr, D3D_DRIVER_TYPE_WARP, 0, 0, fLvl, _countof(fLvl),
-                                         D3D11_SDK_VERSION, &pDeviceWARP, &m_warpFL, nullptr );
-    if ( SUCCEEDED(hr) )
+    D3D_FEATURE_LEVEL fLvl[] = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1 };
+
+    // Check WARP max feature level
     {
-        pDeviceWARP->Release();
+        ID3D11Device* pDevice = nullptr;
+        hr = DXUT_Dynamic_D3D11CreateDevice( nullptr, D3D_DRIVER_TYPE_WARP, 0, 0, fLvl, _countof(fLvl),
+                                             D3D11_SDK_VERSION, &pDevice, &m_warpFL, nullptr );
+        if ( hr == E_INVALIDARG )
+        {
+            // DirectX 11.0 runtime will not recognize FL 11.1, so try without it
+            hr = DXUT_Dynamic_D3D11CreateDevice( nullptr, D3D_DRIVER_TYPE_WARP, 0, 0, &fLvl[1], _countof(fLvl) - 1,
+                                                 D3D11_SDK_VERSION, &pDevice, &m_warpFL, nullptr );
+        }
+
+        if ( SUCCEEDED(hr) )
+        {
+            pDevice->Release();
+        }
+        else
+            m_warpFL = D3D_FEATURE_LEVEL_10_1;
     }
-    else
-        m_warpFL = D3D_FEATURE_LEVEL_10_1;
+
+    // Check REF max feature level
+    {
+        ID3D11Device* pDevice = nullptr;
+        hr = DXUT_Dynamic_D3D11CreateDevice( nullptr, D3D_DRIVER_TYPE_REFERENCE, 0, 0, fLvl, _countof(fLvl),
+                                             D3D11_SDK_VERSION, &pDevice, &m_refFL, nullptr );
+        if ( hr == E_INVALIDARG )
+        {
+            // DirectX 11.0 runtime will not recognize FL 11.1, so try without it
+            hr = DXUT_Dynamic_D3D11CreateDevice( nullptr, D3D_DRIVER_TYPE_REFERENCE, 0, 0, &fLvl[1], _countof(fLvl) - 1,
+                                                 D3D11_SDK_VERSION, &pDevice, &m_refFL, nullptr );
+        }
+
+        if ( SUCCEEDED(hr) )
+        {
+            pDevice->Release();
+        }
+        else
+            m_refFL = D3D_FEATURE_LEVEL_11_0;
+    }
 
     return S_OK;
 }
@@ -447,7 +476,7 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
 
         D3D_FEATURE_LEVEL FeatureLevels[] =
         {
-            // TODO - D3D_FEATURE_LEVEL_11_1
+            D3D_FEATURE_LEVEL_11_1,
             D3D_FEATURE_LEVEL_11_0,
             D3D_FEATURE_LEVEL_10_1,
             D3D_FEATURE_LEVEL_10_0,
@@ -461,8 +490,6 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
         ID3D11Device* pd3dDevice = nullptr;
         ID3D11DeviceContext* pd3dDeviceContext = nullptr;
         IDXGIAdapter* pAdapter = nullptr;
-        //if( devTypeArray[iDeviceType] == D3D_DRIVER_TYPE_HARDWARE )
-        //    pAdapter = pAdapterInfo->m_pAdapter;
         hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
                                              devTypeArray[iDeviceType],
                                              ( HMODULE )0,
@@ -474,7 +501,20 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
                                              &pDeviceInfo->MaxLevel,
                                              &pd3dDeviceContext );
 
-        // TODO - D3D_FEATURE_LEVEL_11_1 on 11.0 can result in E_INVALIDARG, so need to retry with FL 11_1 removed
+        if ( hr == E_INVALIDARG )
+        {
+            // DirectX 11.0 runtime will not recognize FL 11.1, so try without it
+            hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
+                                                 devTypeArray[iDeviceType],
+                                                 ( HMODULE )0,
+                                                 0,
+                                                 &FeatureLevels[1],
+                                                 NumFeatureLevels - 1,
+                                                 D3D11_SDK_VERSION,
+                                                 &pd3dDevice,
+                                                 &pDeviceInfo->MaxLevel,
+                                                 &pd3dDeviceContext );
+        }
 
         if( FAILED( hr ) || pDeviceInfo->MaxLevel < deviceSettings.MinimumFeatureLevel)
         {
@@ -500,15 +540,15 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
             SAFE_RELEASE( pd3dDeviceContext );
             D3D_FEATURE_LEVEL rtFL;
             hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
-                                             devTypeArray[iDeviceType],
-                                             ( HMODULE )0,
-                                             0,
-                                             &m_forceFL,
-                                             1,
-                                             D3D11_SDK_VERSION,
-                                             &pd3dDevice,
-                                             &rtFL,
-                                             &pd3dDeviceContext );
+                                                 devTypeArray[iDeviceType],
+                                                 ( HMODULE )0,
+                                                 0,
+                                                 &m_forceFL,
+                                                 1,
+                                                 D3D11_SDK_VERSION,
+                                                 &pd3dDevice,
+                                                 &rtFL,
+                                                 &pd3dDeviceContext );
 
             if( SUCCEEDED( hr ) && rtFL == m_forceFL )
             {
@@ -572,45 +612,42 @@ HRESULT CD3D11Enumeration::EnumerateDeviceCombosNoAdapter( _In_ CD3D11EnumAdapte
         {
             DXGI_FORMAT BufferFormat = BufferFormatArray[iBufferFormat];
 
+            // determine if there are any modes for this particular format
 
-
-                // determine if there are any modes for this particular format
-
-
-                // If an application callback function has been provided, make sure this device
-                // is acceptable to the app.
-                if( m_IsD3D11DeviceAcceptableFunc )
-                {
-                    if( !m_IsD3D11DeviceAcceptableFunc( pAdapterInfo, 
-                                                        0,
-                                                        *dit, 
-                                                        BufferFormat,
-                                                        TRUE,
-                                                        m_pIsD3D11DeviceAcceptableFuncUserContext ) )
-                        continue;
-                }
-
-                // At this point, we have an adapter/device/backbufferformat/iswindowed
-                // DeviceCombo that is supported by the system. We still 
-                // need to find one or more suitable depth/stencil buffer format,
-                // multisample type, and present interval.
-                CD3D11EnumDeviceSettingsCombo* pDeviceCombo = new (std::nothrow) CD3D11EnumDeviceSettingsCombo;
-                if( !pDeviceCombo )
-                    return E_OUTOFMEMORY;
-
-                pDeviceCombo->AdapterOrdinal = (*dit)->AdapterOrdinal;
-                pDeviceCombo->DeviceType = (*dit)->DeviceType;
-                pDeviceCombo->BackBufferFormat = BufferFormat;
-                pDeviceCombo->Windowed = TRUE;
-                pDeviceCombo->Output = 0;
-                pDeviceCombo->pAdapterInfo = pAdapterInfo;
-                pDeviceCombo->pDeviceInfo = (*dit);
-                pDeviceCombo->pOutputInfo = nullptr;
-
-                BuildMultiSampleQualityList( BufferFormat, pDeviceCombo );
-
-                pAdapterInfo->deviceSettingsComboList.push_back( pDeviceCombo );
+            // If an application callback function has been provided, make sure this device
+            // is acceptable to the app.
+            if( m_IsD3D11DeviceAcceptableFunc )
+            {
+                if( !m_IsD3D11DeviceAcceptableFunc( pAdapterInfo, 
+                                                    0,
+                                                    *dit, 
+                                                    BufferFormat,
+                                                    TRUE,
+                                                    m_pIsD3D11DeviceAcceptableFuncUserContext ) )
+                    continue;
             }
+
+            // At this point, we have an adapter/device/backbufferformat/iswindowed
+            // DeviceCombo that is supported by the system. We still 
+            // need to find one or more suitable depth/stencil buffer format,
+            // multisample type, and present interval.
+            CD3D11EnumDeviceSettingsCombo* pDeviceCombo = new (std::nothrow) CD3D11EnumDeviceSettingsCombo;
+            if( !pDeviceCombo )
+                return E_OUTOFMEMORY;
+
+            pDeviceCombo->AdapterOrdinal = (*dit)->AdapterOrdinal;
+            pDeviceCombo->DeviceType = (*dit)->DeviceType;
+            pDeviceCombo->BackBufferFormat = BufferFormat;
+            pDeviceCombo->Windowed = TRUE;
+            pDeviceCombo->Output = 0;
+            pDeviceCombo->pAdapterInfo = pAdapterInfo;
+            pDeviceCombo->pDeviceInfo = (*dit);
+            pDeviceCombo->pOutputInfo = nullptr;
+
+            BuildMultiSampleQualityList( BufferFormat, pDeviceCombo );
+
+            pAdapterInfo->deviceSettingsComboList.push_back( pDeviceCombo );
+        }
     }
 
     return S_OK;
@@ -731,6 +768,7 @@ void CD3D11Enumeration::ResetPossibleDepthStencilFormats()
     m_DepthStencilPossibleList.push_back( DXGI_FORMAT_D16_UNORM );
 }
 
+
 //--------------------------------------------------------------------------------------
 void CD3D11Enumeration::SetEnumerateAllAdapterFormats( _In_ bool bEnumerateAllAdapterFormats )
 {
@@ -746,12 +784,6 @@ void CD3D11Enumeration::BuildMultiSampleQualityList( DXGI_FORMAT fmt, CD3D11Enum
     ID3D11DeviceContext* pd3dDeviceContext = nullptr;
     IDXGIAdapter* pAdapter = nullptr;
     
-    //if( pDeviceCombo->DeviceType == D3D_DRIVER_TYPE_HARDWARE )
-    //    DXUTGetDXGIFactory()->EnumAdapters( pDeviceCombo->pAdapterInfo->AdapterOrdinal, &pAdapter );
-
-    //DXGI_ADAPTER_DESC dad;
-    //pAdapter->GetDesc(&dad);
-
     D3D_FEATURE_LEVEL *FeatureLevels = &(pDeviceCombo->pDeviceInfo->SelectedLevel);
     D3D_FEATURE_LEVEL returnedFeatureLevel;
 

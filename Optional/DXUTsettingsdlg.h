@@ -16,6 +16,7 @@
 // Header Includes
 //--------------------------------------------------------------------------------------
 #include "DXUTgui.h"
+
 //--------------------------------------------------------------------------------------
 // Control IDs
 //--------------------------------------------------------------------------------------
@@ -50,8 +51,7 @@
 #define DXUTSETTINGSDLG_STATIC_MODE_CHANGE_TIMEOUT      60
 #define DXUTSETTINGSDLG_WINDOWED_GROUP                  0x0100
 
-#define TOTAL_FEATURE_LEVELS                            6
-// TODO - D3D_FEATURE_LEVEL_11_1 -> 7
+#define TOTAL_FEATURE_LEVELS                            7
 
 //--------------------------------------------------------------------------------------
 // Dialog for selection of device settings 

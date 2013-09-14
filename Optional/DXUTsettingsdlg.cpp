@@ -50,8 +50,7 @@ CD3DSettingsDlg::CD3DSettingsDlg() :
     m_Levels[3] = D3D_FEATURE_LEVEL_10_0;
     m_Levels[4] = D3D_FEATURE_LEVEL_10_1;
     m_Levels[5] = D3D_FEATURE_LEVEL_11_0;
-
-    // TODO - D3D_FEATURE_LEVEL_11_1   
+    m_Levels[6] = D3D_FEATURE_LEVEL_11_1;
 }
 
 
@@ -248,10 +247,19 @@ HRESULT CD3DSettingsDlg::Refresh()
 
     CDXUTComboBox *pFeatureLevelBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
     pFeatureLevelBox->RemoveAllItems();
+
+    D3D_FEATURE_LEVEL clampFL;
+    if ( g_DeviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
+        clampFL = DXUTGetD3D11Enumeration()->GetWARPFeaturevel();
+    else if ( g_DeviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE )
+        clampFL = DXUTGetD3D11Enumeration()->GetREFFeaturevel();
+    else
+        clampFL = pBestDeviceSettingsCombo->pDeviceInfo->MaxLevel;
+
     for (int fli = 0; fli < TOTAL_FEATURE_LEVELS; fli++)
     {
         if (m_Levels[fli] >= g_DeviceSettings.MinimumFeatureLevel 
-            && m_Levels[fli] <=pBestDeviceSettingsCombo->pDeviceInfo->MaxLevel)
+            && m_Levels[fli] <= clampFL)
         {
             AddD3D11FeatureLevel( m_Levels[fli] );
         }
@@ -655,37 +663,42 @@ HRESULT CD3DSettingsDlg::OnDeviceTypeChanged()
 
     SetWindowed( g_DeviceSettings.d3d11.sd.Windowed != 0 );
 
+    CD3D11EnumDeviceSettingsCombo* pBestDeviceSettingsCombo = DXUTGetD3D11Enumeration()->GetDeviceSettingsCombo(
+        g_DeviceSettings.d3d11.AdapterOrdinal, g_DeviceSettings.d3d11.sd.BufferDesc.Format,
+        ( g_DeviceSettings.d3d11.sd.Windowed != 0 ) );
+
+    if( !pBestDeviceSettingsCombo )
+        return DXUT_ERR_MSGBOX( L"GetDeviceSettingsCombo", E_INVALIDARG );
+
+    D3D_FEATURE_LEVEL clampFL;
     if ( g_DeviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
+        clampFL = DXUTGetD3D11Enumeration()->GetWARPFeaturevel();
+    else if ( g_DeviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE )
+        clampFL = DXUTGetD3D11Enumeration()->GetREFFeaturevel();
+    else
+        clampFL = pBestDeviceSettingsCombo->pDeviceInfo->MaxLevel;
+
+    if ( g_DeviceSettings.d3d11.DeviceFeatureLevel > clampFL
+         || clampFL > pBestDeviceSettingsCombo->pDeviceInfo->MaxLevel )
     {
-        D3D_FEATURE_LEVEL maxWarpFL = DXUTGetD3D11Enumeration()->GetWarpFeaturevel();
-
-        if ( g_DeviceSettings.d3d11.DeviceFeatureLevel > maxWarpFL )
-        {
-            g_DeviceSettings.d3d11.DeviceFeatureLevel = maxWarpFL;
-
-            CD3D11EnumDeviceSettingsCombo* pBestDeviceSettingsCombo = DXUTGetD3D11Enumeration()->GetDeviceSettingsCombo(
-                g_DeviceSettings.d3d11.AdapterOrdinal, g_DeviceSettings.d3d11.sd.BufferDesc.Format,
-                ( g_DeviceSettings.d3d11.sd.Windowed != 0 ) );
-
-            if( !pBestDeviceSettingsCombo )
-                return DXUT_ERR_MSGBOX( L"GetDeviceSettingsCombo", E_INVALIDARG );
+        g_DeviceSettings.d3d11.DeviceFeatureLevel = std::min<D3D_FEATURE_LEVEL>( g_DeviceSettings.d3d11.DeviceFeatureLevel,
+                                                                                 clampFL );
                 
-            CDXUTComboBox *pFeatureLevelBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
-            pFeatureLevelBox->RemoveAllItems();
-            for (int fli = 0; fli < TOTAL_FEATURE_LEVELS; fli++)
+        CDXUTComboBox *pFeatureLevelBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
+        pFeatureLevelBox->RemoveAllItems();
+        for (int fli = 0; fli < TOTAL_FEATURE_LEVELS; fli++)
+        {
+            if (m_Levels[fli] >= g_DeviceSettings.MinimumFeatureLevel 
+                && m_Levels[fli] <= clampFL)
             {
-                if (m_Levels[fli] >= g_DeviceSettings.MinimumFeatureLevel 
-                    && m_Levels[fli] <=pBestDeviceSettingsCombo->pDeviceInfo->MaxLevel)
-                {
-                    AddD3D11FeatureLevel( m_Levels[fli] );
-                }
-            } 
-            pFeatureLevelBox->SetSelectedByData( ULongToPtr( g_DeviceSettings.d3d11.DeviceFeatureLevel ) );
+                AddD3D11FeatureLevel( m_Levels[fli] );
+            }
+        } 
+        pFeatureLevelBox->SetSelectedByData( ULongToPtr( g_DeviceSettings.d3d11.DeviceFeatureLevel ) );
 
-            hr = OnFeatureLevelChanged();
-            if( FAILED( hr ) )
-                return hr;
-        }
+        hr = OnFeatureLevelChanged();
+        if( FAILED( hr ) )
+            return hr;
     }
 
     hr = OnWindowedFullScreenChanged();
@@ -1092,8 +1105,12 @@ void CD3DSettingsDlg::AddD3D11FeatureLevel( _In_ D3D_FEATURE_LEVEL fl) {
                 pComboBox->AddItem( L"D3D_FEATURE_LEVEL_11_0", ULongToPtr( D3D_FEATURE_LEVEL_11_0 ) ); 
         }
         break;
-
-    // TODO - D3D_FEATURE_LEVEL_11_1
+    case D3D_FEATURE_LEVEL_11_1: 
+        {
+            if( !pComboBox->ContainsItem( L"D3D_FEATURE_LEVEL_11_1" ) )
+                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_11_1", ULongToPtr( D3D_FEATURE_LEVEL_11_1 ) ); 
+        }
+        break;
     }
 
 }

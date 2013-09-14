@@ -72,8 +72,8 @@ public:
     CD3D11EnumOutputInfo*                    GetOutputInfo( _In_ UINT AdapterOrdinal, _In_ UINT Output ) const;
     CD3D11EnumDeviceSettingsCombo*           GetDeviceSettingsCombo( _In_ DXUTD3D11DeviceSettings* pDeviceSettings ) const { return GetDeviceSettingsCombo( pDeviceSettings->AdapterOrdinal, pDeviceSettings->sd.BufferDesc.Format, pDeviceSettings->sd.Windowed ); }
     CD3D11EnumDeviceSettingsCombo*           GetDeviceSettingsCombo( _In_ UINT AdapterOrdinal, _In_ DXGI_FORMAT BackBufferFormat, _In_ BOOL Windowed ) const;
-
-    D3D_FEATURE_LEVEL                        GetWarpFeaturevel() const { return m_warpFL; }
+    D3D_FEATURE_LEVEL                        GetWARPFeaturevel() const { return m_warpFL; }
+    D3D_FEATURE_LEVEL                        GetREFFeaturevel() const { return m_refFL; }
 
     ~CD3D11Enumeration();
 
@@ -92,6 +92,7 @@ private:
     bool m_bEnumerateAllAdapterFormats;
     D3D_FEATURE_LEVEL m_forceFL;
     D3D_FEATURE_LEVEL m_warpFL;
+    D3D_FEATURE_LEVEL m_refFL;
 
     std::vector<CD3D11EnumAdapterInfo*> m_AdapterInfoList;
 
