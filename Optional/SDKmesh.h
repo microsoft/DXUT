@@ -80,6 +80,8 @@ enum FRAME_TRANSFORM_TYPE
 //--------------------------------------------------------------------------------------
 // Structures.  Unions with pointers are forced to 64bit.
 //--------------------------------------------------------------------------------------
+#pragma pack(push,8)
+
 struct SDKMESH_HEADER
 {
     //Basic Info and sizes
@@ -257,6 +259,20 @@ struct SDKANIMATION_FRAME_DATA
         SDKANIMATION_DATA* pAnimationData;
     };
 };
+
+#pragma pack(pop)
+
+static_assert( sizeof(D3DVERTEXELEMENT9) == 8, "Direct3D9 Decl structure size incorrect" );
+static_assert( sizeof(SDKMESH_HEADER)== 104, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_VERTEX_BUFFER_HEADER) == 288, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_INDEX_BUFFER_HEADER) == 32, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_MESH) == 224, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_SUBSET) == 144, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_FRAME) == 184, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKMESH_MATERIAL) == 1256, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKANIMATION_FILE_HEADER) == 40, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKANIMATION_DATA) == 40, "SDK Mesh structure size incorrect" );
+static_assert( sizeof(SDKANIMATION_FRAME_DATA) == 112, "SDK Mesh structure size incorrect" );
 
 #ifndef _CONVERTER_APP_
 
