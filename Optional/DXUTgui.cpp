@@ -341,6 +341,9 @@ void DrawText11DXUT( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3d11Device
 _Use_decl_annotations_
 void EndText11( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3d11DeviceContext )
 {
+    if ( g_FontVertices.empty() )
+        return;
+
     // ensure our buffer size can hold our sprites
     UINT FontDataBytes = static_cast<UINT>( g_FontVertices.size() * sizeof( DXUTSpriteVertex ) );
     if( g_FontBufferBytes11 < FontDataBytes )

@@ -1766,7 +1766,7 @@ HRESULT DXUTChangeDevice( DXUTDeviceSettings* pNewDeviceSettings,
     pNewDeviceSettings = pNewDeviceSettingsOnHeap;
 
     GetDXUTState().SetCurrentDeviceSettings(pNewDeviceSettingsOnHeap);
-    DXUTSnapDeviceSettingsToEnumDevice(pNewDeviceSettingsOnHeap, false);
+    hr = DXUTSnapDeviceSettingsToEnumDevice(pNewDeviceSettingsOnHeap, false);
 
     if( FAILED( hr ) ) // the call will fail if no valid devices were found
     {
@@ -4246,7 +4246,13 @@ HRESULT DXUTSnapDeviceSettingsToEnumDevice( DXUTDeviceSettings* pDeviceSettings,
         if (tempAdapterInfo->AdapterOrdinal == pDeviceSettings->d3d11.AdapterOrdinal) pAdapterInfo = tempAdapterInfo;
     }
     if ( !pAdapterInfo )
-        return E_FAIL; // no adapters found.
+    {
+        if ( pAdapterList->empty() || pDeviceSettings->d3d11.AdapterOrdinal > 0 )
+        {
+            return E_FAIL; // no adapters found.
+        }
+        pAdapterInfo = *pAdapterList->cbegin();
+    }
     CD3D11EnumDeviceSettingsCombo* pDeviceSettingsCombo = nullptr;
     float biggestScore = 0;
 
