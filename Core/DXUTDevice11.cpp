@@ -557,8 +557,11 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
             else
             {
                 delete pDeviceInfo;
-                SAFE_RELEASE( pd3dDevice );
-                SAFE_RELEASE( pd3dDeviceContext );        
+                if ( SUCCEEDED(hr) )
+                {
+                    SAFE_RELEASE( pd3dDevice );
+                    SAFE_RELEASE( pd3dDeviceContext );
+                }
                 continue;
             }
         }
@@ -573,7 +576,10 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
         SAFE_RELEASE( pDXGIDev );
 
         D3D11_FEATURE_DATA_D3D10_X_HARDWARE_OPTIONS ho;
-        pd3dDevice->CheckFeatureSupport(D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS, &ho, sizeof(ho));
+        hr = pd3dDevice->CheckFeatureSupport(D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS, &ho, sizeof(ho));
+        if ( FAILED(hr) )
+            memset( &ho, 0, sizeof(ho) );
+
         pDeviceInfo->ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x = ho.ComputeShaders_Plus_RawAndStructuredBuffers_Via_Shader_4_x; 
         SAFE_RELEASE( pd3dDeviceContext );             
         SAFE_RELEASE( pd3dDevice );
