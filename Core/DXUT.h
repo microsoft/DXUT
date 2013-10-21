@@ -122,33 +122,7 @@
     ((DWORD)((((a)&0xff)<<24)|(((r)&0xff)<<16)|(((g)&0xff)<<8)|((b)&0xff)))
 #endif
 
-#define DXUT_VERSION 1103
-
-//--------------------------------------------------------------------------------------
-// SAL2 fixups for VS 2010
-//--------------------------------------------------------------------------------------
-
-#if defined(_MSC_VER) && (_MSC_VER<1610) && !defined(_In_reads_)
-#define _Analysis_assume_(exp)
-#define _In_reads_(exp)
-#define _In_reads_opt_(exp)
-#define _Out_writes_(exp)
-#define _In_reads_bytes_(exp)
-#define _Out_writes_bytes_(exp)
-#define _COM_Outptr_
-#define _Outptr_
-#define _Outptr_opt_
-#define _Outptr_result_z_
-#define _Outptr_opt_result_maybenull_
-#define _Acquires_lock_(exp)
-#define _Releases_lock_(exp)
-#define _Inexpressible_(exp)
-#endif
-
-#ifndef _Use_decl_annotations_
-#define _Use_decl_annotations_
-#endif
-
+#define DXUT_VERSION 1104
 
 //--------------------------------------------------------------------------------------
 // Structs
