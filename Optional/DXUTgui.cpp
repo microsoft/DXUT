@@ -2256,7 +2256,8 @@ CDXUTDialogResourceManager::CDXUTDialogResourceManager() :
     m_pSamplerStateStored11(nullptr),
     m_pInputLayout11(nullptr),
     m_pVBScreenQuad11(nullptr),
-    m_pSpriteBuffer11(nullptr)
+    m_pSpriteBuffer11(nullptr),
+    m_SpriteBufferBytes11(0)
 {
 }
 
