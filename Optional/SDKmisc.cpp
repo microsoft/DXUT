@@ -33,7 +33,14 @@ CDXUTResourceCache& WINAPI DXUTGetGlobalResourceCache()
     static CDXUTResourceCache* s_cache = nullptr;
     if ( !s_cache )
     {
+#if defined(DEBUG) || defined(_DEBUG)
+        int flag = _CrtSetDbgFlag( _CRTDBG_REPORT_FLAG );
+        _CrtSetDbgFlag( flag & ~_CRTDBG_ALLOC_MEM_DF );
+#endif
         s_cache = new CDXUTResourceCache;
+#if defined(DEBUG) || defined(_DEBUG)
+        _CrtSetDbgFlag( flag );
+#endif
     }
     return *s_cache;
 }
@@ -808,8 +815,6 @@ XMMATRIX WINAPI DXUTGetCubeMapViewMatrix( _In_ DWORD dwFace )
 CDXUTResourceCache::~CDXUTResourceCache()
 {
     OnDestroyDevice();
-
-    m_TextureCache.clear();
 }
 
 //--------------------------------------------------------------------------------------
@@ -892,6 +897,7 @@ HRESULT CDXUTResourceCache::OnDestroyDevice()
         SAFE_RELEASE( m_TextureCache[ j ].pSRV11 );
     }
     m_TextureCache.clear();
+    m_TextureCache.shrink_to_fit();
 
     return S_OK;
 }
