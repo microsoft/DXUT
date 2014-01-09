@@ -12,6 +12,10 @@
 //--------------------------------------------------------------------------------------
 #include "DXUT.h"
 
+#ifndef NDEBUG
+#include <dxgidebug.h>
+#endif
+
 #define DXUT_MIN_WINDOW_SIZE_X 200
 #define DXUT_MIN_WINDOW_SIZE_Y 200
 #define DXUT_COUNTER_STAT_LENGTH 2048
@@ -3000,6 +3004,17 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
         }
         GetDXUTState().SetD3D11Device( nullptr );
         GetDXUTState().SetD3D11Device1( nullptr );
+
+#ifndef NDEBUG
+        {
+            IDXGIDebug* dxgiDebug = nullptr;
+            if ( SUCCEEDED( DXUT_Dynamic_DXGIGetDebugInterface( IID_IDXGIDebug, reinterpret_cast<void**>( &dxgiDebug ) ) ) )
+            {
+                dxgiDebug->ReportLiveObjects( DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL );
+                dxgiDebug->Release();
+            }
+        }
+#endif
 
         if( bReleaseSettings )
         {

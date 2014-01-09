@@ -1693,17 +1693,17 @@ bool ImeUi_Initialize(_In_  HWND hwnd, _In_ bool bDisable )
     g_hwndMain = hwnd;
     g_disableCicero.Initialize();
 
-    g_hImmDll = LoadLibraryA( "imm32.dll" );
+    g_hImmDll = LoadLibraryEx( L"imm32.dll", nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
     g_bDisableImeCompletely = false;
 
     if( g_hImmDll )
     {
-        _ImmLockIMC = ( LPINPUTCONTEXT2 ( WINAPI* )( HIMC hIMC ) )GetProcAddress( g_hImmDll, "ImmLockIMC" );
-        _ImmUnlockIMC = ( BOOL ( WINAPI* )( HIMC hIMC ) )GetProcAddress( g_hImmDll, "ImmUnlockIMC" );
-        _ImmLockIMCC = ( LPVOID ( WINAPI* )( HIMCC hIMCC ) )GetProcAddress( g_hImmDll, "ImmLockIMCC" );
-        _ImmUnlockIMCC = ( BOOL ( WINAPI* )( HIMCC hIMCC ) )GetProcAddress( g_hImmDll, "ImmUnlockIMCC" );
-        BOOL ( WINAPI* _ImmDisableTextFrameService )( DWORD ) = ( BOOL ( WINAPI* )( DWORD ) )GetProcAddress( g_hImmDll,
-                                                                                                             "ImmDisableTextFrameService" );
+        _ImmLockIMC = reinterpret_cast<LPINPUTCONTEXT2 ( WINAPI* )( HIMC hIMC )>( GetProcAddress( g_hImmDll, "ImmLockIMC" ) );
+        _ImmUnlockIMC = reinterpret_cast<BOOL ( WINAPI* )( HIMC hIMC )>( GetProcAddress( g_hImmDll, "ImmUnlockIMC" ) );
+        _ImmLockIMCC = reinterpret_cast<LPVOID ( WINAPI* )( HIMCC hIMCC )>( GetProcAddress( g_hImmDll, "ImmLockIMCC" ) );
+        _ImmUnlockIMCC = reinterpret_cast<BOOL ( WINAPI* )( HIMCC hIMCC )>( GetProcAddress( g_hImmDll, "ImmUnlockIMCC" ) );
+        BOOL ( WINAPI* _ImmDisableTextFrameService )( DWORD ) = reinterpret_cast<BOOL ( WINAPI* )( DWORD )>( GetProcAddress( g_hImmDll,
+                                                                                                             "ImmDisableTextFrameService" ) );
         if( _ImmDisableTextFrameService )
         {
             _ImmDisableTextFrameService( ( DWORD )-1 );
@@ -2504,13 +2504,11 @@ static void SetImeApi()
     HKL kl = g_hklCurrent;
     if( _ImmGetIMEFileNameA( kl, szImeFile, sizeof( szImeFile ) - 1 ) <= 0 )
         return;
-    HMODULE hIme = LoadLibraryA( szImeFile );
+    HMODULE hIme = LoadLibraryExA( szImeFile, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
     if( !hIme )
         return;
-    _GetReadingString = ( UINT ( WINAPI* )( HIMC, UINT, LPWSTR, PINT, BOOL*, PUINT ) )
-        ( GetProcAddress( hIme, "GetReadingString" ) );
-    _ShowReadingWindow = ( BOOL ( WINAPI* )( HIMC himc, BOOL ) )
-        ( GetProcAddress( hIme, "ShowReadingWindow" ) );
+    _GetReadingString = reinterpret_cast<UINT ( WINAPI* )( HIMC, UINT, LPWSTR, PINT, BOOL*, PUINT )>( GetProcAddress( hIme, "GetReadingString" ) );
+    _ShowReadingWindow = reinterpret_cast<BOOL ( WINAPI* )( HIMC himc, BOOL )>( GetProcAddress( hIme, "ShowReadingWindow" ) );
     if( _ShowReadingWindow )
     {
         HIMC himc = _ImmGetContext( g_hwndCurr );
