@@ -31,10 +31,6 @@
 #define _WIN32_WINNT   0x0600
 #endif
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) && !defined(DXGI_1_2_FORMATS)
-#define DXGI_1_2_FORMATS
-#endif
-
 // #define DXUT_AUTOLIB to automatically include the libs needed for DXUT 
 #ifdef DXUT_AUTOLIB
 #pragma comment( lib, "comctl32.lib" )

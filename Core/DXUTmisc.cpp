@@ -319,9 +319,7 @@ LPCWSTR WINAPI DXUTDXGIFormatToString( DXGI_FORMAT format, bool bWithPrefix )
         DXUTDXGIFMTSTR(DXGI_FORMAT_BC7_UNORM_SRGB)
 
         // DXGI 1.2
-#ifdef DXGI_1_2_FORMATS
         DXUTDXGIFMTSTR(DXGI_FORMAT_B4G4R4A4_UNORM)
-#endif
 
         default:
             pstr = L"Unknown format"; break;

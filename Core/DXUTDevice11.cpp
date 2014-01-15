@@ -999,10 +999,8 @@ UINT WINAPI DXUTGetDXGIColorChannelBits( DXGI_FORMAT fmt )
         case DXGI_FORMAT_B5G5R5A1_UNORM:
             return 5;
 
-#ifdef DXGI_1_2_FORMATS
         case DXGI_FORMAT_B4G4R4A4_UNORM:
             return 4;
-#endif
 
         default:
             return 0;
