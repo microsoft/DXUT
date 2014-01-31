@@ -1838,7 +1838,7 @@ static DWORD GetImeId( _In_ UINT uIndex )
         return dwRet[uIndex];
     }
     hklPrev = kl;
-    DWORD dwLang = ( ( DWORD )kl & 0xffff );
+    DWORD dwLang = ( static_cast<DWORD>(reinterpret_cast<UINT_PTR>(kl)) & 0xffff );
 
     if( g_bUILessMode && GETLANG() == LANG_CHT )
     {
@@ -2307,7 +2307,7 @@ static void CheckToggleState()
     }
 
     bool bIme = _ImmIsIME( g_hklCurrent ) != 0
-        && ( ( 0xF0000000 & ( DWORD )g_hklCurrent ) == 0xE0000000 ); // Hack to detect IME correctly. When IME is running as TIP, ImmIsIME() returns true for CHT US keyboard.
+        && ( ( 0xF0000000 & static_cast<DWORD>( reinterpret_cast<UINT_PTR>( g_hklCurrent ) ) ) == 0xE0000000 ); // Hack to detect IME correctly. When IME is running as TIP, ImmIsIME() returns true for CHT US keyboard.
     g_bChineseIME = ( GETPRIMLANG() == LANG_CHINESE ) && bIme;
 
     HIMC himc = _ImmGetContext( g_hwndCurr );
@@ -2563,8 +2563,8 @@ static void CheckInputLocale()
             g_pszIndicatior = g_aszIndicator[INDICATOR_NON_IME];
     }
     char szCodePage[8];
-    int iRc = GetLocaleInfoA( MAKELCID( GETLANG(), SORT_DEFAULT ), LOCALE_IDEFAULTANSICODEPAGE, szCodePage,
-                              COUNTOF( szCodePage ) ); iRc;
+    (void)GetLocaleInfoA( MAKELCID( GETLANG(), SORT_DEFAULT ), LOCALE_IDEFAULTANSICODEPAGE, szCodePage,
+                              COUNTOF( szCodePage ) );
     g_uCodePage = _strtoul( szCodePage, nullptr, 0 );
     for( int i = 0; i < 256; i++ )
     {
@@ -2699,7 +2699,7 @@ STDAPI CTsfUiLessMode::CUIElementSink::QueryInterface( _In_ REFIID riid, _COM_Ou
 
     if( IsEqualIID( riid, IID_IUnknown ) )
     {
-        *ppvObj = reinterpret_cast<IUnknown*>( this );
+        *ppvObj = static_cast<IUnknown*>( static_cast<ITfUIElementSink*>( this ) );
     }
     else if( IsEqualIID( riid, __uuidof( ITfUIElementSink ) ) )
     {

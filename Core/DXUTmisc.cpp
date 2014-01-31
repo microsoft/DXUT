@@ -392,7 +392,6 @@ typedef VOID        (WINAPI * LPD3DPERF_SETOPTIONS)( DWORD dwOptions );
 typedef DWORD       (WINAPI * LPD3DPERF_GETSTATUS)();
 typedef HRESULT     (WINAPI * LPCREATEDXGIFACTORY)(REFIID, void ** );
 typedef HRESULT     (WINAPI * LPDXGIGETDEBUGINTERFACE)(REFIID, void ** );
-typedef HRESULT     (WINAPI * LPD3D11CREATEDEVICE)( IDXGIAdapter*, D3D_DRIVER_TYPE, HMODULE, UINT32, D3D_FEATURE_LEVEL*, UINT, UINT32, ID3D11Device**, D3D_FEATURE_LEVEL*, ID3D11DeviceContext** );
 
 // Module and function pointers
 static HMODULE                              s_hModD3D9 = nullptr;
@@ -408,7 +407,7 @@ static HMODULE                              s_hModDXGIDebug = nullptr;
 static LPCREATEDXGIFACTORY                  s_DynamicCreateDXGIFactory = nullptr;
 static LPDXGIGETDEBUGINTERFACE              s_DynamicDXGIGetDebugInterface = nullptr;
 static HMODULE                              s_hModD3D11 = nullptr;
-static LPD3D11CREATEDEVICE                  s_DynamicD3D11CreateDevice = nullptr;
+static PFN_D3D11_CREATE_DEVICE              s_DynamicD3D11CreateDevice = nullptr;
 
 // Ensure function pointers are initialized
 static bool DXUT_EnsureD3D9APIs()
@@ -446,7 +445,7 @@ bool DXUT_EnsureD3D11APIs()
     s_hModD3D11 = LoadLibraryEx( L"d3d11.dll", nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
     if( s_hModD3D11 )
     {
-        s_DynamicD3D11CreateDevice = reinterpret_cast<LPD3D11CREATEDEVICE>( GetProcAddress( s_hModD3D11, "D3D11CreateDevice" ) );
+        s_DynamicD3D11CreateDevice = reinterpret_cast<PFN_D3D11_CREATE_DEVICE>( GetProcAddress( s_hModD3D11, "D3D11CreateDevice" ) );
     }
 
     if( !s_DynamicCreateDXGIFactory )

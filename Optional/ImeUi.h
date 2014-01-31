@@ -19,7 +19,7 @@ class CImeUiFont_Base
 public:
     virtual void    SetHeight( _In_ UINT uHeight )
     {
-        uHeight;
+        UNREFERENCED_PARAMETER(uHeight);
     }; // for backward compatibility
     virtual void    SetColor( _In_ DWORD color ) = 0;
     virtual void    SetPosition( _In_ int x, _In_ int y ) = 0;
