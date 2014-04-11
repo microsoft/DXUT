@@ -29,14 +29,12 @@
 #include <dxgiformat.h>
 #include <assert.h>
 
-#if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP)
 // VS 2010's stdint.h conflicts with intsafe.h
 #pragma warning(push)
 #pragma warning(disable : 4005)
 #include <wincodec.h>
 #include <wrl.h>
 #pragma warning(pop)
-#endif
 
 #include <memory>
 
@@ -670,8 +668,6 @@ static HRESULT CaptureTexture( _In_ ID3D11DeviceContext* pContext,
 
 
 //--------------------------------------------------------------------------------------
-#if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP)
-
 static bool g_WIC2 = false;
 
 static IWICImagingFactory* _GetWIC()
@@ -729,7 +725,6 @@ static IWICImagingFactory* _GetWIC()
 
     return s_Factory;
 }
-#endif
 
 
 //--------------------------------------------------------------------------------------
@@ -761,7 +756,7 @@ HRESULT DirectX::SaveDDSTextureToFile( _In_ ID3D11DeviceContext* pContext,
 
     *reinterpret_cast<uint32_t*>(&fileHeader[0]) = DDS_MAGIC;
 
-    auto header = reinterpret_cast<DDS_HEADER*>( reinterpret_cast<uint8_t*>(&fileHeader[0]) + sizeof(uint32_t) );
+    auto header = reinterpret_cast<DDS_HEADER*>( &fileHeader[0] + sizeof(uint32_t) );
     size_t headerSize = sizeof(uint32_t) + sizeof(DDS_HEADER);
     memset( header, 0, sizeof(DDS_HEADER) );
     header->size = sizeof( DDS_HEADER );
@@ -840,7 +835,7 @@ HRESULT DirectX::SaveDDSTextureToFile( _In_ ID3D11DeviceContext* pContext,
     }
 
     // Setup pixels
-    std::unique_ptr<uint8_t> pixels( new (std::nothrow) uint8_t[ slicePitch ] );
+    std::unique_ptr<uint8_t[]> pixels( new (std::nothrow) uint8_t[ slicePitch ] );
     if (!pixels)
         return E_OUTOFMEMORY;
 
@@ -886,8 +881,6 @@ HRESULT DirectX::SaveDDSTextureToFile( _In_ ID3D11DeviceContext* pContext,
 }
 
 //--------------------------------------------------------------------------------------
-#if !defined(WINAPI_FAMILY) || (WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP)
-
 HRESULT DirectX::SaveWICTextureToFile( _In_ ID3D11DeviceContext* pContext,
                                        _In_ ID3D11Resource* pSource,
                                        _In_ REFGUID guidContainerFormat, 
@@ -1162,5 +1155,3 @@ HRESULT DirectX::SaveWICTextureToFile( _In_ ID3D11DeviceContext* pContext,
 
     return S_OK;
 }
-
-#endif // !WINAPI_FAMILY || (WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP)
