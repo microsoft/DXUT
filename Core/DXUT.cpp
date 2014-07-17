@@ -97,6 +97,12 @@ protected:
         ID3D11Device1*          m_D3D11Device1;            // the D3D11.1 rendering device
         ID3D11DeviceContext1*	m_D3D11DeviceContext1;	   // the D3D11.1 immediate device context
 
+#ifdef USE_DIRECT3D11_2
+        // D3D11.2 specific
+        ID3D11Device2*          m_D3D11Device2;            // the D3D11.2 rendering device
+        ID3D11DeviceContext2*	m_D3D11DeviceContext2;	   // the D3D11.2 immediate device context
+#endif
+
         // General
         HWND  m_HWNDFocus;                  // the main app focus window
         HWND  m_HWNDDeviceFullScreen;       // the main app device window in fullscreen mode
@@ -300,6 +306,11 @@ public:
 
     GET_SET_ACCESSOR( ID3D11Device1*, D3D11Device1 );
     GET_SET_ACCESSOR( ID3D11DeviceContext1*, D3D11DeviceContext1 );
+
+#ifdef USE_DIRECT3D11_2
+    GET_SET_ACCESSOR(ID3D11Device2*, D3D11Device2);
+    GET_SET_ACCESSOR(ID3D11DeviceContext2*, D3D11DeviceContext2);
+#endif
 
     GET_SET_ACCESSOR( HWND, HWNDFocus );
     GET_SET_ACCESSOR( HWND, HWNDDeviceFullScreen );
@@ -554,11 +565,7 @@ bool WINAPI DXUTGetMSAASwapChainCreated()
         return false;
     return (psettings->d3d11.sd.SampleDesc.Count > 1);
 }
-ID3D11Device* WINAPI DXUTGetD3D11Device()                  { return GetDXUTState().GetD3D11Device(); }
-ID3D11Device1* WINAPI DXUTGetD3D11Device1()                { return GetDXUTState().GetD3D11Device1(); }
 D3D_FEATURE_LEVEL	 WINAPI DXUTGetD3D11DeviceFeatureLevel() { return GetDXUTState().GetD3D11FeatureLevel(); }
-ID3D11DeviceContext* WINAPI DXUTGetD3D11DeviceContext()    { return GetDXUTState().GetD3D11DeviceContext(); }
-ID3D11DeviceContext1* WINAPI DXUTGetD3D11DeviceContext1()  { return GetDXUTState().GetD3D11DeviceContext1(); }
 IDXGISwapChain* WINAPI DXUTGetDXGISwapChain()              { return GetDXUTState().GetDXGISwapChain(); }
 ID3D11RenderTargetView* WINAPI DXUTGetD3D11RenderTargetView() { return GetDXUTState().GetD3D11RenderTargetView(); }
 ID3D11DepthStencilView* WINAPI DXUTGetD3D11DepthStencilView() { return GetDXUTState().GetD3D11DepthStencilView(); }
@@ -587,6 +594,16 @@ bool WINAPI DXUTGetAutomation()                            { return GetDXUTState
 bool WINAPI DXUTIsWindowed()                               { return DXUTGetIsWindowedFromDS( GetDXUTState().GetCurrentDeviceSettings() ); }
 bool WINAPI DXUTIsInGammaCorrectMode()                     { return GetDXUTState().GetIsInGammaCorrectMode(); }
 IDXGIFactory1* WINAPI DXUTGetDXGIFactory()                 { DXUTDelayLoadDXGI(); return GetDXUTState().GetDXGIFactory(); }
+
+ID3D11Device* WINAPI DXUTGetD3D11Device()                  { return GetDXUTState().GetD3D11Device(); }
+ID3D11DeviceContext* WINAPI DXUTGetD3D11DeviceContext()    { return GetDXUTState().GetD3D11DeviceContext(); }
+ID3D11Device1* WINAPI DXUTGetD3D11Device1()                { return GetDXUTState().GetD3D11Device1(); }
+ID3D11DeviceContext1* WINAPI DXUTGetD3D11DeviceContext1()  { return GetDXUTState().GetD3D11DeviceContext1(); }
+
+#ifdef USE_DIRECT3D11_2
+ID3D11Device2* WINAPI DXUTGetD3D11Device2()                { return GetDXUTState().GetD3D11Device2(); }
+ID3D11DeviceContext2* WINAPI DXUTGetD3D11DeviceContext2()  { return GetDXUTState().GetD3D11DeviceContext2(); }
+#endif
 
 //--------------------------------------------------------------------------------------
 // External callback setup functions
@@ -2538,6 +2555,25 @@ HRESULT DXUTCreate3DEnvironment11( _In_ ID3D11Device* pd3d11DeviceFromApp )
         }
     }
 
+#ifdef USE_DIRECT3D11_2
+    // Direct3D 11.2
+    {
+        ID3D11Device2* pd3d11Device2 = nullptr;
+        hr = pd3d11Device->QueryInterface(__uuidof(ID3D11Device2), (LPVOID*) &pd3d11Device2);
+        if (SUCCEEDED(hr) && pd3d11Device2)
+        {
+            GetDXUTState().SetD3D11Device2(pd3d11Device2);
+
+            ID3D11DeviceContext2* pd3dImmediateContext2 = nullptr;
+            hr = pd3dImmediateContext->QueryInterface(__uuidof(ID3D11DeviceContext2), (LPVOID*) &pd3dImmediateContext2);
+            if (SUCCEEDED(hr) && pd3dImmediateContext2)
+            {
+                GetDXUTState().SetD3D11DeviceContext2(pd3dImmediateContext2);
+            }
+        }
+    }
+#endif
+
     // If switching to REF, set the exit code to 11.  If switching to HAL and exit code was 11, then set it back to 0.
     if( pNewDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE && GetDXUTState().GetExitCode() == 0 )
         GetDXUTState().SetExitCode( 10 );
@@ -2560,7 +2596,7 @@ HRESULT DXUTCreate3DEnvironment11( _In_ ID3D11Device* pd3d11DeviceFromApp )
     // Call the app's device created callback if non-NULL
     auto pBackBufferSurfaceDesc = DXUTGetDXGIBackBufferSurfaceDesc();
     GetDXUTState().SetInsideDeviceCallback( true );
-    LPDXUTCALLBACKD3D11DEVICECREATED pCallbackDeviceCreated = GetDXUTState().GetD3D11DeviceCreatedFunc();
+    auto pCallbackDeviceCreated = GetDXUTState().GetD3D11DeviceCreatedFunc();
     hr = S_OK;
     if( pCallbackDeviceCreated )
         hr = pCallbackDeviceCreated( DXUTGetD3D11Device(), pBackBufferSurfaceDesc,
@@ -2582,9 +2618,6 @@ HRESULT DXUTCreate3DEnvironment11( _In_ ID3D11Device* pd3d11DeviceFromApp )
         DXUT_ERR( L"DXUTCreateD3D11Views", hr );
         return DXUTERR_CREATINGDEVICEOBJECTS;
     }
-
-    // Create performance counters
-    //DXUTCreateD3D11Counters( pd3d11Device );
 
     // Call the app's swap chain reset callback if non-NULL
     GetDXUTState().SetInsideDeviceCallback( true );
@@ -2746,8 +2779,6 @@ void WINAPI DXUTRender3DEnvironment()
     GetDXUTState().SetAbsoluteTime( fAbsTime );
     GetDXUTState().SetElapsedTime( fElapsedTime );
 
-    // Start Performance Counters
-
     // Update the FPS stats
     DXUTUpdateFrameStats();
 
@@ -2871,10 +2902,6 @@ void WINAPI DXUTRender3DEnvironment()
     nFrame++;
     GetDXUTState().SetCurrentFrameNumber( nFrame );
 
-
-    // Update the D3D11 counter stats
-    //DXUTUpdateD3D11CounterStats();
-
     // Check to see if the app should shutdown due to cmdline
     if( GetDXUTState().GetOverrideQuitAfterFrame() != 0 )
     {
@@ -2928,7 +2955,7 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
         // Call the app's device destroyed callback
         if( GetDXUTState().GetDeviceObjectsCreated() )
         {
-            LPDXUTCALLBACKD3D11DEVICEDESTROYED pCallbackDeviceDestroyed = GetDXUTState().GetD3D11DeviceDestroyedFunc();
+            auto pCallbackDeviceDestroyed = GetDXUTState().GetD3D11DeviceDestroyedFunc();
             if( pCallbackDeviceDestroyed )
                 pCallbackDeviceDestroyed( GetDXUTState().GetD3D11DeviceDestroyedFuncUserContext() );
             GetDXUTState().SetDeviceObjectsCreated( false );
@@ -2961,9 +2988,6 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
         SAFE_RELEASE( pAdapter );
         GetDXUTState().SetDXGIAdapter( nullptr );
 
-        // Release the counters
-        //DXUTDestroyD3D11Counters();
-
         // Call ClearState to avoid tons of messy debug spew telling us that we're deleting bound objects
         auto pImmediateContext = DXUTGetD3D11DeviceContext();
         assert( pImmediateContext );
@@ -2977,6 +3001,12 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
         auto pImmediateContext1 = DXUTGetD3D11DeviceContext1();
         SAFE_RELEASE( pImmediateContext1 );
         GetDXUTState().SetD3D11DeviceContext1( nullptr );
+
+#ifdef USE_DIRECT3D11_2
+        auto pImmediateContext2 = DXUTGetD3D11DeviceContext2();
+        SAFE_RELEASE(pImmediateContext2);
+        GetDXUTState().SetD3D11DeviceContext2(nullptr);
+#endif
 
         // Report live objects
         if ( pd3dDevice )
@@ -2992,6 +3022,13 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
 
             auto pd3dDevice1 = DXUTGetD3D11Device1();
             SAFE_RELEASE( pd3dDevice1 );
+            GetDXUTState().SetD3D11Device1(nullptr);
+
+#ifdef USE_DIRECT3D11_2
+            auto pd3dDevice2 = DXUTGetD3D11Device2();
+            SAFE_RELEASE(pd3dDevice2);
+            GetDXUTState().SetD3D11Device2(nullptr);
+#endif
 
             // Release the D3D device and in debug configs, displays a message box if there 
             // are unrelease objects.
@@ -3003,7 +3040,6 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
             }
         }
         GetDXUTState().SetD3D11Device( nullptr );
-        GetDXUTState().SetD3D11Device1( nullptr );
 
 #ifndef NDEBUG
         {

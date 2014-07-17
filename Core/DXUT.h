@@ -66,6 +66,10 @@
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
 
+#ifdef USE_DIRECT3D11_2
+#include <d3d11_2.h>
+#endif
+
 // DirectXMath includes
 #include <DirectXMath.h>
 #include <DirectXColors.h>
@@ -257,18 +261,25 @@ bool    WINAPI DXUTGetMSAASwapChainCreated();
 // State Retrieval  
 //--------------------------------------------------------------------------------------
 
-// Direct3D 11
-IDXGIFactory1*           WINAPI DXUTGetDXGIFactory(); // Does not addref unlike typical Get* APIs
-IDXGISwapChain*          WINAPI DXUTGetDXGISwapChain(); // Does not addref unlike typical Get* APIs
+// Direct3D 11.x (These do not addref unlike typical Get* APIs)
+IDXGIFactory1*           WINAPI DXUTGetDXGIFactory(); 
+IDXGISwapChain*          WINAPI DXUTGetDXGISwapChain();
 const DXGI_SURFACE_DESC* WINAPI DXUTGetDXGIBackBufferSurfaceDesc();
-ID3D11Device*            WINAPI DXUTGetD3D11Device(); // Does not addref unlike typical Get* APIs
-ID3D11DeviceContext*     WINAPI DXUTGetD3D11DeviceContext(); // Does not addref unlike typical Get* APIs
-ID3D11Device1*           WINAPI DXUTGetD3D11Device1(); // Does not addref unlike typical Get* APIs
-ID3D11DeviceContext1*	 WINAPI DXUTGetD3D11DeviceContext1(); // Does not addref unlike typical Get* APIs
 HRESULT                  WINAPI DXUTSetupD3D11Views( _In_ ID3D11DeviceContext* pd3dDeviceContext ); // Supports immediate or deferred context
 D3D_FEATURE_LEVEL        WINAPI DXUTGetD3D11DeviceFeatureLevel(); // Returns the D3D11 devices current feature level
-ID3D11RenderTargetView*  WINAPI DXUTGetD3D11RenderTargetView(); // Does not addref unlike typical Get* APIs
-ID3D11DepthStencilView*  WINAPI DXUTGetD3D11DepthStencilView(); // Does not addref unlike typical Get* APIs
+ID3D11RenderTargetView*  WINAPI DXUTGetD3D11RenderTargetView();
+ID3D11DepthStencilView*  WINAPI DXUTGetD3D11DepthStencilView();
+
+ID3D11Device*            WINAPI DXUTGetD3D11Device();
+ID3D11DeviceContext*     WINAPI DXUTGetD3D11DeviceContext();
+
+ID3D11Device1*           WINAPI DXUTGetD3D11Device1();
+ID3D11DeviceContext1*	 WINAPI DXUTGetD3D11DeviceContext1();
+
+#ifdef USE_DIRECT3D11_2
+ID3D11Device2*           WINAPI DXUTGetD3D11Device2();
+ID3D11DeviceContext2*	 WINAPI DXUTGetD3D11DeviceContext2();
+#endif
 
 // General
 DXUTDeviceSettings WINAPI DXUTGetDeviceSettings(); 
