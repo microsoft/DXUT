@@ -172,35 +172,35 @@ public:
     // Control retrieval
     CDXUTStatic* GetStatic( _In_ int ID ) const
     {
-        return ( CDXUTStatic* )GetControl( ID, DXUT_CONTROL_STATIC );
+        return reinterpret_cast<CDXUTStatic*>( GetControl( ID, DXUT_CONTROL_STATIC ) );
     }
     CDXUTButton* GetButton( _In_ int ID ) const
     {
-        return ( CDXUTButton* )GetControl( ID, DXUT_CONTROL_BUTTON );
+        return reinterpret_cast<CDXUTButton*>( GetControl(ID, DXUT_CONTROL_BUTTON) );
     }
     CDXUTCheckBox* GetCheckBox( _In_ int ID ) const
     {
-        return ( CDXUTCheckBox* )GetControl( ID, DXUT_CONTROL_CHECKBOX );
+        return reinterpret_cast<CDXUTCheckBox*>( GetControl(ID, DXUT_CONTROL_CHECKBOX) );
     }
     CDXUTRadioButton* GetRadioButton( _In_ int ID ) const
     {
-        return ( CDXUTRadioButton* )GetControl( ID, DXUT_CONTROL_RADIOBUTTON );
+        return reinterpret_cast<CDXUTRadioButton*>( GetControl(ID, DXUT_CONTROL_RADIOBUTTON) );
     }
     CDXUTComboBox* GetComboBox( _In_ int ID ) const
     {
-        return ( CDXUTComboBox* )GetControl( ID, DXUT_CONTROL_COMBOBOX );
+        return reinterpret_cast<CDXUTComboBox*>( GetControl(ID, DXUT_CONTROL_COMBOBOX) );
     }
     CDXUTSlider* GetSlider( _In_ int ID ) const
     {
-        return ( CDXUTSlider* )GetControl( ID, DXUT_CONTROL_SLIDER );
+        return reinterpret_cast<CDXUTSlider*>( GetControl(ID, DXUT_CONTROL_SLIDER) );
     }
     CDXUTEditBox* GetEditBox( _In_ int ID ) const
     {
-        return ( CDXUTEditBox* )GetControl( ID, DXUT_CONTROL_EDITBOX );
+        return reinterpret_cast<CDXUTEditBox*>( GetControl(ID, DXUT_CONTROL_EDITBOX) );
     }
     CDXUTListBox* GetListBox( _In_ int ID ) const
     {
-        return ( CDXUTListBox* )GetControl( ID, DXUT_CONTROL_LISTBOX );
+        return reinterpret_cast<CDXUTListBox*>( GetControl(ID, DXUT_CONTROL_LISTBOX) );
     }
 
     CDXUTControl* GetControl( _In_ int ID ) const;
