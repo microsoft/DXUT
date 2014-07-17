@@ -199,8 +199,8 @@ protected:
         int   m_OverrideQuitAfterFrame;         // if != 0, then it will force the app to quit after that frame
         int   m_OverrideForceVsync;             // if == 0, then it will force the app to use D3DPRESENT_INTERVAL_IMMEDIATE, if == 1 force use of D3DPRESENT_INTERVAL_DEFAULT
         bool  m_AppCalledWasKeyPressed;         // true if the app ever calls DXUTWasKeyPressed().  Allows for optimzation
-        bool  m_ReleasingSwapChain;		        // if true, the app is releasing its swapchain
-        bool  m_IsInGammaCorrectMode;		    // Tell DXUTRes and DXUTMisc that we are in gamma correct mode
+        bool  m_ReleasingSwapChain;             // if true, the app is releasing its swapchain
+        bool  m_IsInGammaCorrectMode;           // Tell DXUTRes and DXUTMisc that we are in gamma correct mode
 
         LPDXUTCALLBACKMODIFYDEVICESETTINGS      m_ModifyDeviceSettingsFunc;     // modify Direct3D device settings callback
         LPDXUTCALLBACKDEVICEREMOVED             m_DeviceRemovedFunc;            // Direct3D device removed callback
@@ -565,7 +565,7 @@ bool WINAPI DXUTGetMSAASwapChainCreated()
         return false;
     return (psettings->d3d11.sd.SampleDesc.Count > 1);
 }
-D3D_FEATURE_LEVEL	 WINAPI DXUTGetD3D11DeviceFeatureLevel() { return GetDXUTState().GetD3D11FeatureLevel(); }
+D3D_FEATURE_LEVEL WINAPI DXUTGetD3D11DeviceFeatureLevel()  { return GetDXUTState().GetD3D11FeatureLevel(); }
 IDXGISwapChain* WINAPI DXUTGetDXGISwapChain()              { return GetDXUTState().GetDXGISwapChain(); }
 ID3D11RenderTargetView* WINAPI DXUTGetD3D11RenderTargetView() { return GetDXUTState().GetD3D11RenderTargetView(); }
 ID3D11DepthStencilView* WINAPI DXUTGetD3D11DepthStencilView() { return GetDXUTState().GetD3D11DepthStencilView(); }
@@ -1670,6 +1670,11 @@ HRESULT WINAPI DXUTCreateDevice(D3D_FEATURE_LEVEL reqFL,  bool bWindowed, int nS
 
     DXUTUpdateDeviceSettingsWithOverrides(&deviceSettings); 
 
+    GetDXUTState().SetWindowBackBufferWidthAtModeChange(deviceSettings.d3d11.sd.BufferDesc.Width);
+    GetDXUTState().SetWindowBackBufferHeightAtModeChange(deviceSettings.d3d11.sd.BufferDesc.Height);
+    GetDXUTState().SetFullScreenBackBufferWidthAtModeChange(deviceSettings.d3d11.sd.BufferDesc.Width);
+    GetDXUTState().SetFullScreenBackBufferHeightAtModeChange(deviceSettings.d3d11.sd.BufferDesc.Height);
+
     // Change to a Direct3D device created from the new device settings.  
     // If there is an existing device, then either reset or recreated the scene
     hr = DXUTChangeDevice( &deviceSettings, nullptr, true );
@@ -1768,6 +1773,9 @@ HRESULT DXUTChangeDevice( DXUTDeviceSettings* pNewDeviceSettings,
                           ID3D11Device* pd3d11DeviceFromApp,
                           bool bClipWindowToSingleAdapter )
 {
+    if ( GetDXUTState().GetReleasingSwapChain() )
+        return S_FALSE;
+
     HRESULT hr = S_OK;
     DXUTDeviceSettings* pOldDeviceSettings = GetDXUTState().GetCurrentDeviceSettings();
 
