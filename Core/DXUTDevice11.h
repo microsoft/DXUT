@@ -106,7 +106,7 @@ private:
     void ClearAdapterInfoList();
 };
 
-CD3D11Enumeration* WINAPI DXUTGetD3D11Enumeration(_In_ bool bForceEnumerate = false, _In_ bool EnumerateAllAdapterFormats = false, _In_ D3D_FEATURE_LEVEL forceFL = ((D3D_FEATURE_LEVEL )0)  );
+CD3D11Enumeration* WINAPI DXUTGetD3D11Enumeration(_In_ bool bForceEnumerate = false, _In_ bool EnumerateAllAdapterFormats = true, _In_ D3D_FEATURE_LEVEL forceFL = ((D3D_FEATURE_LEVEL )0)  );
 
 
 #define DXGI_MAX_DEVICE_IDENTIFIER_STRING 128

@@ -4295,7 +4295,7 @@ HRESULT DXUTSnapDeviceSettingsToEnumDevice( DXUTDeviceSettings* pDeviceSettings,
     int bestMSAAIndex=0;
 
     //DXUTSetDefaultDeviceSettings
-    CD3D11Enumeration *pEnum = DXUTGetD3D11Enumeration( forceEnum, false, forceFL);
+    CD3D11Enumeration *pEnum = DXUTGetD3D11Enumeration( forceEnum, true, forceFL);
 
     CD3D11EnumAdapterInfo* pAdapterInfo = nullptr; 
     auto pAdapterList = pEnum->GetAdapterInfoList();
