@@ -58,11 +58,11 @@ CD3DSettingsDlg::CD3DSettingsDlg() :
 CD3DSettingsDlg::~CD3DSettingsDlg()
 {
     // Release the memory used to hold the D3D11 refresh data in the combo box
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
     if( pComboBox )
         for( UINT i = 0; i < pComboBox->GetNumItems(); ++i )
         {
-            DXGI_RATIONAL* pRate = reinterpret_cast<DXGI_RATIONAL*>( pComboBox->GetItemData( i ) );
+            auto pRate = reinterpret_cast<DXGI_RATIONAL*>( pComboBox->GetItemData( i ) );
             delete pRate;
         }
 }
@@ -112,7 +112,7 @@ void CD3DSettingsDlg::CreateControls()
     m_Dialog.SetFont( 1, L"Arial", 28, FW_BOLD );
 
     // Right-justify static controls
-    CDXUTElement* pElement = m_Dialog.GetDefaultElement( DXUT_CONTROL_STATIC, 0 );
+    auto pElement = m_Dialog.GetDefaultElement( DXUT_CONTROL_STATIC, 0 );
     if( pElement )
     {
         pElement->dwTextFormat = DT_VCENTER | DT_RIGHT;
@@ -223,12 +223,12 @@ HRESULT CD3DSettingsDlg::Refresh()
 {
     g_DeviceSettings = DXUTGetDeviceSettings();
 
-    CD3D11Enumeration* pD3DEnum = DXUTGetD3D11Enumeration();
+    auto pD3DEnum = DXUTGetD3D11Enumeration();
 
     // Fill the UI with the current settings
     AddD3D11DeviceType( g_DeviceSettings.d3d11.DriverType );
     SetWindowed( FALSE != g_DeviceSettings.d3d11.sd.Windowed );
-    CD3D11EnumOutputInfo* pOutputInfo = GetCurrentD3D11OutputInfo();
+    auto pOutputInfo = GetCurrentD3D11OutputInfo();
     AddD3D11AdapterOutput( pOutputInfo->Desc.DeviceName, g_DeviceSettings.d3d11.Output );
             
     AddD3D11Resolution( g_DeviceSettings.d3d11.sd.BufferDesc.Width,
@@ -238,7 +238,7 @@ HRESULT CD3DSettingsDlg::Refresh()
     AddD3D11MultisampleCount( g_DeviceSettings.d3d11.sd.SampleDesc.Count );
     AddD3D11MultisampleQuality( g_DeviceSettings.d3d11.sd.SampleDesc.Quality );
 
-    CD3D11EnumDeviceSettingsCombo* pBestDeviceSettingsCombo = pD3DEnum->GetDeviceSettingsCombo(
+    auto pBestDeviceSettingsCombo = pD3DEnum->GetDeviceSettingsCombo(
                 g_DeviceSettings.d3d11.AdapterOrdinal, g_DeviceSettings.d3d11.sd.BufferDesc.Format,
                 ( g_DeviceSettings.d3d11.sd.Windowed != 0 ) );
 
@@ -272,7 +272,7 @@ HRESULT CD3DSettingsDlg::Refresh()
     if( pAdapterInfoList->empty() )
         return DXUT_ERR_MSGBOX( L"CD3DSettingsDlg::OnCreatedDevice", DXUTERR_NOCOMPATIBLEDEVICES );
 
-    CDXUTComboBox* pAdapterCombo = m_Dialog.GetComboBox( DXUTSETTINGSDLG_ADAPTER );
+    auto pAdapterCombo = m_Dialog.GetComboBox( DXUTSETTINGSDLG_ADAPTER );
     pAdapterCombo->RemoveAllItems();
 
     // Add adapters
@@ -293,11 +293,11 @@ HRESULT CD3DSettingsDlg::Refresh()
 //--------------------------------------------------------------------------------------
 void CD3DSettingsDlg::SetSelectedD3D11RefreshRate( _In_ DXGI_RATIONAL RefreshRate )
 {
-    CDXUTComboBox* pRefreshRateComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
+    auto pRefreshRateComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
 
     for( UINT i = 0; i < pRefreshRateComboBox->GetNumItems(); ++i )
     {
-        DXGI_RATIONAL* pRate = ( DXGI_RATIONAL* )pRefreshRateComboBox->GetItemData( i );
+        auto pRate = reinterpret_cast<DXGI_RATIONAL*>( pRefreshRateComboBox->GetItemData( i ) );
 
         if( pRate && pRate->Numerator == RefreshRate.Numerator && pRate->Denominator == RefreshRate.Denominator )
         {
@@ -376,7 +376,7 @@ _Use_decl_annotations_
 void WINAPI CD3DSettingsDlg::StaticOnEvent( UINT nEvent, int nControlID,
                                             CDXUTControl* pControl, void* pUserData )
 {
-    CD3DSettingsDlg* pD3DSettings = ( CD3DSettingsDlg* )pUserData;
+    auto pD3DSettings = reinterpret_cast<CD3DSettingsDlg*>( pUserData );
     if( pD3DSettings )
         pD3DSettings->OnEvent( nEvent, nControlID, pControl );
 }
@@ -391,7 +391,7 @@ void WINAPI CD3DSettingsDlg::StaticOnModeChangeTimer( UINT nIDEvent, void* pUser
 {
     UNREFERENCED_PARAMETER(nIDEvent);
 
-    CD3DSettingsDlg* pD3DSettings = ( CD3DSettingsDlg* )pUserContext;
+    auto pD3DSettings = reinterpret_cast<CD3DSettingsDlg*>( pUserContext );
     assert( pD3DSettings );
     _Analysis_assume_( pD3DSettings );
     assert( pD3DSettings->m_pActiveDialog == &pD3DSettings->m_RevertModeDialog );
@@ -399,7 +399,7 @@ void WINAPI CD3DSettingsDlg::StaticOnModeChangeTimer( UINT nIDEvent, void* pUser
 
     if( 0 == --pD3DSettings->m_nRevertModeTimeout )
     {
-        CDXUTControl* pControl = pD3DSettings->m_RevertModeDialog.GetControl( DXUTSETTINGSDLG_MODE_CHANGE_REVERT );
+        auto pControl = pD3DSettings->m_RevertModeDialog.GetControl( DXUTSETTINGSDLG_MODE_CHANGE_REVERT );
         assert( pControl );
         _Analysis_assume_( pControl );
         pD3DSettings->m_RevertModeDialog.SendEvent( EVENT_BUTTON_CLICKED, false, pControl );
@@ -543,7 +543,7 @@ void CD3DSettingsDlg::OnEvent( UINT nEvent, int nControlID, CDXUTControl* pContr
 //-------------------------------------------------------------------------------------
 CD3D11EnumAdapterInfo* CD3DSettingsDlg::GetCurrentD3D11AdapterInfo() const
 {
-    CD3D11Enumeration* pD3DEnum = DXUTGetD3D11Enumeration();
+    auto pD3DEnum = DXUTGetD3D11Enumeration();
     return pD3DEnum->GetAdapterInfo( g_DeviceSettings.d3d11.AdapterOrdinal );
 }
 
@@ -551,7 +551,7 @@ CD3D11EnumAdapterInfo* CD3DSettingsDlg::GetCurrentD3D11AdapterInfo() const
 //-------------------------------------------------------------------------------------
 CD3D11EnumDeviceInfo* CD3DSettingsDlg::GetCurrentD3D11DeviceInfo() const
 {
-    CD3D11Enumeration* pD3DEnum = DXUTGetD3D11Enumeration();
+    auto pD3DEnum = DXUTGetD3D11Enumeration();
     return pD3DEnum->GetDeviceInfo( g_DeviceSettings.d3d11.AdapterOrdinal,
                                     g_DeviceSettings.d3d11.DriverType );
 }
@@ -560,7 +560,7 @@ CD3D11EnumDeviceInfo* CD3DSettingsDlg::GetCurrentD3D11DeviceInfo() const
 //-------------------------------------------------------------------------------------
 CD3D11EnumOutputInfo* CD3DSettingsDlg::GetCurrentD3D11OutputInfo() const
 {
-    CD3D11Enumeration* pD3DEnum = DXUTGetD3D11Enumeration();
+    auto pD3DEnum = DXUTGetD3D11Enumeration();
     return pD3DEnum->GetOutputInfo( g_DeviceSettings.d3d11.AdapterOrdinal,
                                     g_DeviceSettings.d3d11.Output );
 }
@@ -568,7 +568,7 @@ CD3D11EnumOutputInfo* CD3DSettingsDlg::GetCurrentD3D11OutputInfo() const
 //-------------------------------------------------------------------------------------
 CD3D11EnumDeviceSettingsCombo* CD3DSettingsDlg::GetCurrentD3D11DeviceSettingsCombo() const
 {
-    CD3D11Enumeration* pD3DEnum = DXUTGetD3D11Enumeration();
+    auto pD3DEnum = DXUTGetD3D11Enumeration();
     return pD3DEnum->GetDeviceSettingsCombo( g_DeviceSettings.d3d11.AdapterOrdinal,
                                              g_DeviceSettings.d3d11.sd.BufferDesc.Format,
                                              ( g_DeviceSettings.d3d11.sd.Windowed == TRUE ) );
@@ -595,10 +595,10 @@ HRESULT CD3DSettingsDlg::OnFeatureLevelChanged () {
         g_DeviceSettings.d3d11.CreateFlags = CreateFlags;
         hr = DXUTSnapDeviceSettingsToEnumDevice(&g_DeviceSettings, true, GetSelectedFeatureLevel());
 
-        CD3D11Enumeration* pD3DEnum = DXUTGetD3D11Enumeration();
+        auto pD3DEnum = DXUTGetD3D11Enumeration();
         auto pAdapterInfoList = pD3DEnum->GetAdapterInfoList();
 
-        CDXUTComboBox* pAdapterComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_ADAPTER );
+        auto pAdapterComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_ADAPTER );
         pAdapterComboBox->RemoveAllItems();
 
         for( auto it = pAdapterInfoList->cbegin(); it != pAdapterInfoList->cend(); ++it )
@@ -608,7 +608,7 @@ HRESULT CD3DSettingsDlg::OnFeatureLevelChanged () {
 
         pAdapterComboBox->SetSelectedByData( ULongToPtr( g_DeviceSettings.d3d11.AdapterOrdinal ) );
 
-        CDXUTCheckBox* pCheckBox = m_Dialog.GetCheckBox( DXUTSETTINGSDLG_D3D11_DEBUG_DEVICE );
+        auto pCheckBox = m_Dialog.GetCheckBox( DXUTSETTINGSDLG_D3D11_DEBUG_DEVICE );
         pCheckBox->SetChecked( 0 != ( g_DeviceSettings.d3d11.CreateFlags & D3D11_CREATE_DEVICE_DEBUG ) );
 
         hr = OnAdapterChanged();
@@ -626,16 +626,16 @@ HRESULT CD3DSettingsDlg::OnAdapterChanged()
     g_DeviceSettings.d3d11.AdapterOrdinal = GetSelectedAdapter();
 
     // DXUTSETTINGSDLG_DEVICE_TYPE
-    CDXUTComboBox* pDeviceTypeComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_DEVICE_TYPE );
+    auto pDeviceTypeComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_DEVICE_TYPE );
     pDeviceTypeComboBox->RemoveAllItems();
 
-    CD3D11EnumAdapterInfo* pAdapterInfo = GetCurrentD3D11AdapterInfo();
+    auto pAdapterInfo = GetCurrentD3D11AdapterInfo();
     if( !pAdapterInfo )
         return E_FAIL;
 
     for( size_t iDeviceInfo = 0; iDeviceInfo < pAdapterInfo->deviceInfoList.size(); iDeviceInfo++ )
     {
-        CD3D11EnumDeviceInfo* pDeviceInfo = pAdapterInfo->deviceInfoList[ iDeviceInfo ];
+        auto pDeviceInfo = pAdapterInfo->deviceInfoList[ iDeviceInfo ];
         AddD3D11DeviceType( pDeviceInfo->DeviceType );
     }
 
@@ -663,7 +663,7 @@ HRESULT CD3DSettingsDlg::OnDeviceTypeChanged()
 
     SetWindowed( g_DeviceSettings.d3d11.sd.Windowed != 0 );
 
-    CD3D11EnumDeviceSettingsCombo* pBestDeviceSettingsCombo = DXUTGetD3D11Enumeration()->GetDeviceSettingsCombo(
+    auto pBestDeviceSettingsCombo = DXUTGetD3D11Enumeration()->GetDeviceSettingsCombo(
         g_DeviceSettings.d3d11.AdapterOrdinal, g_DeviceSettings.d3d11.sd.BufferDesc.Format,
         ( g_DeviceSettings.d3d11.sd.Windowed != 0 ) );
 
@@ -728,15 +728,15 @@ HRESULT CD3DSettingsDlg::OnWindowedFullScreenChanged()
             g_DeviceSettings.d3d11.sd.Windowed = bWindowed;
 
             // Get available adapter output
-            CD3D11Enumeration* pD3DEnum = DXUTGetD3D11Enumeration();
+            auto pD3DEnum = DXUTGetD3D11Enumeration();
 
-            CDXUTComboBox* pOutputComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_ADAPTER_OUTPUT );
+            auto pOutputComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_ADAPTER_OUTPUT );
             pOutputComboBox->RemoveAllItems();
 
-            CD3D11EnumAdapterInfo* pAdapterInfo = pD3DEnum->GetAdapterInfo( g_DeviceSettings.d3d11.AdapterOrdinal );
+            auto pAdapterInfo = pD3DEnum->GetAdapterInfo( g_DeviceSettings.d3d11.AdapterOrdinal );
             for( size_t ioutput = 0; ioutput < pAdapterInfo->outputInfoList.size(); ++ioutput )
             {
-                CD3D11EnumOutputInfo* pOutputInfo = pAdapterInfo->outputInfoList[ ioutput ];
+                auto pOutputInfo = pAdapterInfo->outputInfoList[ ioutput ];
                 AddD3D11AdapterOutput( pOutputInfo->Desc.DeviceName, pOutputInfo->Output );
             }
 
@@ -786,7 +786,7 @@ HRESULT CD3DSettingsDlg::OnAdapterOutputChanged()
 
             const DXGI_RATIONAL RefreshRate = g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate;
 
-            CD3D11EnumAdapterInfo* pAdapterInfo = GetCurrentD3D11AdapterInfo();
+            auto pAdapterInfo = GetCurrentD3D11AdapterInfo();
             if( !pAdapterInfo )
                 return E_FAIL;
 
@@ -796,13 +796,13 @@ HRESULT CD3DSettingsDlg::OnAdapterOutputChanged()
                 return hr;
 
             // DXUTSETTINGSDLG_D3D11_BACK_BUFFER_FORMAT
-            CDXUTComboBox* pBackBufferFormatComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_BACK_BUFFER_FORMAT
+            auto pBackBufferFormatComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_BACK_BUFFER_FORMAT
                                                                               );
             pBackBufferFormatComboBox->RemoveAllItems();
 
             for( size_t idc = 0; idc < pAdapterInfo->deviceSettingsComboList.size(); idc++ )
             {
-                CD3D11EnumDeviceSettingsCombo* pDeviceCombo = pAdapterInfo->deviceSettingsComboList[ idc ];
+                auto pDeviceCombo = pAdapterInfo->deviceSettingsComboList[ idc ];
                 if( ( pDeviceCombo->Windowed == TRUE ) == bWindowed )
                 {
                     AddD3D11BackBufferFormat( pDeviceCombo->BackBufferFormat );
@@ -818,11 +818,10 @@ HRESULT CD3DSettingsDlg::OnAdapterOutputChanged()
             // DXUTSETTINGSDLG_D3D11_REFRESH_RATE
             if( bWindowed )
             {
-                CDXUTComboBox* pRefreshRateComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
+                auto pRefreshRateComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
                 for( UINT i = 0; i < pRefreshRateComboBox->GetNumItems(); ++i )
                 {
-                    DXGI_RATIONAL* pRefreshRate = reinterpret_cast<DXGI_RATIONAL*>(
-                        pRefreshRateComboBox->GetItemData( i ) );
+                    auto pRefreshRate = reinterpret_cast<DXGI_RATIONAL*>( pRefreshRateComboBox->GetItemData( i ) );
                     delete pRefreshRate;
                 }
                 pRefreshRateComboBox->RemoveAllItems();
@@ -858,19 +857,19 @@ HRESULT CD3DSettingsDlg::OnBackBufferFormatChanged()
 
             DXGI_FORMAT backBufferFormat = g_DeviceSettings.d3d11.sd.BufferDesc.Format;
 
-            CD3D11EnumAdapterInfo* pAdapterInfo = GetCurrentD3D11AdapterInfo();
+            auto pAdapterInfo = GetCurrentD3D11AdapterInfo();
             if( !pAdapterInfo )
                 return E_FAIL;
 
             for( size_t idc = 0; idc < pAdapterInfo->deviceSettingsComboList.size(); idc++ )
             {
-                CD3D11EnumDeviceSettingsCombo* pDeviceCombo = pAdapterInfo->deviceSettingsComboList[ idc ];
+                auto pDeviceCombo = pAdapterInfo->deviceSettingsComboList[ idc ];
 
                 if( pDeviceCombo->Windowed == ( g_DeviceSettings.d3d11.sd.Windowed == TRUE ) &&
                     pDeviceCombo->BackBufferFormat == backBufferFormat &&
                     pDeviceCombo->DeviceType == g_DeviceSettings.d3d11.DriverType )
                 {
-                    CDXUTComboBox* pMultisampleCountCombo = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_COUNT
+                    auto pMultisampleCountCombo = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_COUNT
                                                                                    );
                     pMultisampleCountCombo->RemoveAllItems();
 
@@ -883,8 +882,7 @@ HRESULT CD3DSettingsDlg::OnBackBufferFormatChanged()
                     if( FAILED( hr ) )
                         return hr;
 
-                    CDXUTComboBox* pPresentIntervalComboBox =
-                        m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_PRESENT_INTERVAL );
+                    auto pPresentIntervalComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_PRESENT_INTERVAL );
                     pPresentIntervalComboBox->RemoveAllItems();
                     pPresentIntervalComboBox->AddItem( L"On", ULongToPtr( 1 ) );
                     pPresentIntervalComboBox->AddItem( L"Off", ULongToPtr( 0 ) );
@@ -913,7 +911,7 @@ HRESULT CD3DSettingsDlg::OnMultisampleTypeChanged()
             UINT multisampleCount = GetSelectedD3D11MultisampleCount();
             g_DeviceSettings.d3d11.sd.SampleDesc.Count = multisampleCount;
 
-            CD3D11EnumDeviceSettingsCombo* pDeviceSettingsCombo = GetCurrentD3D11DeviceSettingsCombo();
+            auto pDeviceSettingsCombo = GetCurrentD3D11DeviceSettingsCombo();
             if( !pDeviceSettingsCombo )
                 return E_FAIL;
 
@@ -929,7 +927,7 @@ HRESULT CD3DSettingsDlg::OnMultisampleTypeChanged()
             }
 
             // DXUTSETTINGSDLG_D3D11_MULTISAMPLE_QUALITY
-            CDXUTComboBox* pMultisampleQualityCombo = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_QUALITY
+            auto pMultisampleQualityCombo = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_QUALITY
                                                                              );
             pMultisampleQualityCombo->RemoveAllItems();
 
@@ -983,7 +981,7 @@ HRESULT CD3DSettingsDlg::OnDebugDeviceChanged()
 //-------------------------------------------------------------------------------------
 void CD3DSettingsDlg::AddAdapter( _In_z_ const WCHAR* strDescription, _In_ UINT iAdapter )
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_ADAPTER );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_ADAPTER );
 
     if( !pComboBox->ContainsItem( strDescription ) )
         pComboBox->AddItem( strDescription, ULongToPtr( iAdapter ) );
@@ -993,7 +991,7 @@ void CD3DSettingsDlg::AddAdapter( _In_z_ const WCHAR* strDescription, _In_ UINT 
 //-------------------------------------------------------------------------------------
 UINT CD3DSettingsDlg::GetSelectedAdapter() const
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_ADAPTER );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_ADAPTER );
 
     return PtrToUlong( pComboBox->GetSelectedData() );
 }
@@ -1002,7 +1000,7 @@ UINT CD3DSettingsDlg::GetSelectedAdapter() const
 //-------------------------------------------------------------------------------------
 void CD3DSettingsDlg::SetWindowed( _In_ bool bWindowed )
 {
-    CDXUTRadioButton* pRadioButton = m_Dialog.GetRadioButton( DXUTSETTINGSDLG_WINDOWED );
+    auto pRadioButton = m_Dialog.GetRadioButton( DXUTSETTINGSDLG_WINDOWED );
     pRadioButton->SetChecked( bWindowed );
 
     pRadioButton = m_Dialog.GetRadioButton( DXUTSETTINGSDLG_FULLSCREEN );
@@ -1013,7 +1011,7 @@ void CD3DSettingsDlg::SetWindowed( _In_ bool bWindowed )
 //-------------------------------------------------------------------------------------
 bool CD3DSettingsDlg::IsWindowed() const
 {
-    CDXUTRadioButton* pRadioButton = m_Dialog.GetRadioButton( DXUTSETTINGSDLG_WINDOWED );
+    auto pRadioButton = m_Dialog.GetRadioButton( DXUTSETTINGSDLG_WINDOWED );
     return pRadioButton->GetChecked();
 }
 
@@ -1021,7 +1019,7 @@ bool CD3DSettingsDlg::IsWindowed() const
 //-------------------------------------------------------------------------------------
 void CD3DSettingsDlg::AddD3D11AdapterOutput( _In_z_ const WCHAR* strName, _In_ UINT Output )
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_ADAPTER_OUTPUT );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_ADAPTER_OUTPUT );
 
     if( !pComboBox->ContainsItem( strName ) )
         pComboBox->AddItem( strName, ULongToPtr( Output ) );
@@ -1031,7 +1029,7 @@ void CD3DSettingsDlg::AddD3D11AdapterOutput( _In_z_ const WCHAR* strName, _In_ U
 //-------------------------------------------------------------------------------------
 UINT CD3DSettingsDlg::GetSelectedD3D11AdapterOutput() const
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_ADAPTER_OUTPUT );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_ADAPTER_OUTPUT );
 
     return PtrToUlong( pComboBox->GetSelectedData() );
 }
@@ -1041,7 +1039,7 @@ UINT CD3DSettingsDlg::GetSelectedD3D11AdapterOutput() const
 _Use_decl_annotations_
 void CD3DSettingsDlg::AddD3D11Resolution( DWORD dwWidth, DWORD dwHeight )
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_RESOLUTION );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_RESOLUTION );
 
     DWORD dwResolutionData;
     WCHAR strResolution[50];
@@ -1057,7 +1055,7 @@ void CD3DSettingsDlg::AddD3D11Resolution( DWORD dwWidth, DWORD dwHeight )
 _Use_decl_annotations_
 void CD3DSettingsDlg::GetSelectedD3D11Resolution( DWORD* pdwWidth, DWORD* pdwHeight ) const
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_RESOLUTION );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_RESOLUTION );
 
     DWORD dwResolution = PtrToUlong( pComboBox->GetSelectedData() );
 
@@ -1065,8 +1063,9 @@ void CD3DSettingsDlg::GetSelectedD3D11Resolution( DWORD* pdwWidth, DWORD* pdwHei
     *pdwHeight = HIWORD( dwResolution );
 }
 
-void CD3DSettingsDlg::AddD3D11FeatureLevel( _In_ D3D_FEATURE_LEVEL fl) {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
+void CD3DSettingsDlg::AddD3D11FeatureLevel( _In_ D3D_FEATURE_LEVEL fl)
+{
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
     switch( fl )
     {
     case D3D_FEATURE_LEVEL_9_1: 
@@ -1117,7 +1116,7 @@ void CD3DSettingsDlg::AddD3D11FeatureLevel( _In_ D3D_FEATURE_LEVEL fl) {
 
 D3D_FEATURE_LEVEL CD3DSettingsDlg::GetSelectedFeatureLevel() const
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
 
     return (D3D_FEATURE_LEVEL)PtrToUlong( pComboBox->GetSelectedData() );
 }
@@ -1126,7 +1125,7 @@ D3D_FEATURE_LEVEL CD3DSettingsDlg::GetSelectedFeatureLevel() const
 //-------------------------------------------------------------------------------------
 void CD3DSettingsDlg::AddD3D11RefreshRate( _In_ DXGI_RATIONAL RefreshRate )
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
 
     WCHAR strRefreshRate[50];
 
@@ -1137,7 +1136,7 @@ void CD3DSettingsDlg::AddD3D11RefreshRate( _In_ DXGI_RATIONAL RefreshRate )
 
     if( !pComboBox->ContainsItem( strRefreshRate ) )
     {
-        DXGI_RATIONAL* pNewRate = new (std::nothrow) DXGI_RATIONAL;
+        auto pNewRate = new (std::nothrow) DXGI_RATIONAL;
         if( pNewRate )
         {
             *pNewRate = RefreshRate;
@@ -1154,7 +1153,7 @@ DXGI_RATIONAL CD3DSettingsDlg::GetSelectedD3D11RefreshRate() const
     dxgiR.Numerator = 0;
     dxgiR.Denominator = 1;
     
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
 
     return *reinterpret_cast<DXGI_RATIONAL*>( pComboBox->GetSelectedData() );
      
@@ -1164,7 +1163,7 @@ DXGI_RATIONAL CD3DSettingsDlg::GetSelectedD3D11RefreshRate() const
 //-------------------------------------------------------------------------------------
 void CD3DSettingsDlg::AddD3D11BackBufferFormat( _In_ DXGI_FORMAT format )
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_BACK_BUFFER_FORMAT );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_BACK_BUFFER_FORMAT );
 
     if( !pComboBox->ContainsItem( DXUTDXGIFormatToString( format, TRUE ) ) )
         pComboBox->AddItem( DXUTDXGIFormatToString( format, TRUE ), ULongToPtr( format ) );
@@ -1174,7 +1173,7 @@ void CD3DSettingsDlg::AddD3D11BackBufferFormat( _In_ DXGI_FORMAT format )
 //-------------------------------------------------------------------------------------
 DXGI_FORMAT CD3DSettingsDlg::GetSelectedD3D11BackBufferFormat() const
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_BACK_BUFFER_FORMAT );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_BACK_BUFFER_FORMAT );
 
     return ( DXGI_FORMAT )PtrToUlong( pComboBox->GetSelectedData() );
 }
@@ -1183,7 +1182,7 @@ DXGI_FORMAT CD3DSettingsDlg::GetSelectedD3D11BackBufferFormat() const
 //-------------------------------------------------------------------------------------
 void CD3DSettingsDlg::AddD3D11MultisampleCount( _In_ UINT Count )
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_COUNT );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_COUNT );
 
     WCHAR str[50];
     swprintf_s( str, 50, L"%u", Count );
@@ -1196,7 +1195,7 @@ void CD3DSettingsDlg::AddD3D11MultisampleCount( _In_ UINT Count )
 //-------------------------------------------------------------------------------------
 UINT CD3DSettingsDlg::GetSelectedD3D11MultisampleCount() const
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_COUNT );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_COUNT );
 
     return ( UINT )PtrToUlong( pComboBox->GetSelectedData() );
 }
@@ -1205,7 +1204,7 @@ UINT CD3DSettingsDlg::GetSelectedD3D11MultisampleCount() const
 //-------------------------------------------------------------------------------------
 void CD3DSettingsDlg::AddD3D11MultisampleQuality( _In_ UINT Quality )
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_QUALITY );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_QUALITY );
 
     WCHAR strQuality[50];
     swprintf_s( strQuality, 50, L"%u", Quality );
@@ -1218,7 +1217,7 @@ void CD3DSettingsDlg::AddD3D11MultisampleQuality( _In_ UINT Quality )
 //-------------------------------------------------------------------------------------
 UINT CD3DSettingsDlg::GetSelectedD3D11MultisampleQuality() const
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_QUALITY );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_MULTISAMPLE_QUALITY );
 
     return ( UINT )PtrToUlong( pComboBox->GetSelectedData() );
 }
@@ -1227,7 +1226,7 @@ UINT CD3DSettingsDlg::GetSelectedD3D11MultisampleQuality() const
 //-------------------------------------------------------------------------------------
 DWORD CD3DSettingsDlg::GetSelectedD3D11PresentInterval() const
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_PRESENT_INTERVAL );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_PRESENT_INTERVAL );
 
     return PtrToUlong( pComboBox->GetSelectedData() );
 }
@@ -1235,7 +1234,7 @@ DWORD CD3DSettingsDlg::GetSelectedD3D11PresentInterval() const
 //-------------------------------------------------------------------------------------
 bool CD3DSettingsDlg::GetSelectedDebugDeviceValue() const
 {
-    CDXUTCheckBox* pCheckBox = m_Dialog.GetCheckBox( DXUTSETTINGSDLG_D3D11_DEBUG_DEVICE );
+    auto pCheckBox = m_Dialog.GetCheckBox( DXUTSETTINGSDLG_D3D11_DEBUG_DEVICE );
 
     return pCheckBox->GetChecked();
 }
@@ -1246,15 +1245,14 @@ bool CD3DSettingsDlg::GetSelectedDebugDeviceValue() const
 //--------------------------------------------------------------------------------------
 HRESULT CD3DSettingsDlg::UpdateD3D11Resolutions()
 {
-
     const DWORD dwWidth = g_DeviceSettings.d3d11.sd.BufferDesc.Width;
     const DWORD dwHeight = g_DeviceSettings.d3d11.sd.BufferDesc.Height;
 
     // DXUTSETTINGSDLG_D3D11_RESOLUTION
-    CDXUTComboBox* pResolutionComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_RESOLUTION );
+    auto pResolutionComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_RESOLUTION );
     pResolutionComboBox->RemoveAllItems();
 
-    CD3D11EnumOutputInfo* pOutputInfo = GetCurrentD3D11OutputInfo();
+    auto pOutputInfo = GetCurrentD3D11OutputInfo();
     if( !pOutputInfo )
         return E_FAIL;
 
@@ -1306,7 +1304,7 @@ HRESULT CD3DSettingsDlg::UpdateD3D11Resolutions()
 //-------------------------------------------------------------------------------------
 void CD3DSettingsDlg::AddD3D11DeviceType( _In_ D3D_DRIVER_TYPE devType )
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_DEVICE_TYPE );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_DEVICE_TYPE );
 
     if( !pComboBox->ContainsItem( DXUTDeviceTypeToString( devType ) ) )
         pComboBox->AddItem( DXUTDeviceTypeToString( devType ), ULongToPtr( devType ) );
@@ -1316,7 +1314,7 @@ void CD3DSettingsDlg::AddD3D11DeviceType( _In_ D3D_DRIVER_TYPE devType )
 //-------------------------------------------------------------------------------------
 D3D_DRIVER_TYPE CD3DSettingsDlg::GetSelectedD3D11DeviceType() const
 {
-    CDXUTComboBox* pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_DEVICE_TYPE );
+    auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_DEVICE_TYPE );
 
     return ( D3D_DRIVER_TYPE )PtrToUlong( pComboBox->GetSelectedData() );
 }
@@ -1330,7 +1328,7 @@ void CD3DSettingsDlg::UpdateModeChangeTimeoutText( _In_ int nSecRemaining )
 
     swprintf_s( buf, CchBuf, StrTimeout, nSecRemaining );
 
-    CDXUTStatic* pStatic = m_RevertModeDialog.GetStatic( DXUTSETTINGSDLG_STATIC_MODE_CHANGE_TIMEOUT );
+    auto pStatic = m_RevertModeDialog.GetStatic( DXUTSETTINGSDLG_STATIC_MODE_CHANGE_TIMEOUT );
     pStatic->SetText( buf );
 }
 

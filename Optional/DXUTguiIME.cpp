@@ -44,7 +44,7 @@ _Use_decl_annotations_
 HRESULT CDXUTIMEEditBox::CreateIMEEditBox( CDXUTDialog* pDialog, int ID, LPCWSTR strText, int x, int y, int width,
                                            int height, bool bIsDefault, CDXUTIMEEditBox** ppCreated )
 {
-    CDXUTIMEEditBox* pEditBox = new (std::nothrow) CDXUTIMEEditBox( pDialog );
+    auto pEditBox = new (std::nothrow) CDXUTIMEEditBox( pDialog );
 
     if( ppCreated )
         *ppCreated = pEditBox;
@@ -315,7 +315,7 @@ bool CDXUTIMEEditBox::HandleMouse( UINT uMsg, const POINT& pt, WPARAM wParam, LP
         case WM_LBUTTONDOWN:
         case WM_LBUTTONDBLCLK:
             {
-                DXUTFontNode* pFont = m_pDialog->GetFont( m_Elements[ 9 ]->iFont );
+                auto pFont = m_pDialog->GetFont( m_Elements[ 9 ]->iFont );
 
                 // Check if this click is on top of the composition string
                 int nCompStrWidth;
@@ -732,7 +732,7 @@ void CDXUTIMEEditBox::RenderComposition()
     int nX, nXFirst;
     m_Buffer.CPtoX( m_nCaret, FALSE, &nX );
     m_Buffer.CPtoX( m_nFirstVisible, FALSE, &nXFirst );
-    CDXUTElement* pElement = m_Elements[ 1 ];
+    auto pElement = m_Elements[ 1 ];
 
     // Get the required width
     RECT rc =
@@ -898,7 +898,7 @@ void CDXUTIMEEditBox::RenderComposition()
 //--------------------------------------------------------------------------------------
 void CDXUTIMEEditBox::RenderIndicator( _In_ float fElapsedTime )
 {
-    CDXUTElement* pElement = m_Elements[ 9 ];
+    auto pElement = m_Elements[ 9 ];
     pElement->TextureColor.Blend( DXUT_STATE_NORMAL, fElapsedTime );
 
     m_pDialog->DrawSprite( pElement, &m_rcIndicator, DXUT_NEAR_BUTTON_DEPTH );
@@ -942,7 +942,7 @@ void CDXUTIMEEditBox::Render( _In_ float fElapsedTime )
     // Let the parent render first (edit control)
     CDXUTEditBox::Render( fElapsedTime );
 
-    CDXUTElement* pElement = GetElement( 1 );
+    auto pElement = GetElement( 1 );
     if( pElement )
     {
         s_CompString.SetFontNode( m_pDialog->GetFont( pElement->iFont ) );

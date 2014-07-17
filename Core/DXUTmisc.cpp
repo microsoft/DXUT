@@ -881,10 +881,10 @@ void WINAPI DXUTGetDesktopResolution( UINT AdapterOrdinal, UINT* pWidth, UINT* p
     ZeroMemory( &devMode, sizeof( DEVMODE ) );
     devMode.dmSize = sizeof( DEVMODE );
 
-    CD3D11Enumeration* pd3dEnum = DXUTGetD3D11Enumeration();
+    auto pd3dEnum = DXUTGetD3D11Enumeration();
     assert( pd3dEnum );
     _Analysis_assume_( pd3dEnum );
-    CD3D11EnumOutputInfo* pOutputInfo = pd3dEnum->GetOutputInfo( AdapterOrdinal, DeviceSettings.d3d11.Output );
+    auto pOutputInfo = pd3dEnum->GetOutputInfo( AdapterOrdinal, DeviceSettings.d3d11.Output );
     if( pOutputInfo )
     {
         wcscpy_s( strDeviceName, 256, pOutputInfo->Desc.DeviceName );
@@ -1258,7 +1258,7 @@ HRESULT DXUTSnapD3D11Screenshot( _In_z_ LPCWSTR szFileName, _In_ bool usedds )
     if (hr != S_OK)
         return hr;
 
-    ID3D11DeviceContext *dc  = DXUTGetD3D11DeviceContext();
+    auto dc  = DXUTGetD3D11DeviceContext();
     if (!dc) {
         SAFE_RELEASE(pBackBuffer);
         return E_FAIL;

@@ -107,7 +107,7 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
 {
     CDXUTPerfEventGenerator eventGenerator( DXUT_PERFEVENTCOLOR, L"DXUT D3D11 Enumeration" );
     HRESULT hr;
-    IDXGIFactory1* pFactory = DXUTGetDXGIFactory();
+    auto pFactory = DXUTGetDXGIFactory();
     if( !pFactory )
         return E_FAIL;
 
@@ -140,7 +140,7 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
             }
         }
 
-        CD3D11EnumAdapterInfo* pAdapterInfo = new (std::nothrow) CD3D11EnumAdapterInfo;
+       auto pAdapterInfo = new (std::nothrow) CD3D11EnumAdapterInfo;
         if( !pAdapterInfo )
         {
             SAFE_RELEASE( pAdapter );
@@ -178,7 +178,7 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
     //  If we did not get an adapter then we should still enumerate WARP and Ref.
     if (m_AdapterInfoList.size() == 0)
     {
-        CD3D11EnumAdapterInfo* pAdapterInfo = new (std::nothrow) CD3D11EnumAdapterInfo;
+        auto pAdapterInfo = new (std::nothrow) CD3D11EnumAdapterInfo;
         if( !pAdapterInfo )
         {
             return E_OUTOFMEMORY;
@@ -298,7 +298,7 @@ HRESULT CD3D11Enumeration::EnumerateOutputs( _In_ CD3D11EnumAdapterInfo* pAdapte
         }
         else //Success!
         {
-            CD3D11EnumOutputInfo* pOutputInfo = new (std::nothrow) CD3D11EnumOutputInfo;
+            auto pOutputInfo = new (std::nothrow) CD3D11EnumOutputInfo;
             if( !pOutputInfo )
             {
                 SAFE_RELEASE( pOutput );
@@ -355,7 +355,7 @@ HRESULT CD3D11Enumeration::EnumerateDisplayModes( _In_ CD3D11EnumOutputInfo* pOu
         //			  This is to avoid calling GetDisplayModeList more times than necessary.
         //			  GetDisplayModeList is an expensive call.
         UINT NumModes = 512;
-        DXGI_MODE_DESC* pDesc = new (std::nothrow) DXGI_MODE_DESC[ NumModes ];
+        auto pDesc = new (std::nothrow) DXGI_MODE_DESC[ NumModes ];
         assert( pDesc );
         if( !pDesc )
             return E_OUTOFMEMORY;
@@ -466,7 +466,7 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
     // Enumerate each Direct3D device type
     for( UINT iDeviceType = 0; iDeviceType < devTypeArrayCount; iDeviceType++ )
     {
-        CD3D11EnumDeviceInfo* pDeviceInfo = new (std::nothrow) CD3D11EnumDeviceInfo;
+        auto pDeviceInfo = new (std::nothrow) CD3D11EnumDeviceInfo;
         if( !pDeviceInfo )
             return E_OUTOFMEMORY;
 
@@ -669,11 +669,11 @@ HRESULT CD3D11Enumeration::EnumerateDeviceCombos( CD3D11EnumAdapterInfo* pAdapte
     //
     for( size_t output = 0; output < pAdapterInfo->outputInfoList.size(); ++output )
     {
-        CD3D11EnumOutputInfo* pOutputInfo = pAdapterInfo->outputInfoList[ output ];
+        auto pOutputInfo = pAdapterInfo->outputInfoList[ output ];
 
         for( size_t device = 0; device < pAdapterInfo->deviceInfoList.size(); ++device )
         {
-            CD3D11EnumDeviceInfo* pDeviceInfo = pAdapterInfo->deviceInfoList[ device ];
+            auto pDeviceInfo = pAdapterInfo->deviceInfoList[ device ];
 
             DXGI_FORMAT backBufferFormatArray[] =
             {
@@ -725,7 +725,7 @@ HRESULT CD3D11Enumeration::EnumerateDeviceCombos( CD3D11EnumAdapterInfo* pAdapte
                     // DeviceCombo that is supported by the system. We still 
                     // need to find one or more suitable depth/stencil buffer format,
                     // multisample type, and present interval.
-                    CD3D11EnumDeviceSettingsCombo* pDeviceCombo = new (std::nothrow) CD3D11EnumDeviceSettingsCombo;
+                    auto pDeviceCombo = new (std::nothrow) CD3D11EnumDeviceSettingsCombo;
                     if( !pDeviceCombo )
                         return E_OUTOFMEMORY;
 
@@ -860,7 +860,7 @@ CD3D11EnumAdapterInfo* CD3D11Enumeration::GetAdapterInfo( _In_ UINT AdapterOrdin
 _Use_decl_annotations_
 CD3D11EnumDeviceInfo* CD3D11Enumeration::GetDeviceInfo( UINT AdapterOrdinal, D3D_DRIVER_TYPE DeviceType ) const
 {
-    CD3D11EnumAdapterInfo* pAdapterInfo = GetAdapterInfo( AdapterOrdinal );
+    auto pAdapterInfo = GetAdapterInfo( AdapterOrdinal );
     if( pAdapterInfo )
     {
         for( auto it = pAdapterInfo->deviceInfoList.cbegin(); it != pAdapterInfo->deviceInfoList.cend(); ++it )
@@ -878,7 +878,7 @@ CD3D11EnumDeviceInfo* CD3D11Enumeration::GetDeviceInfo( UINT AdapterOrdinal, D3D
 _Use_decl_annotations_
 CD3D11EnumOutputInfo* CD3D11Enumeration::GetOutputInfo( UINT AdapterOrdinal, UINT Output ) const
 {
-    CD3D11EnumAdapterInfo* pAdapterInfo = GetAdapterInfo( AdapterOrdinal );
+    auto pAdapterInfo = GetAdapterInfo( AdapterOrdinal );
     if( pAdapterInfo && pAdapterInfo->outputInfoList.size() > size_t( Output ) )
     {
         return pAdapterInfo->outputInfoList[ Output ];
@@ -893,12 +893,12 @@ _Use_decl_annotations_
 CD3D11EnumDeviceSettingsCombo* CD3D11Enumeration::GetDeviceSettingsCombo( UINT AdapterOrdinal,
                                                                           DXGI_FORMAT BackBufferFormat, BOOL Windowed ) const
 {
-    CD3D11EnumAdapterInfo* pAdapterInfo = GetAdapterInfo( AdapterOrdinal );
+    auto pAdapterInfo = GetAdapterInfo( AdapterOrdinal );
     if( pAdapterInfo )
     {
         for( size_t iDeviceCombo = 0; iDeviceCombo < pAdapterInfo->deviceSettingsComboList.size(); iDeviceCombo++ )
         {
-            CD3D11EnumDeviceSettingsCombo* pDeviceSettingsCombo = pAdapterInfo->deviceSettingsComboList[ iDeviceCombo ];
+            auto pDeviceSettingsCombo = pAdapterInfo->deviceSettingsComboList[ iDeviceCombo ];
             if( pDeviceSettingsCombo->BackBufferFormat == BackBufferFormat &&
                 pDeviceSettingsCombo->Windowed == Windowed )
                 return pDeviceSettingsCombo;
@@ -1183,11 +1183,11 @@ HRESULT WINAPI DXUTGetD3D11AdapterDisplayMode( UINT AdapterOrdinal, UINT nOutput
     if( !pModeDesc )
         return E_INVALIDARG;
 
-    CD3D11Enumeration* pD3DEnum = DXUTGetD3D11Enumeration();
+    auto pD3DEnum = DXUTGetD3D11Enumeration();
     if ( !pD3DEnum )
         return E_POINTER;
 
-    CD3D11EnumOutputInfo* pOutputInfo = pD3DEnum->GetOutputInfo( AdapterOrdinal, nOutput );
+    auto pOutputInfo = pD3DEnum->GetOutputInfo( AdapterOrdinal, nOutput );
     if( pOutputInfo )
     {
         pModeDesc->Width = 640;

@@ -2744,7 +2744,7 @@ CTsfUiLessMode::CUIElementSink::Release()
 
 STDAPI CTsfUiLessMode::CUIElementSink::BeginUIElement( DWORD dwUIElementId, BOOL* pbShow )
 {
-    ITfUIElement* pElement = GetUIElement( dwUIElementId );
+    auto pElement = GetUIElement( dwUIElementId );
     if( !pElement )
         return E_INVALIDARG;
 
@@ -2771,7 +2771,7 @@ STDAPI CTsfUiLessMode::CUIElementSink::BeginUIElement( DWORD dwUIElementId, BOOL
 
 STDAPI CTsfUiLessMode::CUIElementSink::UpdateUIElement( DWORD dwUIElementId )
 {
-    ITfUIElement* pElement = GetUIElement( dwUIElementId );
+    auto pElement = GetUIElement( dwUIElementId );
     if( !pElement )
         return E_INVALIDARG;
 
@@ -2796,7 +2796,7 @@ STDAPI CTsfUiLessMode::CUIElementSink::UpdateUIElement( DWORD dwUIElementId )
 
 STDAPI CTsfUiLessMode::CUIElementSink::EndUIElement( DWORD dwUIElementId )
 {
-    ITfUIElement* pElement = GetUIElement( dwUIElementId );
+    auto pElement = GetUIElement( dwUIElementId );
     if( !pElement )
         return E_INVALIDARG;
 
