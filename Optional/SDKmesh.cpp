@@ -510,8 +510,8 @@ void CDXUTSDKMesh::TransformFrame( UINT iFrame, CXMMATRIX parentWorld, double fT
 
     if( INVALID_ANIMATION_DATA != m_pFrameArray[iFrame].AnimationDataIndex )
     {
-        SDKANIMATION_FRAME_DATA* pFrameData = &m_pAnimationFrameData[ m_pFrameArray[iFrame].AnimationDataIndex ];
-        SDKANIMATION_DATA* pData = &pFrameData->pAnimationData[ iTick ];
+        auto pFrameData = &m_pAnimationFrameData[ m_pFrameArray[iFrame].AnimationDataIndex ];
+        auto pData = &pFrameData->pAnimationData[ iTick ];
 
         // turn it into a matrix (Ignore scaling for now)
         XMFLOAT3 parentPos = pData->Translation;
@@ -558,9 +558,9 @@ void CDXUTSDKMesh::TransformFrameAbsolute( UINT iFrame, double fTime )
 
     if( INVALID_ANIMATION_DATA != m_pFrameArray[iFrame].AnimationDataIndex )
     {
-        SDKANIMATION_FRAME_DATA* pFrameData = &m_pAnimationFrameData[ m_pFrameArray[iFrame].AnimationDataIndex ];
-        SDKANIMATION_DATA* pData = &pFrameData->pAnimationData[ iTick ];
-        SDKANIMATION_DATA* pDataOrig = &pFrameData->pAnimationData[ 0 ];
+        auto pFrameData = &m_pAnimationFrameData[ m_pFrameArray[iFrame].AnimationDataIndex ];
+        auto pData = &pFrameData->pAnimationData[ iTick ];
+        auto pDataOrig = &pFrameData->pAnimationData[ 0 ];
 
         XMMATRIX mTrans1 = XMMatrixTranslation( -pDataOrig->Translation.x, -pDataOrig->Translation.y, -pDataOrig->Translation.z );
         XMMATRIX mTrans2 = XMMatrixTranslation( pData->Translation.x, pData->Translation.y, pData->Translation.z );
@@ -593,7 +593,7 @@ void CDXUTSDKMesh::RenderMesh( UINT iMesh,
     if( 0 < GetOutstandingBufferResources() )
         return;
 
-    SDKMESH_MESH* pMesh = &m_pMeshArray[iMesh];
+    auto pMesh = &m_pMeshArray[iMesh];
 
     UINT Strides[MAX_D3D11_VERTEX_STREAMS];
     UINT Offsets[MAX_D3D11_VERTEX_STREAMS];
@@ -615,7 +615,7 @@ void CDXUTSDKMesh::RenderMesh( UINT iMesh,
     else
         pIndexBufferArray = m_pIndexBufferArray;
 
-    ID3D11Buffer* pIB = pIndexBufferArray[ pMesh->IndexBuffer ].pIB11;
+    auto pIB = pIndexBufferArray[ pMesh->IndexBuffer ].pIB11;
     DXGI_FORMAT ibFormat = DXGI_FORMAT_R16_UINT;
     switch( pIndexBufferArray[ pMesh->IndexBuffer ].IndexType )
     {
@@ -805,7 +805,7 @@ HRESULT CDXUTSDKMesh::LoadAnimation( _In_z_ const WCHAR* szFileName )
         m_pAnimationFrameData[i].pAnimationData = ( SDKANIMATION_DATA* )( m_pAnimationData +
                                                                           m_pAnimationFrameData[i].DataOffset +
                                                                           BaseOffset );
-        SDKMESH_FRAME* pFrame = FindFrame( m_pAnimationFrameData[i].FrameName );
+        auto pFrame = FindFrame( m_pAnimationFrameData[i].FrameName );
         if( pFrame )
         {
             pFrame->AnimationDataIndex = i;
