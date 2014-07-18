@@ -223,11 +223,11 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
 
     for( auto it = m_AdapterInfoList.begin(); it != m_AdapterInfoList.end(); ++it )
     {
-        wcscpy_s( (*it)->szUniqueDescription, 100, (*it)->AdapterDesc.Description );
+        wcscpy_s((*it)->szUniqueDescription, DXGI_MAX_DEVICE_IDENTIFIER_STRING, (*it)->AdapterDesc.Description);
         if( !bUniqueDesc )
         {
-            WCHAR sz[100];
-            swprintf_s( sz, 100, L" (#%u)", (*it)->AdapterOrdinal );
+            WCHAR sz[32];
+            swprintf_s( sz, 32, L" (#%u)", (*it)->AdapterOrdinal );
             wcscat_s( (*it)->szUniqueDescription, DXGI_MAX_DEVICE_IDENTIFIER_STRING, sz );
         }
     }
