@@ -223,11 +223,10 @@ HRESULT WINAPI DXUTCreateWindow( _In_z_ const WCHAR* strWindowTitle = L"Direct3D
 HRESULT WINAPI DXUTSetWindow( _In_ HWND hWndFocus, _In_ HWND hWndDeviceFullScreen, _In_ HWND hWndDeviceWindowed, _In_ bool bHandleMessages = true );
 LRESULT CALLBACK DXUTStaticWndProc( _In_ HWND hWnd, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam );
 
-// Choose either DXUTCreateDevice or DXUTSetD3D*Device or DXUTCreateD3DDeviceFromSettings
+// Choose either DXUTCreateDevice or DXUTCreateD3DDeviceFromSettings
 
 HRESULT WINAPI DXUTCreateDevice(_In_ D3D_FEATURE_LEVEL reqFL, _In_ bool bWindowed= true, _In_ int nSuggestedWidth =0,_In_  int nSuggestedHeight =0 );
 HRESULT WINAPI DXUTCreateDeviceFromSettings( _In_ DXUTDeviceSettings* pDeviceSettings, _In_ bool bClipWindowToSingleAdapter = true );
-HRESULT WINAPI DXUTSetD3D11Device( _In_ ID3D11Device* pd3dDevice, _In_ IDXGISwapChain* pSwapChain );
 
 // Choose either DXUTMainLoop or implement your own main loop 
 HRESULT WINAPI DXUTMainLoop( _In_opt_ HACCEL hAccel = nullptr );

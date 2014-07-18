@@ -156,11 +156,11 @@ protected:
 
         bool  m_DXUTInited;                 // if true, then DXUTInit() has succeeded
         bool  m_WindowCreated;              // if true, then DXUTCreateWindow() or DXUTSetWindow() has succeeded
-        bool  m_DeviceCreated;              // if true, then DXUTCreateDevice() or DXUTSetD3D*Device() has succeeded
+        bool  m_DeviceCreated;              // if true, then DXUTCreateDevice() has succeeded
 
         bool  m_DXUTInitCalled;             // if true, then DXUTInit() was called
         bool  m_WindowCreateCalled;         // if true, then DXUTCreateWindow() or DXUTSetWindow() was called
-        bool  m_DeviceCreateCalled;         // if true, then DXUTCreateDevice() or DXUTSetD3D*Device() was called
+        bool  m_DeviceCreateCalled;         // if true, then DXUTCreateDevice() was called
 
         bool  m_DeviceObjectsCreated;       // if true, then DeviceCreated callback has been called (if non-NULL)
         bool  m_DeviceObjectsReset;         // if true, then DeviceReset callback has been called (if non-NULL)
@@ -504,7 +504,6 @@ void DXUTDisplayErrorMessage( _In_ HRESULT hr );
 int DXUTMapButtonToArrayIndex( _In_ BYTE vButton );
 
 HRESULT DXUTChangeDevice( _In_ DXUTDeviceSettings* pNewDeviceSettings,
-                          _In_opt_ ID3D11Device* pd3d11DeviceFromApp,
                           _In_ bool bClipWindowToSingleAdapter );
 
 bool DXUTCanDeviceBeReset( _In_ DXUTDeviceSettings* pOldDeviceSettings,
@@ -530,7 +529,7 @@ void DXUTSetupCursor();
 
 // Direct3D 11
 HRESULT DXUTCreateD3D11Views( _In_ ID3D11Device* pd3dDevice, _In_ ID3D11DeviceContext* pd3dDeviceContext, _In_ DXUTDeviceSettings* pDeviceSettings );
-HRESULT DXUTCreate3DEnvironment11( _In_ ID3D11Device* pd3dDeviceFromApp );
+HRESULT DXUTCreate3DEnvironment11();
 HRESULT DXUTReset3DEnvironment11();
 void DXUTUpdateD3D11DeviceStats( _In_ D3D_DRIVER_TYPE DeviceType, _In_ D3D_FEATURE_LEVEL featureLevel, _In_ DXGI_ADAPTER_DESC* pAdapterDesc );
 
@@ -1542,7 +1541,7 @@ LRESULT CALLBACK DXUTStaticWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 
 //--------------------------------------------------------------------------------------
-// Handles app's message loop and rendering when idle.  If DXUTCreateDevice() or DXUTSetD3D*Device() 
+// Handles app's message loop and rendering when idle.  If DXUTCreateDevice()
 // has not already been called, it will call DXUTCreateWindow() with the default parameters.  
 //--------------------------------------------------------------------------------------
 HRESULT WINAPI DXUTMainLoop( _In_opt_ HACCEL hAccel )
@@ -1559,7 +1558,7 @@ HRESULT WINAPI DXUTMainLoop( _In_opt_ HACCEL hAccel )
 
     GetDXUTState().SetInsideMainloop( true );
 
-    // If DXUTCreateDevice() or DXUTSetD3D*Device() has not already been called, 
+    // If DXUTCreateDevice() has not already been called, 
     // then call DXUTCreateDevice() with the default parameters.         
     if( !GetDXUTState().GetDeviceCreated() )
     {
@@ -1583,7 +1582,7 @@ HRESULT WINAPI DXUTMainLoop( _In_opt_ HACCEL hAccel )
 
     // DXUTInit() must have been called and succeeded for this function to proceed
     // DXUTCreateWindow() or DXUTSetWindow() must have been called and succeeded for this function to proceed
-    // DXUTCreateDevice() or DXUTCreateDeviceFromSettings() or DXUTSetD3D*Device() must have been called and succeeded for this function to proceed
+    // DXUTCreateDevice() or DXUTCreateDeviceFromSettings() must have been called and succeeded for this function to proceed
     if( !GetDXUTState().GetDXUTInited() || !GetDXUTState().GetWindowCreated() || !GetDXUTState().GetDeviceCreated() )
     {
         if( ( GetDXUTState().GetExitCode() == 0 ) || ( GetDXUTState().GetExitCode() == 10 ) )
@@ -1641,7 +1640,7 @@ HRESULT WINAPI DXUTCreateDevice(D3D_FEATURE_LEVEL reqFL,  bool bWindowed, int nS
    
     // Not allowed to call this from inside the device callbacks
     if( GetDXUTState().GetInsideDeviceCallback() )
-        return DXUT_ERR_MSGBOX( L"DXUTCreateWindow", E_FAIL );
+        return DXUT_ERR_MSGBOX( L"DXUTCreateDevice", E_FAIL );
 
     GetDXUTState().SetDeviceCreateCalled( true );
 
@@ -1677,7 +1676,7 @@ HRESULT WINAPI DXUTCreateDevice(D3D_FEATURE_LEVEL reqFL,  bool bWindowed, int nS
 
     // Change to a Direct3D device created from the new device settings.  
     // If there is an existing device, then either reset or recreated the scene
-    hr = DXUTChangeDevice( &deviceSettings, nullptr, true );
+    hr = DXUTChangeDevice( &deviceSettings, true );
 
     if ( hr ==  DXUTERR_NODIRECT3D && GetDXUTState().GetMessageWhenD3D11NotAvailable() )
     {
@@ -1725,11 +1724,13 @@ HRESULT WINAPI DXUTCreateDevice(D3D_FEATURE_LEVEL reqFL,  bool bWindowed, int nS
 // Tells the framework to change to a device created from the passed in device settings
 // If DXUTCreateWindow() has not already been called, it will call it with the 
 // default parameters.  Instead of calling this, you can call DXUTCreateDevice() 
-// or DXUTSetD3D*Device() 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
 HRESULT WINAPI DXUTCreateDeviceFromSettings( DXUTDeviceSettings* pDeviceSettings, bool bClipWindowToSingleAdapter )
 {
+    if ( !pDeviceSettings )
+        return E_INVALIDARG;
+
     HRESULT hr;
 
     GetDXUTState().SetDeviceCreateCalled( true );
@@ -1751,10 +1752,15 @@ HRESULT WINAPI DXUTCreateDeviceFromSettings( DXUTDeviceSettings* pDeviceSettings
     }
 
     DXUTUpdateDeviceSettingsWithOverrides(pDeviceSettings); 
-    
+
+    GetDXUTState().SetWindowBackBufferWidthAtModeChange(pDeviceSettings->d3d11.sd.BufferDesc.Width);
+    GetDXUTState().SetWindowBackBufferHeightAtModeChange(pDeviceSettings->d3d11.sd.BufferDesc.Height);
+    GetDXUTState().SetFullScreenBackBufferWidthAtModeChange(pDeviceSettings->d3d11.sd.BufferDesc.Width);
+    GetDXUTState().SetFullScreenBackBufferHeightAtModeChange(pDeviceSettings->d3d11.sd.BufferDesc.Height);
+
     // Change to a Direct3D device created from the new device settings.  
     // If there is an existing device, then either reset or recreate the scene
-    hr = DXUTChangeDevice( pDeviceSettings, nullptr, bClipWindowToSingleAdapter );
+    hr = DXUTChangeDevice( pDeviceSettings, bClipWindowToSingleAdapter );
     if( FAILED( hr ) )
         return hr;
 
@@ -1770,7 +1776,6 @@ HRESULT WINAPI DXUTCreateDeviceFromSettings( DXUTDeviceSettings* pDeviceSettings
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
 HRESULT DXUTChangeDevice( DXUTDeviceSettings* pNewDeviceSettings,
-                          ID3D11Device* pd3d11DeviceFromApp,
                           bool bClipWindowToSingleAdapter )
 {
     if ( GetDXUTState().GetReleasingSwapChain() )
@@ -1879,7 +1884,7 @@ HRESULT DXUTChangeDevice( DXUTDeviceSettings* pNewDeviceSettings,
         DXUTCleanup3DEnvironment( false );
 
     // Create the D3D device and call the app's device callbacks
-    hr = DXUTCreate3DEnvironment11( pd3d11DeviceFromApp );
+    hr = DXUTCreate3DEnvironment11();
     if( FAILED( hr ) )
     {
         SAFE_DELETE( pOldDeviceSettings );
@@ -2118,7 +2123,7 @@ HRESULT DXUTChangeDevice( DXUTDeviceSettings* pNewDeviceSettings,
             deviceSettings.d3d11.sd.BufferDesc.Width = 0; 
             deviceSettings.d3d11.sd.BufferDesc.Height = 0;
 
-            hr = DXUTChangeDevice( &deviceSettings, nullptr, bClipWindowToSingleAdapter );
+            hr = DXUTChangeDevice( &deviceSettings, bClipWindowToSingleAdapter );
             if( FAILED( hr ) )
             {
                 SAFE_DELETE( pOldDeviceSettings );
@@ -2232,8 +2237,9 @@ void DXUTUpdateDeviceSettingsWithOverrides( _Inout_ DXUTDeviceSettings* pDeviceS
         pDeviceSettings->d3d11.SyncInterval = 1;
     }
   
-    if (GetDXUTState().GetOverrideForceFeatureLevel() != 0) {
-        pDeviceSettings->d3d11.DeviceFeatureLevel = (D3D_FEATURE_LEVEL)GetDXUTState().GetOverrideForceFeatureLevel();
+    if (GetDXUTState().GetOverrideForceFeatureLevel() != 0)
+    {
+        pDeviceSettings->d3d11.DeviceFeatureLevel = GetDXUTState().GetOverrideForceFeatureLevel();
     }
 }
 
@@ -2341,7 +2347,7 @@ HRESULT DXUTCreateD3D11Views( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3
 //--------------------------------------------------------------------------------------
 // Creates the 3D environment
 //--------------------------------------------------------------------------------------
-HRESULT DXUTCreate3DEnvironment11( _In_ ID3D11Device* pd3d11DeviceFromApp )
+HRESULT DXUTCreate3DEnvironment11()
 {
     HRESULT hr = S_OK;
 
@@ -2359,180 +2365,173 @@ HRESULT DXUTCreate3DEnvironment11( _In_ ID3D11Device* pd3d11DeviceFromApp )
     _Analysis_assume_( pDXGIFactory );
     hr = pDXGIFactory->MakeWindowAssociation( DXUTGetHWND(), 0  );
 
-    // Only create a Direct3D device if one hasn't been supplied by the app
-    if( !pd3d11DeviceFromApp )
+    // Try to create the device with the chosen settings
+    IDXGIAdapter1* pAdapter = nullptr;
+
+    hr = S_OK;
+    D3D_DRIVER_TYPE ddt = pNewDeviceSettings->d3d11.DriverType;
+    if( pNewDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_HARDWARE ) 
     {
-        // Try to create the device with the chosen settings
-        IDXGIAdapter1* pAdapter = nullptr;
+        hr = pDXGIFactory->EnumAdapters1( pNewDeviceSettings->d3d11.AdapterOrdinal, &pAdapter );
+        if ( FAILED( hr) ) 
+        {
+            return E_FAIL;
+        }
+        ddt = D3D_DRIVER_TYPE_UNKNOWN;    
+    }
+    else if (pNewDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_WARP) 
+    {
+        ddt = D3D_DRIVER_TYPE_WARP;  
+        pAdapter = nullptr;
+    }
+    else if (pNewDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE) 
+    {
+        ddt = D3D_DRIVER_TYPE_REFERENCE;
+        pAdapter = nullptr;
+    }
 
-        hr = S_OK;
-        D3D_DRIVER_TYPE ddt = pNewDeviceSettings->d3d11.DriverType;
-        if( pNewDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_HARDWARE ) 
-        {
-            hr = pDXGIFactory->EnumAdapters1( pNewDeviceSettings->d3d11.AdapterOrdinal, &pAdapter );
-            if ( FAILED( hr) ) 
-            {
-                return E_FAIL;
-            }
-            ddt = D3D_DRIVER_TYPE_UNKNOWN;    
-        }
-        else if (pNewDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_WARP) 
-        {
-            ddt = D3D_DRIVER_TYPE_WARP;  
-            pAdapter = nullptr;
-        }
-        else if (pNewDeviceSettings->d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE) 
-        {
-            ddt = D3D_DRIVER_TYPE_REFERENCE;
-            pAdapter = nullptr;
-        }
-
-        if( SUCCEEDED( hr ) )
-        {
-            hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
-                                                 ddt,
-                                                 ( HMODULE )0,
-                                                 pNewDeviceSettings->d3d11.CreateFlags,
-                                                 &pNewDeviceSettings->d3d11.DeviceFeatureLevel,
-                                                 1,
-                                                 D3D11_SDK_VERSION,
-                                                 &pd3d11Device,
-                                                 &FeatureLevel,
-                                                 &pd3dImmediateContext
-                                                 );
+    if( SUCCEEDED( hr ) )
+    {
+        hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
+                                                ddt,
+                                                ( HMODULE )0,
+                                                pNewDeviceSettings->d3d11.CreateFlags,
+                                                &pNewDeviceSettings->d3d11.DeviceFeatureLevel,
+                                                1,
+                                                D3D11_SDK_VERSION,
+                                                &pd3d11Device,
+                                                &FeatureLevel,
+                                                &pd3dImmediateContext
+                                                );
             
-            if ( FAILED( hr ) )
-            {
-                pAdapter = nullptr;
-                // Remote desktop does not allow you to enumerate the adapter.  In this case, we let D3D11 do the enumeration.
-                if ( ddt == D3D_DRIVER_TYPE_UNKNOWN )
-                { 
-                    hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
-                                                         D3D_DRIVER_TYPE_HARDWARE,
-                                                         ( HMODULE )0,
-                                                         pNewDeviceSettings->d3d11.CreateFlags,
-                                                         &pNewDeviceSettings->d3d11.DeviceFeatureLevel,
-                                                         1,
-                                                         D3D11_SDK_VERSION,
-                                                         &pd3d11Device,
-                                                         &FeatureLevel,
-                                                         &pd3dImmediateContext
-                                                         );
-                }
-                if ( FAILED ( hr ) )
-                {
-                    DXUT_ERR( L"D3D11CreateDevice", hr );
-                    return DXUTERR_CREATINGDEVICE;
-                }
-            }
-        }
-
-#ifndef NDEBUG
-        if( SUCCEEDED( hr ) )
-        {
-            ID3D11Debug * d3dDebug = nullptr;
-            if( SUCCEEDED( pd3d11Device->QueryInterface( __uuidof(ID3D11Debug), reinterpret_cast<void**>( &d3dDebug ) ) ) )
-            {
-                ID3D11InfoQueue* infoQueue = nullptr;
-                if( SUCCEEDED( d3dDebug->QueryInterface( __uuidof(ID3D11InfoQueue), reinterpret_cast<void**>( &infoQueue ) ) ) )
-                {
-                    // ignore some "expected" errors
-                    D3D11_MESSAGE_ID denied [] =
-                    {
-                        D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
-                    };
-
-                    D3D11_INFO_QUEUE_FILTER filter;
-                    memset( &filter, 0, sizeof(filter) );
-                    filter.DenyList.NumIDs = _countof(denied);
-                    filter.DenyList.pIDList = denied;
-                    infoQueue->AddStorageFilterEntries( &filter );
-                    infoQueue->Release();
-                }
-                d3dDebug->Release();
-            }
-        }
-#endif
-
-        if( SUCCEEDED( hr ) )
-        {
-            IDXGIDevice1* pDXGIDev = nullptr;
-            hr = pd3d11Device->QueryInterface( __uuidof( IDXGIDevice1 ), ( LPVOID* )&pDXGIDev );
-            if( SUCCEEDED( hr ) && pDXGIDev )
-            {
-                if ( !pAdapter ) 
-                {
-                    IDXGIAdapter *pTempAdapter;
-                    pDXGIDev->GetAdapter( &pTempAdapter );
-                    V_RETURN( pTempAdapter->QueryInterface( __uuidof( IDXGIAdapter1 ), (LPVOID*) &pAdapter ) );
-                    V_RETURN( pAdapter->GetParent( __uuidof( IDXGIFactory1 ), (LPVOID*) &pDXGIFactory ) );
-                    SAFE_RELEASE ( pTempAdapter );
-                    GetDXUTState().SetDXGIFactory( pDXGIFactory );
-                }
-            }
-            SAFE_RELEASE( pDXGIDev );
-            GetDXUTState().SetDXGIAdapter( pAdapter );
-        }
-
-        if( FAILED( hr ) )
-        {
-            DXUT_ERR( L"D3D11CreateDevice", hr );
-            return DXUTERR_CREATINGDEVICE;
-        }
-
-        // set default render state to msaa enabled
-        D3D11_RASTERIZER_DESC drd = {
-            D3D11_FILL_SOLID, //D3D11_FILL_MODE FillMode;
-            D3D11_CULL_BACK,//D3D11_CULL_MODE CullMode;
-            FALSE, //BOOL FrontCounterClockwise;
-            0, //INT DepthBias;
-            0.0f,//FLOAT DepthBiasClamp;
-            0.0f,//FLOAT SlopeScaledDepthBias;
-            TRUE,//BOOL DepthClipEnable;
-            FALSE,//BOOL ScissorEnable;
-            TRUE,//BOOL MultisampleEnable;
-            FALSE//BOOL AntialiasedLineEnable;        
-        };
-        ID3D11RasterizerState* pRS = nullptr;
-        hr = pd3d11Device->CreateRasterizerState(&drd, &pRS);
         if ( FAILED( hr ) )
         {
-            DXUT_ERR( L"CreateRasterizerState", hr );
-            return DXUTERR_CREATINGDEVICE;
-        }
-        DXUT_SetDebugName( pRS, "DXUT Default" );
-        GetDXUTState().SetD3D11RasterizerState(pRS);
-        pd3dImmediateContext->RSSetState(pRS);
-
-        // Enumerate its outputs.
-        UINT OutputCount, iOutput;
-        for( OutputCount = 0; ; ++OutputCount )
-        {
-            IDXGIOutput* pOutput;
-            if( FAILED( pAdapter->EnumOutputs( OutputCount, &pOutput ) ) )
-                break;
-            SAFE_RELEASE( pOutput );
-        }
-        auto ppOutputArray = new (std::nothrow) IDXGIOutput*[OutputCount];
-        if( !ppOutputArray )
-            return E_OUTOFMEMORY;
-        for( iOutput = 0; iOutput < OutputCount; ++iOutput )
-            pAdapter->EnumOutputs( iOutput, ppOutputArray + iOutput );
-        GetDXUTState().SetDXGIOutputArray( ppOutputArray );
-        GetDXUTState().SetDXGIOutputArraySize( OutputCount );
-
-        // Create the swapchain
-        hr = pDXGIFactory->CreateSwapChain( pd3d11Device, &pNewDeviceSettings->d3d11.sd, &pSwapChain );
-        if( FAILED( hr ) )
-        {
-            DXUT_ERR( L"CreateSwapChain", hr );
-            return DXUTERR_CREATINGDEVICE;
+            pAdapter = nullptr;
+            // Remote desktop does not allow you to enumerate the adapter.  In this case, we let D3D11 do the enumeration.
+            if ( ddt == D3D_DRIVER_TYPE_UNKNOWN )
+            { 
+                hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
+                                                        D3D_DRIVER_TYPE_HARDWARE,
+                                                        ( HMODULE )0,
+                                                        pNewDeviceSettings->d3d11.CreateFlags,
+                                                        &pNewDeviceSettings->d3d11.DeviceFeatureLevel,
+                                                        1,
+                                                        D3D11_SDK_VERSION,
+                                                        &pd3d11Device,
+                                                        &FeatureLevel,
+                                                        &pd3dImmediateContext
+                                                        );
+            }
+            if ( FAILED ( hr ) )
+            {
+                DXUT_ERR( L"D3D11CreateDevice", hr );
+                return DXUTERR_CREATINGDEVICE;
+            }
         }
     }
-    else
+
+#ifndef NDEBUG
+    if( SUCCEEDED( hr ) )
     {
-        pd3d11DeviceFromApp->AddRef();
-        pd3d11Device = pd3d11DeviceFromApp;
+        ID3D11Debug * d3dDebug = nullptr;
+        if( SUCCEEDED( pd3d11Device->QueryInterface( __uuidof(ID3D11Debug), reinterpret_cast<void**>( &d3dDebug ) ) ) )
+        {
+            ID3D11InfoQueue* infoQueue = nullptr;
+            if( SUCCEEDED( d3dDebug->QueryInterface( __uuidof(ID3D11InfoQueue), reinterpret_cast<void**>( &infoQueue ) ) ) )
+            {
+                // ignore some "expected" errors
+                D3D11_MESSAGE_ID denied [] =
+                {
+                    D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
+                };
+
+                D3D11_INFO_QUEUE_FILTER filter;
+                memset( &filter, 0, sizeof(filter) );
+                filter.DenyList.NumIDs = _countof(denied);
+                filter.DenyList.pIDList = denied;
+                infoQueue->AddStorageFilterEntries( &filter );
+                infoQueue->Release();
+            }
+            d3dDebug->Release();
+        }
+    }
+#endif
+
+    if( SUCCEEDED( hr ) )
+    {
+        IDXGIDevice1* pDXGIDev = nullptr;
+        hr = pd3d11Device->QueryInterface( __uuidof( IDXGIDevice1 ), ( LPVOID* )&pDXGIDev );
+        if( SUCCEEDED( hr ) && pDXGIDev )
+        {
+            if ( !pAdapter ) 
+            {
+                IDXGIAdapter *pTempAdapter;
+                pDXGIDev->GetAdapter( &pTempAdapter );
+                V_RETURN( pTempAdapter->QueryInterface( __uuidof( IDXGIAdapter1 ), (LPVOID*) &pAdapter ) );
+                V_RETURN( pAdapter->GetParent( __uuidof( IDXGIFactory1 ), (LPVOID*) &pDXGIFactory ) );
+                SAFE_RELEASE ( pTempAdapter );
+                if ( GetDXUTState().GetDXGIFactory() != pDXGIFactory )
+                    GetDXUTState().GetDXGIFactory()->Release();
+                GetDXUTState().SetDXGIFactory( pDXGIFactory );
+            }
+        }
+        SAFE_RELEASE( pDXGIDev );
+        GetDXUTState().SetDXGIAdapter( pAdapter );
+    }
+
+    if( FAILED( hr ) )
+    {
+        DXUT_ERR( L"D3D11CreateDevice", hr );
+        return DXUTERR_CREATINGDEVICE;
+    }
+
+    // set default render state to msaa enabled
+    D3D11_RASTERIZER_DESC drd = {
+        D3D11_FILL_SOLID, //D3D11_FILL_MODE FillMode;
+        D3D11_CULL_BACK,//D3D11_CULL_MODE CullMode;
+        FALSE, //BOOL FrontCounterClockwise;
+        0, //INT DepthBias;
+        0.0f,//FLOAT DepthBiasClamp;
+        0.0f,//FLOAT SlopeScaledDepthBias;
+        TRUE,//BOOL DepthClipEnable;
+        FALSE,//BOOL ScissorEnable;
+        TRUE,//BOOL MultisampleEnable;
+        FALSE//BOOL AntialiasedLineEnable;        
+    };
+    ID3D11RasterizerState* pRS = nullptr;
+    hr = pd3d11Device->CreateRasterizerState(&drd, &pRS);
+    if ( FAILED( hr ) )
+    {
+        DXUT_ERR( L"CreateRasterizerState", hr );
+        return DXUTERR_CREATINGDEVICE;
+    }
+    DXUT_SetDebugName( pRS, "DXUT Default" );
+    GetDXUTState().SetD3D11RasterizerState(pRS);
+    pd3dImmediateContext->RSSetState(pRS);
+
+    // Enumerate its outputs.
+    UINT OutputCount, iOutput;
+    for( OutputCount = 0; ; ++OutputCount )
+    {
+        IDXGIOutput* pOutput;
+        if( FAILED( pAdapter->EnumOutputs( OutputCount, &pOutput ) ) )
+            break;
+        SAFE_RELEASE( pOutput );
+    }
+    auto ppOutputArray = new (std::nothrow) IDXGIOutput*[OutputCount];
+    if( !ppOutputArray )
+        return E_OUTOFMEMORY;
+    for( iOutput = 0; iOutput < OutputCount; ++iOutput )
+        pAdapter->EnumOutputs( iOutput, ppOutputArray + iOutput );
+    GetDXUTState().SetDXGIOutputArray( ppOutputArray );
+    GetDXUTState().SetDXGIOutputArraySize( OutputCount );
+
+    // Create the swapchain
+    hr = pDXGIFactory->CreateSwapChain( pd3d11Device, &pNewDeviceSettings->d3d11.sd, &pSwapChain );
+    if( FAILED( hr ) )
+    {
+        DXUT_ERR( L"CreateSwapChain", hr );
+        return DXUTERR_CREATINGDEVICE;
     }
 
     GetDXUTState().SetD3D11Device( pd3d11Device );
@@ -2873,7 +2872,7 @@ void WINAPI DXUTRender3DEnvironment()
                 // Reset failed, but the device wasn't lost so something bad happened, 
                 // so recreate the device to try to recover
                 auto pDeviceSettings = GetDXUTState().GetCurrentDeviceSettings();
-                if( FAILED( DXUTChangeDevice( pDeviceSettings, nullptr, false ) ) )
+                if( FAILED( DXUTChangeDevice( pDeviceSettings, false ) ) )
                 {
                     DXUTShutdown();
                     return;
@@ -3447,13 +3446,13 @@ HRESULT WINAPI DXUTToggleFullScreen()
         deviceSettings.d3d11.sd.BufferDesc.Width = r.right;
     }
 
-    hr = DXUTChangeDevice( &deviceSettings, nullptr, false );
+    hr = DXUTChangeDevice( &deviceSettings, false );
 
     // If hr == E_ABORT, this means the app rejected the device settings in the ModifySettingsCallback so nothing changed
     if( FAILED( hr ) && ( hr != E_ABORT ) )
     {
         // Failed creating device, try to switch back.
-        HRESULT hr2 = DXUTChangeDevice( &orginalDeviceSettings, nullptr, false );
+        HRESULT hr2 = DXUTChangeDevice( &orginalDeviceSettings, false );
         if( FAILED( hr2 ) )
         {
             // If this failed, then shutdown
@@ -3494,13 +3493,13 @@ HRESULT WINAPI DXUTToggleWARP ()
 
         // Create a Direct3D device using the new device settings.  
         // If there is an existing device, then it will either reset or recreate the scene.
-        hr = DXUTChangeDevice( &deviceSettings, nullptr, false );
+        hr = DXUTChangeDevice( &deviceSettings, false );
 
         // If hr == E_ABORT, this means the app rejected the device settings in the ModifySettingsCallback so nothing changed
         if( FAILED( hr ) && ( hr != E_ABORT ) )
         {
             // Failed creating device, try to switch back.
-            HRESULT hr2 = DXUTChangeDevice( &orginalDeviceSettings, nullptr, false );
+            HRESULT hr2 = DXUTChangeDevice( &orginalDeviceSettings, false );
             if( FAILED( hr2 ) )
             {
                 // If this failed, then shutdown
@@ -3546,13 +3545,13 @@ HRESULT WINAPI DXUTToggleREF()
 
         // Create a Direct3D device using the new device settings.  
         // If there is an existing device, then it will either reset or recreate the scene.
-        hr = DXUTChangeDevice( &deviceSettings, nullptr, false );
+        hr = DXUTChangeDevice( &deviceSettings, false );
 
         // If hr == E_ABORT, this means the app rejected the device settings in the ModifySettingsCallback so nothing changed
         if( FAILED( hr ) && ( hr != E_ABORT ) )
         {
             // Failed creating device, try to switch back.
-            HRESULT hr2 = DXUTChangeDevice( &orginalDeviceSettings, nullptr, false );
+            HRESULT hr2 = DXUTChangeDevice( &orginalDeviceSettings, false );
             if( FAILED( hr2 ) )
             {
                 // If this failed, then shutdown
@@ -3785,7 +3784,7 @@ void DXUTCheckForWindowChangingMonitors()
             {
                 // Create a Direct3D device using the new device settings.  
                 // If there is an existing device, then it will either reset or recreate the scene.
-                hr = DXUTChangeDevice( &deviceSettings, nullptr, false );
+                hr = DXUTChangeDevice( &deviceSettings, false );
 
                 // If hr == E_ABORT, this means the app rejected the device settings in the ModifySettingsCallback
                 if( hr == E_ABORT )
@@ -3919,7 +3918,7 @@ HRESULT DXUTHandleDeviceRemoved()
         {
             // Change to a Direct3D device created from the new device settings
             // that is compatible with the removed device.
-            hr = DXUTChangeDevice( pDeviceSettings, nullptr, false );
+            hr = DXUTChangeDevice( pDeviceSettings, false );
             if( SUCCEEDED( hr ) )
                 return S_OK;
         }
