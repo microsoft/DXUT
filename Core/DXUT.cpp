@@ -3408,18 +3408,24 @@ int DXUTMapButtonToArrayIndex( _In_ BYTE vButton )
 }
 
 
-
 //--------------------------------------------------------------------------------------
 // Toggle between full screen and windowed
 //--------------------------------------------------------------------------------------
 HRESULT WINAPI DXUTToggleFullScreen()
 {
-    HRESULT hr;
     DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
+    if ( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
+    {
+        // WARP driver type doesn't support fullscreen
+        return S_FALSE;
+    }
+
     DXUTDeviceSettings orginalDeviceSettings = DXUTGetDeviceSettings();
     
-    deviceSettings.d3d11.sd.Windowed = !deviceSettings.d3d11.sd.Windowed; // datut
-    if ( !deviceSettings.d3d11.sd.Windowed )
+    deviceSettings.d3d11.sd.Windowed = !deviceSettings.d3d11.sd.Windowed;
+
+    HRESULT hr;
+    if (!deviceSettings.d3d11.sd.Windowed)
     {
         DXGI_MODE_DESC adapterDesktopDisplayMode;
         hr = DXUTGetD3D11AdapterDisplayMode( deviceSettings.d3d11.AdapterOrdinal, 0, &adapterDesktopDisplayMode );
@@ -3460,24 +3466,32 @@ HRESULT WINAPI DXUTToggleFullScreen()
 
 
 //--------------------------------------------------------------------------------------
-// Toggle between HAL and WARP
+// Toggle between HAL/REF and WARP
 //--------------------------------------------------------------------------------------
-
 HRESULT WINAPI DXUTToggleWARP ()
 {
     DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
-    DXUTDeviceSettings orginalDeviceSettings = DXUTGetDeviceSettings();
 
-    HRESULT hr;
+    if ( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_HARDWARE || deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE )
+    {
+        if ( !deviceSettings.d3d11.sd.Windowed )
+        {
+            // WARP driver type doesn't support fullscreen
+            return S_FALSE;
+        }
 
-    if( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_HARDWARE || deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE  )
         deviceSettings.d3d11.DriverType = D3D_DRIVER_TYPE_WARP;
-    else if( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
+    }
+    else if ( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
+    {
         deviceSettings.d3d11.DriverType = D3D_DRIVER_TYPE_HARDWARE;
+    }
     
-    hr = DXUTSnapDeviceSettingsToEnumDevice(&deviceSettings, false);
+    HRESULT hr = DXUTSnapDeviceSettingsToEnumDevice(&deviceSettings, false);
     if( SUCCEEDED( hr ) )
     {
+        DXUTDeviceSettings orginalDeviceSettings = DXUTGetDeviceSettings();
+
         // Create a Direct3D device using the new device settings.  
         // If there is an existing device, then it will either reset or recreate the scene.
         hr = DXUTChangeDevice( &deviceSettings, nullptr, false );
@@ -3497,25 +3511,39 @@ HRESULT WINAPI DXUTToggleWARP ()
 
     return hr;
 }
+
+
 //--------------------------------------------------------------------------------------
-// Toggle between HAL and REF
+// Toggle between HAL/WARP and REF
 //--------------------------------------------------------------------------------------
 HRESULT WINAPI DXUTToggleREF()
 {
-    HRESULT hr;
-
     DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
-    DXUTDeviceSettings orginalDeviceSettings = DXUTGetDeviceSettings();
 
-    // Toggle between REF & HAL
-    if( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_HARDWARE )
+    if ( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_HARDWARE )
+    {
         deviceSettings.d3d11.DriverType = D3D_DRIVER_TYPE_REFERENCE;
-    else if( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE )
+    }
+    else if ( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE )
+    {
         deviceSettings.d3d11.DriverType = D3D_DRIVER_TYPE_HARDWARE;
-    
-    hr = DXUTSnapDeviceSettingsToEnumDevice(&deviceSettings, false);
+    }
+    else if ( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
+    {
+        if ( !deviceSettings.d3d11.sd.Windowed )
+        {
+            // WARP driver type doesn't support fullscreen
+            return S_FALSE;
+        }
+
+        deviceSettings.d3d11.DriverType = D3D_DRIVER_TYPE_REFERENCE;
+    }
+
+    HRESULT hr = DXUTSnapDeviceSettingsToEnumDevice(&deviceSettings, false);
     if( SUCCEEDED( hr ) )
     {
+        DXUTDeviceSettings orginalDeviceSettings = DXUTGetDeviceSettings();
+
         // Create a Direct3D device using the new device settings.  
         // If there is an existing device, then it will either reset or recreate the scene.
         hr = DXUTChangeDevice( &deviceSettings, nullptr, false );
@@ -4276,7 +4304,7 @@ void DXUTApplyDefaultDeviceSettings(DXUTDeviceSettings *modifySettings)
     modifySettings->d3d11.sd.SampleDesc.Count = 1;
     modifySettings->d3d11.sd.SampleDesc.Quality = 0;
     modifySettings->d3d11.sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    modifySettings->d3d11.sd.Windowed = 1;
+    modifySettings->d3d11.sd.Windowed = TRUE;
     modifySettings->d3d11.SyncInterval = 0;
 }
 
@@ -4289,7 +4317,7 @@ HRESULT DXUTSnapDeviceSettingsToEnumDevice( DXUTDeviceSettings* pDeviceSettings,
 {
     if( GetSystemMetrics(SM_REMOTESESSION) != 0 )
     {
-        pDeviceSettings->d3d11.sd.Windowed = 1;
+        pDeviceSettings->d3d11.sd.Windowed = TRUE;
     }   
     int bestModeIndex=0;
     int bestMSAAIndex=0;
@@ -4345,7 +4373,7 @@ HRESULT DXUTSnapDeviceSettingsToEnumDevice( DXUTDeviceSettings* pDeviceSettings,
     pDeviceSettings->d3d11.sd.Windowed = pDeviceSettingsCombo->Windowed;
     if( GetSystemMetrics(SM_REMOTESESSION) != 0 )
     {
-        pDeviceSettings->d3d11.sd.Windowed = 1;
+        pDeviceSettings->d3d11.sd.Windowed = TRUE;
     }   
     if (pDeviceSettingsCombo->pOutputInfo)
     {
