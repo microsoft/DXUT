@@ -3522,15 +3522,15 @@ void CDXUTComboBox::UpdateRects()
     m_rcText.right = m_rcButton.left;
 
     m_rcDropdown = m_rcText;
-    OffsetRect( &m_rcDropdown, 0, ( int )( 0.90f * RectHeight( m_rcText ) ) );
+    OffsetRect( &m_rcDropdown, 0, static_cast<int>( 0.90f * RectHeight( m_rcText ) ) );
     m_rcDropdown.bottom += m_nDropHeight;
     m_rcDropdown.right -= m_nSBWidth;
 
     m_rcDropdownText = m_rcDropdown;
-    m_rcDropdownText.left += ( int )( 0.1f * RectWidth( m_rcDropdown ) );
-    m_rcDropdownText.right -= ( int )( 0.1f * RectWidth( m_rcDropdown ) );
-    m_rcDropdownText.top += ( int )( 0.1f * RectHeight( m_rcDropdown ) );
-    m_rcDropdownText.bottom -= ( int )( 0.1f * RectHeight( m_rcDropdown ) );
+    m_rcDropdownText.left += static_cast<int>(0.1f * RectWidth(m_rcDropdown));
+    m_rcDropdownText.right -= static_cast<int>(0.1f * RectWidth(m_rcDropdown));
+    m_rcDropdownText.top += static_cast<int>(0.1f * RectHeight(m_rcDropdown));
+    m_rcDropdownText.bottom -= static_cast<int>(0.1f * RectHeight(m_rcDropdown));
 
     // Update the scrollbar's rects
     m_ScrollBar.SetLocation( m_rcDropdown.right, m_rcDropdown.top + 2 );
@@ -3830,6 +3830,7 @@ void CDXUTComboBox::Render( _In_ float fElapsedTime )
 {
     if( m_bVisible == false )
         return;
+
     DXUT_CONTROL_STATE iState = DXUT_STATE_NORMAL;
 
     if( !m_bOpened )
@@ -3872,8 +3873,7 @@ void CDXUTComboBox::Render( _In_ float fElapsedTime )
     {
         int curY = m_rcDropdownText.top;
         int nRemainingHeight = RectHeight( m_rcDropdownText );
-        //WCHAR strDropdown[4096] = {0};
-
+        
         for( size_t i = m_ScrollBar.GetTrackPos(); i < m_Items.size(); i++ )
         {
             auto pItem = m_Items[ i ];
@@ -3889,10 +3889,6 @@ void CDXUTComboBox::Render( _In_ float fElapsedTime )
             SetRect( &pItem->rcActive, m_rcDropdownText.left, curY, m_rcDropdownText.right, curY + pFont->nHeight );
             curY += pFont->nHeight;
 
-            //debug
-            //int blue = 50 * i;
-            //m_pDialog->DrawRect( &pItem->rcActive, 0xFFFF0000 | blue );
-
             pItem->bVisible = true;
 
             if( m_bOpened )
@@ -3900,7 +3896,7 @@ void CDXUTComboBox::Render( _In_ float fElapsedTime )
                 if( ( int )i == m_iFocused )
                 {
                     RECT rc;
-                    SetRect( &rc, m_rcDropdown.left, pItem->rcActive.top - 2, m_rcDropdown.right,
+                    SetRect( &rc, m_rcDropdown.left, pItem->rcActive.top, m_rcDropdown.right,
                              pItem->rcActive.bottom + 2 );
                     m_pDialog->DrawSprite( pSelectionElement, &rc, DXUT_NEAR_BUTTON_DEPTH );
                     m_pDialog->DrawText( pItem->strText, pSelectionElement, &pItem->rcActive );

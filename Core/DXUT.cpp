@@ -633,7 +633,7 @@ void DXUTGetCallbackD3D11DeviceAcceptable( _In_ LPDXUTCALLBACKISD3D11DEVICEACCEP
 //          -forcefeaturelevel:fl     forces app to use a specified direct3D11 feature level    
 //          -screenshotexit:filename save a screenshot to the filename.bmp and exit.
 //          -adapter:#              forces app to use this adapter # (fails if the adapter doesn't exist)
-//          -output:#               [D3D11 only] forces app to use a particular output on the adapter (fails if the output doesn't exist) 
+//          -output:#               forces app to use a particular output on the adapter (fails if the output doesn't exist) 
 //          -windowed               forces app to start windowed
 //          -fullscreen             forces app to start full screen
 //          -forcehal               forces app to use HAL (fails if HAL doesn't exist)
@@ -2209,7 +2209,8 @@ void DXUTUpdateDeviceSettingsWithOverrides( _Inout_ DXUTDeviceSettings* pDeviceS
         pDeviceSettings->d3d11.sd.Windowed = FALSE;
     }
 
-    if( GetDXUTState().GetOverrideWindowed() ) {
+    if( GetDXUTState().GetOverrideWindowed() )
+    {
         pDeviceSettings->d3d11.sd.Windowed = TRUE;
     }
 
@@ -2226,6 +2227,7 @@ void DXUTUpdateDeviceSettingsWithOverrides( _Inout_ DXUTDeviceSettings* pDeviceS
     if( GetDXUTState().GetOverrideForceWARP() )
     {
         pDeviceSettings->d3d11.DriverType = D3D_DRIVER_TYPE_WARP;
+        pDeviceSettings->d3d11.sd.Windowed = TRUE;
     }
 
     if( GetDXUTState().GetOverrideForceVsync() == 0 )
@@ -2465,8 +2467,8 @@ HRESULT DXUTCreate3DEnvironment11()
         {
             if ( !pAdapter ) 
             {
-                IDXGIAdapter *pTempAdapter;
-                pDXGIDev->GetAdapter( &pTempAdapter );
+                IDXGIAdapter *pTempAdapter = nullptr;
+                V_RETURN( pDXGIDev->GetAdapter( &pTempAdapter ) );
                 V_RETURN( pTempAdapter->QueryInterface( __uuidof( IDXGIAdapter1 ), (LPVOID*) &pAdapter ) );
                 V_RETURN( pAdapter->GetParent( __uuidof( IDXGIFactory1 ), (LPVOID*) &pDXGIFactory ) );
                 SAFE_RELEASE ( pTempAdapter );
