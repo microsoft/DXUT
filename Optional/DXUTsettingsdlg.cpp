@@ -687,12 +687,16 @@ HRESULT CD3DSettingsDlg::OnFeatureLevelChanged ()
     // Obtain a set of valid D3D11 device settings.
     UINT CreateFlags = g_DeviceSettings.d3d11.CreateFlags;
     DXGI_FORMAT BackBufferFormat = g_DeviceSettings.d3d11.sd.BufferDesc.Format;
-    ZeroMemory( &g_DeviceSettings, sizeof( g_DeviceSettings ) );
-            
+    UINT Count = g_DeviceSettings.d3d11.sd.SampleDesc.Count;
+    UINT Quality = g_DeviceSettings.d3d11.sd.SampleDesc.Quality;
+    ZeroMemory(&g_DeviceSettings, sizeof(g_DeviceSettings));
+
     DXUTApplyDefaultDeviceSettings(&g_DeviceSettings);
     g_DeviceSettings.d3d11.CreateFlags = CreateFlags;
     hr = DXUTSnapDeviceSettingsToEnumDevice(&g_DeviceSettings, true, GetSelectedFeatureLevel());
     g_DeviceSettings.d3d11.sd.BufferDesc.Format = BackBufferFormat;
+    g_DeviceSettings.d3d11.sd.SampleDesc.Count = Count;
+    g_DeviceSettings.d3d11.sd.SampleDesc.Quality = Quality;
 
     auto pD3DEnum = DXUTGetD3D11Enumeration();
     auto pAdapterInfoList = pD3DEnum->GetAdapterInfoList();
