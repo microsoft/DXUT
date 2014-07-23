@@ -140,7 +140,7 @@ HRESULT CD3D11Enumeration::Enumerate( LPDXUTCALLBACKISD3D11DEVICEACCEPTABLE IsD3
             }
         }
 
-       auto pAdapterInfo = new (std::nothrow) CD3D11EnumAdapterInfo;
+        auto pAdapterInfo = new (std::nothrow) CD3D11EnumAdapterInfo;
         if( !pAdapterInfo )
         {
             SAFE_RELEASE( pAdapter );
@@ -489,9 +489,8 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
         // Call D3D11CreateDevice to ensure that this is a D3D11 device.
         ID3D11Device* pd3dDevice = nullptr;
         ID3D11DeviceContext* pd3dDeviceContext = nullptr;
-        IDXGIAdapter* pAdapter = nullptr;
-        hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
-                                             devTypeArray[iDeviceType],
+        hr = DXUT_Dynamic_D3D11CreateDevice( (devTypeArray[iDeviceType] == D3D_DRIVER_TYPE_HARDWARE) ? pAdapterInfo->m_pAdapter : nullptr,
+                                             (devTypeArray[iDeviceType] == D3D_DRIVER_TYPE_HARDWARE) ? D3D_DRIVER_TYPE_UNKNOWN : devTypeArray[iDeviceType],
                                              ( HMODULE )0,
                                              0,
                                              FeatureLevels,
@@ -504,8 +503,8 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
         if ( hr == E_INVALIDARG )
         {
             // DirectX 11.0 runtime will not recognize FL 11.1, so try without it
-            hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
-                                                 devTypeArray[iDeviceType],
+            hr = DXUT_Dynamic_D3D11CreateDevice( (devTypeArray[iDeviceType] == D3D_DRIVER_TYPE_HARDWARE) ? pAdapterInfo->m_pAdapter : nullptr,
+                                                 (devTypeArray[iDeviceType] == D3D_DRIVER_TYPE_HARDWARE) ? D3D_DRIVER_TYPE_UNKNOWN : devTypeArray[iDeviceType],
                                                  ( HMODULE )0,
                                                  0,
                                                  &FeatureLevels[1],
@@ -516,9 +515,16 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
                                                  &pd3dDeviceContext );
         }
 
-        if( FAILED( hr ) || pDeviceInfo->MaxLevel < deviceSettings.MinimumFeatureLevel)
+        if ( FAILED(hr) )
         {
             delete pDeviceInfo;
+            continue;
+        }
+        else if ( pDeviceInfo->MaxLevel < deviceSettings.MinimumFeatureLevel )
+        {
+            delete pDeviceInfo;
+            SAFE_RELEASE( pd3dDevice );
+            SAFE_RELEASE( pd3dDeviceContext );        
             continue;
         }
         
@@ -539,8 +545,8 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
             SAFE_RELEASE( pd3dDevice );
             SAFE_RELEASE( pd3dDeviceContext );
             D3D_FEATURE_LEVEL rtFL;
-            hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
-                                                 devTypeArray[iDeviceType],
+            hr = DXUT_Dynamic_D3D11CreateDevice( (devTypeArray[iDeviceType] == D3D_DRIVER_TYPE_HARDWARE) ? pAdapterInfo->m_pAdapter : nullptr,
+                                                 (devTypeArray[iDeviceType] == D3D_DRIVER_TYPE_HARDWARE) ? D3D_DRIVER_TYPE_UNKNOWN : devTypeArray[iDeviceType],
                                                  ( HMODULE )0,
                                                  0,
                                                  &m_forceFL,
@@ -565,15 +571,6 @@ HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapte
                 continue;
             }
         }
-
-        IDXGIDevice1* pDXGIDev = nullptr;
-        hr = pd3dDevice->QueryInterface( __uuidof( IDXGIDevice1 ), ( LPVOID* )&pDXGIDev );
-        if( SUCCEEDED( hr ) && pDXGIDev )
-        {
-            SAFE_RELEASE( pAdapterInfo->m_pAdapter );
-            pDXGIDev->GetAdapter( &pAdapterInfo->m_pAdapter );
-        }
-        SAFE_RELEASE( pDXGIDev );
 
         D3D11_FEATURE_DATA_D3D10_X_HARDWARE_OPTIONS ho;
         hr = pd3dDevice->CheckFeatureSupport(D3D11_FEATURE_D3D10_X_HARDWARE_OPTIONS, &ho, sizeof(ho));

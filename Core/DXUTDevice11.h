@@ -126,6 +126,7 @@ public:
         bAdapterUnavailable(false)
     {
        *szUniqueDescription = 0;
+       memset( &AdapterDesc, 0, sizeof(AdapterDesc) );
     }
     ~CD3D11EnumAdapterInfo();
 
