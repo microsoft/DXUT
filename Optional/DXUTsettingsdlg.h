@@ -93,6 +93,7 @@ protected:
     void CreateControls();
     void SetSelectedD3D11RefreshRate( _In_ DXGI_RATIONAL RefreshRate );
     HRESULT UpdateD3D11Resolutions();
+    HRESULT UpdateD3D11RefreshRates();
 
     void OnEvent( _In_ UINT nEvent, _In_ int nControlID, _In_ CDXUTControl* pControl );
 

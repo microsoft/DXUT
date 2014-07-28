@@ -295,7 +295,14 @@ HRESULT CD3DSettingsDlg::Refresh()
     pAdapterCombo->SetSelectedByData( ULongToPtr( g_DeviceSettings.d3d11.AdapterOrdinal ) );
 
     // DXUTSETTINGSDLG_D3D11_RESOLUTION
-    (void)UpdateD3D11Resolutions();
+    HRESULT hr = UpdateD3D11Resolutions();
+    if ( FAILED(hr) )
+        return hr;
+
+    // DXUTSETTINGSDLG_D3D11_REFRESH_RATE
+    hr = UpdateD3D11RefreshRates();
+    if ( FAILED(hr) )
+        return hr;
 
     // Windowed mode
     bool bWindowed = IsWindowed();
@@ -377,7 +384,6 @@ HRESULT CD3DSettingsDlg::Refresh()
         pPresentIntervalComboBox->SetSelectedByData(ULongToPtr(g_DeviceSettings.d3d11.SyncInterval) );
     }
 
-    //m_Dialog.Refresh();
     CDXUTDialog::SetRefreshTime( ( float )DXUTGetTime() );
 
     return S_OK;
@@ -542,35 +548,35 @@ void CD3DSettingsDlg::OnEvent( UINT nEvent, int nControlID, CDXUTControl* pContr
         case DXUTSETTINGSDLG_OK:
         {
             bool bFullScreenModeChange = false;
-            DXUTDeviceSettings currentSettings = DXUTGetDeviceSettings();
+            auto currentSettings = DXUTGetDeviceSettings();
             g_DeviceSettings.MinimumFeatureLevel = currentSettings.MinimumFeatureLevel;
-                if( g_DeviceSettings.d3d11.sd.Windowed )
-                {
-                    g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Denominator =
-                        g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Numerator = 0;
+            if( g_DeviceSettings.d3d11.sd.Windowed )
+            {
+                g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Denominator =
+                g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Numerator = 0;
 
-                    RECT rcClient;
-                    if( DXUTIsWindowed() )
-                        GetClientRect( DXUTGetHWND(), &rcClient );
-                    else
-                        rcClient = DXUTGetWindowClientRectAtModeChange();
-                    DWORD dwWindowWidth = rcClient.right - rcClient.left;
-                    DWORD dwWindowHeight = rcClient.bottom - rcClient.top;
-
-                    g_DeviceSettings.d3d11.sd.BufferDesc.Width = dwWindowWidth;
-                    g_DeviceSettings.d3d11.sd.BufferDesc.Height = dwWindowHeight;
-                }
+                RECT rcClient;
+                if( DXUTIsWindowed() )
+                    GetClientRect( DXUTGetHWND(), &rcClient );
                 else
-                {
-                    // Check for fullscreen mode change
-                    bFullScreenModeChange = g_DeviceSettings.d3d11.sd.BufferDesc.Width !=
-                        currentSettings.d3d11.sd.BufferDesc.Width ||
-                        g_DeviceSettings.d3d11.sd.BufferDesc.Height != currentSettings.d3d11.sd.BufferDesc.Height ||
-                        g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Denominator !=
-                        currentSettings.d3d11.sd.BufferDesc.RefreshRate.Denominator ||
-                        g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Numerator !=
-                        currentSettings.d3d11.sd.BufferDesc.RefreshRate.Numerator;
-                }
+                    rcClient = DXUTGetWindowClientRectAtModeChange();
+                DWORD dwWindowWidth = rcClient.right - rcClient.left;
+                DWORD dwWindowHeight = rcClient.bottom - rcClient.top;
+
+                g_DeviceSettings.d3d11.sd.BufferDesc.Width = dwWindowWidth;
+                g_DeviceSettings.d3d11.sd.BufferDesc.Height = dwWindowHeight;
+            }
+            else
+            {
+                // Check for fullscreen mode change
+                bFullScreenModeChange = g_DeviceSettings.d3d11.sd.BufferDesc.Width !=
+                    currentSettings.d3d11.sd.BufferDesc.Width ||
+                    g_DeviceSettings.d3d11.sd.BufferDesc.Height != currentSettings.d3d11.sd.BufferDesc.Height ||
+                    g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Denominator !=
+                    currentSettings.d3d11.sd.BufferDesc.RefreshRate.Denominator ||
+                    g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Numerator !=
+                    currentSettings.d3d11.sd.BufferDesc.RefreshRate.Numerator;
+            }
 
             if( bFullScreenModeChange )
             {
@@ -670,11 +676,19 @@ CD3D11EnumDeviceSettingsCombo* CD3DSettingsDlg::GetCurrentD3D11DeviceSettingsCom
 
 HRESULT CD3DSettingsDlg::OnD3D11ResolutionChanged ()
 {
+    if ( g_DeviceSettings.d3d11.sd.Windowed )
+        return S_OK;
+
     DWORD dwWidth, dwHeight;
     GetSelectedD3D11Resolution( &dwWidth, &dwHeight );
-    g_DeviceSettings.d3d11.sd.BufferDesc.Width= dwWidth;
+    g_DeviceSettings.d3d11.sd.BufferDesc.Width = dwWidth;
     g_DeviceSettings.d3d11.sd.BufferDesc.Height = dwHeight;
-    
+
+    // DXUTSETTINGSDLG_D3D11_REFRESH_RATE
+    HRESULT hr = UpdateD3D11RefreshRates();
+    if ( FAILED(hr) )
+        return hr;
+
     return S_OK;
 }
 
@@ -689,6 +703,7 @@ HRESULT CD3DSettingsDlg::OnFeatureLevelChanged ()
     DXGI_FORMAT BackBufferFormat = g_DeviceSettings.d3d11.sd.BufferDesc.Format;
     UINT Count = g_DeviceSettings.d3d11.sd.SampleDesc.Count;
     UINT Quality = g_DeviceSettings.d3d11.sd.SampleDesc.Quality;
+    DXGI_RATIONAL RefreshRate = g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate;
     ZeroMemory(&g_DeviceSettings, sizeof(g_DeviceSettings));
 
     DXUTApplyDefaultDeviceSettings(&g_DeviceSettings);
@@ -697,6 +712,7 @@ HRESULT CD3DSettingsDlg::OnFeatureLevelChanged ()
     g_DeviceSettings.d3d11.sd.BufferDesc.Format = BackBufferFormat;
     g_DeviceSettings.d3d11.sd.SampleDesc.Count = Count;
     g_DeviceSettings.d3d11.sd.SampleDesc.Quality = Quality;
+    g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate = RefreshRate;
 
     auto pD3DEnum = DXUTGetD3D11Enumeration();
     auto pAdapterInfoList = pD3DEnum->GetAdapterInfoList();
@@ -887,6 +903,10 @@ HRESULT CD3DSettingsDlg::OnWindowedFullScreenChanged()
     if (FAILED(hr))
         return hr;
 
+    hr = UpdateD3D11RefreshRates();
+    if ( FAILED(hr) )
+        return hr;
+
     return S_OK;
 }
 
@@ -922,10 +942,9 @@ HRESULT CD3DSettingsDlg::OnAdapterOutputChanged()
             g_DeviceSettings.d3d11.sd.BufferDesc.Height = rc.bottom;
         }
 
-        g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate = mode.RefreshRate;
+        g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Numerator =
+        g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Denominator = 0;
     }
-
-    const DXGI_RATIONAL RefreshRate = g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate;
 
     auto pAdapterInfo = GetCurrentD3D11AdapterInfo();
     if( !pAdapterInfo )
@@ -934,6 +953,11 @@ HRESULT CD3DSettingsDlg::OnAdapterOutputChanged()
     // DXUTSETTINGSDLG_D3D11_RESOLUTION
     hr = UpdateD3D11Resolutions();
     if( FAILED( hr ) )
+        return hr;
+
+    // DXUTSETTINGSDLG_D3D11_REFRESH_RATE
+    hr = UpdateD3D11RefreshRates();
+    if ( FAILED(hr) )
         return hr;
 
     // DXUTSETTINGSDLG_D3D11_BACK_BUFFER_FORMAT
@@ -955,21 +979,6 @@ HRESULT CD3DSettingsDlg::OnAdapterOutputChanged()
     if( FAILED( hr ) )
         return hr;
 
-    // DXUTSETTINGSDLG_D3D11_REFRESH_RATE
-    if( bWindowed )
-    {
-        auto pRefreshRateComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
-        for( UINT i = 0; i < pRefreshRateComboBox->GetNumItems(); ++i )
-        {
-            auto pRefreshRate = reinterpret_cast<DXGI_RATIONAL*>( pRefreshRateComboBox->GetItemData( i ) );
-            delete pRefreshRate;
-        }
-        pRefreshRateComboBox->RemoveAllItems();
-        AddD3D11RefreshRate( RefreshRate );
-    }
-
-    SetSelectedD3D11RefreshRate( RefreshRate );
-
     hr = OnRefreshRateChanged();
     if( FAILED( hr ) )
         return hr;
@@ -982,7 +991,7 @@ HRESULT CD3DSettingsDlg::OnAdapterOutputChanged()
 HRESULT CD3DSettingsDlg::OnRefreshRateChanged()
 {
     // Set refresh rate
-            g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate = GetSelectedD3D11RefreshRate();
+    g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate = GetSelectedD3D11RefreshRate();
 
     return S_OK;
 }
@@ -1030,6 +1039,12 @@ HRESULT CD3DSettingsDlg::OnBackBufferFormatChanged()
             hr = UpdateD3D11Resolutions();
             if( FAILED( hr ) )
                 return hr;
+
+            hr = UpdateD3D11RefreshRates();
+            if ( FAILED(hr) )
+                return hr;
+
+            break;
         }
     }
 
@@ -1205,6 +1220,8 @@ void CD3DSettingsDlg::GetSelectedD3D11Resolution( DWORD* pdwWidth, DWORD* pdwHei
     *pdwHeight = HIWORD( dwResolution );
 }
 
+
+//-------------------------------------------------------------------------------------
 void CD3DSettingsDlg::AddD3D11FeatureLevel( _In_ D3D_FEATURE_LEVEL fl)
 {
     auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
@@ -1291,14 +1308,8 @@ void CD3DSettingsDlg::AddD3D11RefreshRate( _In_ DXGI_RATIONAL RefreshRate )
 //-------------------------------------------------------------------------------------
 DXGI_RATIONAL CD3DSettingsDlg::GetSelectedD3D11RefreshRate() const
 {
-    DXGI_RATIONAL dxgiR;
-    dxgiR.Numerator = 0;
-    dxgiR.Denominator = 1;
-    
     auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
-
     return *reinterpret_cast<DXGI_RATIONAL*>( pComboBox->GetSelectedData() );
-     
 }
 
 
@@ -1428,7 +1439,7 @@ HRESULT CD3DSettingsDlg::UpdateD3D11Resolutions()
 
         for (size_t idm = 0; idm < pOutputInfo->displayModeList.size(); idm++)
         {
-            DXGI_MODE_DESC DisplayMode = pOutputInfo->displayModeList[idm];
+            auto DisplayMode = pOutputInfo->displayModeList[idm];
             float fAspect = (float) DisplayMode.Width / (float) DisplayMode.Height;
 
             if (DisplayMode.Format == g_DeviceSettings.d3d11.sd.BufferDesc.Format)
@@ -1450,6 +1461,54 @@ HRESULT CD3DSettingsDlg::UpdateD3D11Resolutions()
 
     pResolutionComboBox->SetSelectedByData(ULongToPtr(MAKELONG(dwWidth, dwHeight)));
     OnD3D11ResolutionChanged();
+
+    return S_OK;
+}
+
+
+//--------------------------------------------------------------------------------------
+// Updates the refresh list for D3D11
+//--------------------------------------------------------------------------------------
+HRESULT CD3DSettingsDlg::UpdateD3D11RefreshRates()
+{
+    const DWORD dwWidth = g_DeviceSettings.d3d11.sd.BufferDesc.Width;
+    const DWORD dwHeight = g_DeviceSettings.d3d11.sd.BufferDesc.Height;
+    DXGI_FORMAT backBuffer = g_DeviceSettings.d3d11.sd.BufferDesc.Format;
+    const DXGI_RATIONAL RefreshRate = g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate;
+
+    auto pRefreshRateComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_REFRESH_RATE );
+    for( UINT i = 0; i < pRefreshRateComboBox->GetNumItems(); ++i )
+    {
+        auto pRefreshRate = reinterpret_cast<DXGI_RATIONAL*>( pRefreshRateComboBox->GetItemData( i ) );
+        delete pRefreshRate;
+    }
+    pRefreshRateComboBox->RemoveAllItems();
+
+    bool bWindowed = IsWindowed();
+    if( bWindowed )
+    {
+        DXGI_RATIONAL default;
+        default.Denominator = default.Numerator = 0;
+        AddD3D11RefreshRate( default );
+    }
+    else
+    {
+        auto pD3DEnum = DXUTGetD3D11Enumeration();
+        if ( !pD3DEnum )
+            return E_POINTER;
+
+        auto pOutputInfo = pD3DEnum->GetOutputInfo( g_DeviceSettings.d3d11.AdapterOrdinal, g_DeviceSettings.d3d11.Output );
+        if ( !pOutputInfo )
+            return E_POINTER;
+
+        for( auto it = pOutputInfo->displayModeList.cbegin(); it != pOutputInfo->displayModeList.cend(); ++it )
+        {
+            if ( it->Width == dwWidth && it->Height == dwHeight && it->Format == backBuffer )
+                AddD3D11RefreshRate( it->RefreshRate );
+        }
+
+        SetSelectedD3D11RefreshRate( RefreshRate );
+    }
 
     return S_OK;
 }

@@ -1041,8 +1041,8 @@ HRESULT WINAPI DXUTCreateWindow( const WCHAR* strWindowTitle, HINSTANCE hInstanc
             GetDXUTState().SetWindowCreatedWithDefaultPositions( true );
 
         // Find the window's initial size, but it might be changed later
-        int nDefaultWidth = 640;
-        int nDefaultHeight = 480;
+        int nDefaultWidth = 800;
+        int nDefaultHeight = 600;
         if( GetDXUTState().GetOverrideWidth() != 0 )
             nDefaultWidth = GetDXUTState().GetOverrideWidth();
         if( GetDXUTState().GetOverrideHeight() != 0 )
@@ -1569,7 +1569,7 @@ HRESULT WINAPI DXUTMainLoop( _In_opt_ HACCEL hAccel )
             return E_FAIL; // DXUTCreateDevice() must first succeed for this function to succeed
         }
 
-        hr = DXUTCreateDevice(D3D_FEATURE_LEVEL_10_0, true, 640, 480);
+        hr = DXUTCreateDevice(D3D_FEATURE_LEVEL_10_0, true, 800, 600);
         if( FAILED( hr ) )
         {
             if( ( GetDXUTState().GetExitCode() == 0 ) || ( GetDXUTState().GetExitCode() == 10 ) )
@@ -2119,7 +2119,7 @@ HRESULT DXUTChangeDevice( DXUTDeviceSettings* pNewDeviceSettings,
         {
             // If its different, then resize the backbuffer again.  This time create a backbuffer that matches the 
             // client rect of the current window w/o resizing the window.
-            DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
+            auto deviceSettings = DXUTGetDeviceSettings();
             deviceSettings.d3d11.sd.BufferDesc.Width = 0; 
             deviceSettings.d3d11.sd.BufferDesc.Height = 0;
 
@@ -3414,14 +3414,14 @@ int DXUTMapButtonToArrayIndex( _In_ BYTE vButton )
 //--------------------------------------------------------------------------------------
 HRESULT WINAPI DXUTToggleFullScreen()
 {
-    DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
+    auto deviceSettings = DXUTGetDeviceSettings();
     if ( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_WARP )
     {
         // WARP driver type doesn't support fullscreen
         return S_FALSE;
     }
 
-    DXUTDeviceSettings orginalDeviceSettings = DXUTGetDeviceSettings();
+    auto orginalDeviceSettings = DXUTGetDeviceSettings();
     
     deviceSettings.d3d11.sd.Windowed = !deviceSettings.d3d11.sd.Windowed;
 
@@ -3434,7 +3434,7 @@ HRESULT WINAPI DXUTToggleFullScreen()
         {
             static const DXGI_MODE_DESC s_adapterDesktopDisplayMode =
             {
-                800, 600, { 60, 1 }, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
+                800, 600, { 0, 0 }, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
             };
             memcpy(&adapterDesktopDisplayMode, &s_adapterDesktopDisplayMode, sizeof(DXGI_MODE_DESC));
         }
@@ -3471,7 +3471,7 @@ HRESULT WINAPI DXUTToggleFullScreen()
 //--------------------------------------------------------------------------------------
 HRESULT WINAPI DXUTToggleWARP ()
 {
-    DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
+    auto deviceSettings = DXUTGetDeviceSettings();
 
     if ( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_HARDWARE || deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_REFERENCE )
     {
@@ -3519,7 +3519,7 @@ HRESULT WINAPI DXUTToggleWARP ()
 //--------------------------------------------------------------------------------------
 HRESULT WINAPI DXUTToggleREF()
 {
-    DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
+    auto deviceSettings = DXUTGetDeviceSettings();
 
     if ( deviceSettings.d3d11.DriverType == D3D_DRIVER_TYPE_HARDWARE )
     {
@@ -3543,7 +3543,7 @@ HRESULT WINAPI DXUTToggleREF()
     HRESULT hr = DXUTSnapDeviceSettingsToEnumDevice(&deviceSettings, false);
     if( SUCCEEDED( hr ) )
     {
-        DXUTDeviceSettings orginalDeviceSettings = DXUTGetDeviceSettings();
+        auto orginalDeviceSettings = DXUTGetDeviceSettings();
 
         // Create a Direct3D device using the new device settings.  
         // If there is an existing device, then it will either reset or recreate the scene.
@@ -3583,7 +3583,7 @@ void DXUTCheckForDXGIFullScreenSwitch()
     {
         pDeviceSettings->d3d11.sd.Windowed = SCDesc.Windowed;
 
-        DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
+        auto deviceSettings = DXUTGetDeviceSettings();
 
         if( bIsWindowed )
         {
@@ -3775,7 +3775,7 @@ void DXUTCheckForWindowChangingMonitors()
         if( SUCCEEDED( DXUTGetAdapterOrdinalFromMonitor( hWindowMonitor, &newOrdinal ) ) )
         {
             // Find the closest valid device settings with the new ordinal
-            DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
+            auto deviceSettings = DXUTGetDeviceSettings();
             deviceSettings.d3d11.AdapterOrdinal = newOrdinal;
             UINT newOutput;
             if( SUCCEEDED( DXUTGetOutputOrdinalFromMonitor( hWindowMonitor, &newOutput ) ) )
@@ -4293,12 +4293,12 @@ void DXUTApplyDefaultDeviceSettings(DXUTDeviceSettings *modifySettings)
     modifySettings->d3d11.PresentFlags = 0;
     modifySettings->d3d11.sd.BufferCount = 2;
     modifySettings->d3d11.sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-    modifySettings->d3d11.sd.BufferDesc.Height = 480;
-    modifySettings->d3d11.sd.BufferDesc.RefreshRate.Numerator = 60;
-    modifySettings->d3d11.sd.BufferDesc.RefreshRate.Denominator = 1;
+    modifySettings->d3d11.sd.BufferDesc.Height = 600;
+    modifySettings->d3d11.sd.BufferDesc.RefreshRate.Numerator = 0;
+    modifySettings->d3d11.sd.BufferDesc.RefreshRate.Denominator = 0;
     modifySettings->d3d11.sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
     modifySettings->d3d11.sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-    modifySettings->d3d11.sd.BufferDesc.Width = 640;
+    modifySettings->d3d11.sd.BufferDesc.Width = 800;
     modifySettings->d3d11.sd.BufferUsage = 32;
     modifySettings->d3d11.sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH ;
     modifySettings->d3d11.sd.OutputWindow = DXUTGetHWND();
@@ -4348,9 +4348,6 @@ HRESULT DXUTSnapDeviceSettingsToEnumDevice( DXUTDeviceSettings* pDeviceSettings,
     {
         CD3D11EnumDeviceSettingsCombo* tempDeviceSettingsCombo = pAdapterInfo->deviceSettingsComboList[ iDeviceCombo ];
     
-        DXGI_MODE_DESC adapterDisplayMode;
-        DXUTGetD3D11AdapterDisplayMode( pAdapterInfo->AdapterOrdinal, 0, &adapterDisplayMode );
-
         int bestMode;
         int bestMSAA;
         float score = DXUTRankD3D11DeviceCombo(tempDeviceSettingsCombo, &(pDeviceSettings->d3d11), bestMode, bestMSAA );
@@ -4378,8 +4375,7 @@ HRESULT DXUTSnapDeviceSettingsToEnumDevice( DXUTDeviceSettings* pDeviceSettings,
     }   
     if (pDeviceSettingsCombo->pOutputInfo)
     {
-        DXGI_MODE_DESC bestDisplayMode;
-        bestDisplayMode = pDeviceSettingsCombo->pOutputInfo->displayModeList[ bestModeIndex ];
+        auto bestDisplayMode = pDeviceSettingsCombo->pOutputInfo->displayModeList[ bestModeIndex ];
         if (!pDeviceSettingsCombo->Windowed)
         {
             pDeviceSettings->d3d11.sd.BufferDesc.Height = bestDisplayMode.Height;

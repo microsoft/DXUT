@@ -874,7 +874,7 @@ HMONITOR WINAPI DXUTMonitorFromRect( LPCRECT lprcScreenCoords, DWORD dwFlags )
 _Use_decl_annotations_
 void WINAPI DXUTGetDesktopResolution( UINT AdapterOrdinal, UINT* pWidth, UINT* pHeight )
 {
-    DXUTDeviceSettings DeviceSettings = DXUTGetDeviceSettings();
+    auto DeviceSettings = DXUTGetDeviceSettings();
 
     WCHAR strDeviceName[256] = {0};
     DEVMODE devMode;

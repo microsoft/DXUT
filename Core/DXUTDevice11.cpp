@@ -384,8 +384,8 @@ HRESULT CD3D11Enumeration::EnumerateDisplayModes( _In_ CD3D11EnumOutputInfo* pOu
                     pDesc[0].Width = DevMode.dmPelsWidth;
                     pDesc[0].Height = DevMode.dmPelsHeight;
                     pDesc[0].Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-                    pDesc[0].RefreshRate.Numerator = 60;
-                    pDesc[0].RefreshRate.Denominator = 1;
+                    pDesc[0].RefreshRate.Numerator = 0;
+                    pDesc[0].RefreshRate.Denominator = 0;
                     pDesc[0].ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
                     pDesc[0].Scaling = DXGI_MODE_SCALING_CENTERED;
                     hr = S_OK;
@@ -454,7 +454,7 @@ HRESULT CD3D11Enumeration::EnumerateDisplayModes( _In_ CD3D11EnumOutputInfo* pOu
 HRESULT CD3D11Enumeration::EnumerateDevices( _In_ CD3D11EnumAdapterInfo* pAdapterInfo )
 {
     HRESULT hr;
-    DXUTDeviceSettings deviceSettings = DXUTGetDeviceSettings();
+    auto deviceSettings = DXUTGetDeviceSettings();
     const D3D_DRIVER_TYPE devTypeArray[] =
     {
         D3D_DRIVER_TYPE_HARDWARE,
@@ -1027,7 +1027,6 @@ float DXUTRankD3D11DeviceCombo( CD3D11EnumDeviceSettingsCombo* pDeviceSettingsCo
     const float fResolutionWeight       = 1.0f;
     const float fBackBufferFormatWeight = 1.0f;
     const float fMultiSampleWeight      = 1.0f;
-    const float fRefreshRateWeight      = 1.0f;
 
     //---------------------
     // Adapter ordinal
@@ -1061,31 +1060,76 @@ float DXUTRankD3D11DeviceCombo( CD3D11EnumDeviceSettingsCombo* pDeviceSettingsCo
         fCurRanking += fWindowWeight;
 
     //---------------------
-    // Resolution
+    // Resolution/Refresh Rate
     //---------------------
-    bool bResolutionFound = false;
-    unsigned int best = 0xffffffff;
     bestModeIndex=0;
-    for( size_t idm = 0; pDeviceSettingsCombo->pOutputInfo && idm < pDeviceSettingsCombo->pOutputInfo->displayModeList.size() && !bResolutionFound; idm++ )
+
+    if( pDeviceSettingsCombo->pOutputInfo )
     {
-        DXGI_MODE_DESC displayMode = pDeviceSettingsCombo->pOutputInfo->displayModeList[ idm ];
-        if( displayMode.Width == pOptimalDeviceSettings->sd.BufferDesc.Width &&
-            displayMode.Height == pOptimalDeviceSettings->sd.BufferDesc.Height )
-            bResolutionFound = true;
+        bool bResolutionFound = false;
+        float best = FLT_MAX;
 
-        unsigned int current = 
-            (UINT) abs ((int)displayMode.Width  - (int)pOptimalDeviceSettings->sd.BufferDesc.Width) + 
-            (UINT) abs ((int)displayMode.Height - (int)pOptimalDeviceSettings->sd.BufferDesc.Height );
+        if ( !pDeviceSettingsCombo->Windowed
+             && !pOptimalDeviceSettings->sd.Windowed
+             && ( pOptimalDeviceSettings->sd.BufferDesc.RefreshRate.Numerator > 0 || pOptimalDeviceSettings->sd.BufferDesc.RefreshRate.Denominator > 0 ) )
+        {
+            // Match both Resolution & Refresh Rate
+            for( size_t idm = 0; idm < pDeviceSettingsCombo->pOutputInfo->displayModeList.size() && !bResolutionFound; idm++ )
+            {
+                auto displayMode = pDeviceSettingsCombo->pOutputInfo->displayModeList[ idm ];
 
-        if (current < best) {
-            best = current;
-            bestModeIndex = static_cast<int>( idm );
+                float refreshDiff = fabs( ( float( displayMode.RefreshRate.Numerator ) / float( displayMode.RefreshRate.Denominator ) ) -
+                                          ( float( pOptimalDeviceSettings->sd.BufferDesc.RefreshRate.Numerator ) / float( pOptimalDeviceSettings->sd.BufferDesc.RefreshRate.Denominator ) ) );
 
+                if( displayMode.Width == pOptimalDeviceSettings->sd.BufferDesc.Width
+                    && displayMode.Height == pOptimalDeviceSettings->sd.BufferDesc.Height
+                    && ( refreshDiff < 0.1f ) )
+                {
+                    bResolutionFound = true;
+                    bestModeIndex = static_cast<int>( idm );
+                    break;
+                }
+
+                float current = refreshDiff
+                                + fabs( float( displayMode.Width ) - float ( pOptimalDeviceSettings->sd.BufferDesc.Width ) ) 
+                                + fabs( float( displayMode.Height ) - float ( pOptimalDeviceSettings->sd.BufferDesc.Height ) );
+
+                if( current < best )
+                {
+                    best = current;
+                    bestModeIndex = static_cast<int>( idm );
+                }
+            }
+        }
+        else
+        {
+            // Match just Resolution
+            for( size_t idm = 0; idm < pDeviceSettingsCombo->pOutputInfo->displayModeList.size() && !bResolutionFound; idm++ )
+            {
+                auto displayMode = pDeviceSettingsCombo->pOutputInfo->displayModeList[ idm ];
+
+                if( displayMode.Width == pOptimalDeviceSettings->sd.BufferDesc.Width
+                    && displayMode.Height == pOptimalDeviceSettings->sd.BufferDesc.Height )
+                {
+                    bResolutionFound = true;
+                    bestModeIndex = static_cast<int>( idm );
+                    break;
+                }
+
+                float current = fabs( float( displayMode.Width ) - float ( pOptimalDeviceSettings->sd.BufferDesc.Width ) ) 
+                                + fabs( float( displayMode.Height ) - float ( pOptimalDeviceSettings->sd.BufferDesc.Height ) );
+
+                if( current < best )
+                {
+                    best = current;
+                    bestModeIndex = static_cast<int>( idm );
+                }
+            }
         }
 
+        if( bResolutionFound )
+            fCurRanking += fResolutionWeight;
     }
-    if( bResolutionFound )
-        fCurRanking += fResolutionWeight;
 
     //---------------------
     // Back buffer format
@@ -1143,25 +1187,6 @@ float DXUTRankD3D11DeviceCombo( CD3D11EnumDeviceSettingsCombo* pDeviceSettingsCo
     // No caps for the present flags
 
     //---------------------
-    // Refresh rate
-    //---------------------
-    bool bRefreshFound = false;
-
-    if ( pDeviceSettingsCombo->pOutputInfo )
-    {
-        for( size_t idm = 0; idm < pDeviceSettingsCombo->pOutputInfo->displayModeList.size(); idm++ )
-        {
-            DXGI_MODE_DESC displayMode = pDeviceSettingsCombo->pOutputInfo->displayModeList[ idm ];
-            if( fabs( float( displayMode.RefreshRate.Numerator ) / displayMode.RefreshRate.Denominator -
-                      float( pOptimalDeviceSettings->sd.BufferDesc.RefreshRate.Numerator ) /
-                      pOptimalDeviceSettings->sd.BufferDesc.RefreshRate.Denominator ) < 0.1f )
-                bRefreshFound = true;
-        }
-    }
-    if( bRefreshFound )
-        fCurRanking += fRefreshRateWeight;
-
-    //---------------------
     // Present interval
     //---------------------
     // No caps for the present flags
@@ -1187,10 +1212,10 @@ HRESULT WINAPI DXUTGetD3D11AdapterDisplayMode( UINT AdapterOrdinal, UINT nOutput
     auto pOutputInfo = pD3DEnum->GetOutputInfo( AdapterOrdinal, nOutput );
     if( pOutputInfo )
     {
-        pModeDesc->Width = 640;
-        pModeDesc->Height = 480;
-        pModeDesc->RefreshRate.Numerator = 60;
-        pModeDesc->RefreshRate.Denominator = 1;
+        pModeDesc->Width = 800;
+        pModeDesc->Height = 600;
+        pModeDesc->RefreshRate.Numerator = 0;
+        pModeDesc->RefreshRate.Denominator = 0;
         pModeDesc->Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
         pModeDesc->Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
         pModeDesc->ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
