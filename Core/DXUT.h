@@ -43,7 +43,10 @@
 #pragma warning( disable : 4481 )
 
 // Standard Windows includes
+#if !defined(NOMINMAX)
 #define NOMINMAX
+#endif
+
 #include <windows.h>
 #include <initguid.h>
 #include <assert.h>
