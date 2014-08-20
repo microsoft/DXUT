@@ -452,7 +452,7 @@ void CBaseCamera::GetInput( bool bGetKeyboardInput, bool bGetMouseInput, bool bG
 
             // Mark time if the controller is in a non-zero state
             if( m_GamePad[iUserIndex].wButtons ||
-                m_GamePad[iUserIndex].sThumbLX || m_GamePad[iUserIndex].sThumbLX ||
+                m_GamePad[iUserIndex].sThumbLX || m_GamePad[iUserIndex].sThumbLY ||
                 m_GamePad[iUserIndex].sThumbRX || m_GamePad[iUserIndex].sThumbRY ||
                 m_GamePad[iUserIndex].bLeftTrigger || m_GamePad[iUserIndex].bRightTrigger )
             {
