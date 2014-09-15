@@ -1262,7 +1262,7 @@ LRESULT CALLBACK DXUTStaticWndProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
                             dwFlags = GetDXUTState().GetCurrentDeviceSettings()->d3d11.PresentFlags;
 
                         auto pSwapChain = DXUTGetDXGISwapChain();
-                        hr = pSwapChain->Present( 0, GetDXUTState().GetCurrentDeviceSettings()->d3d11.PresentFlags );
+                        hr = pSwapChain->Present( 0, dwFlags );
                         if( DXGI_STATUS_OCCLUDED == hr )
                         {
                             // There is a window covering our entire rendering area.
