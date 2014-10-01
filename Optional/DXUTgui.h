@@ -109,8 +109,8 @@ struct DXUTBlendColor
 class CDXUTElement
 {
 public:
-    void SetTexture( _In_ UINT iTexture, _In_ RECT* prcTexture, _In_ DWORD defaultTextureColor = D3DCOLOR_ARGB( 255, 255, 255, 255 ) );
-    void SetFont( _In_ UINT iFont, _In_ DWORD defaultFontColor = D3DCOLOR_ARGB( 255, 255, 255, 255 ), DWORD dwTextFormat = DT_CENTER | DT_VCENTER );
+    void SetTexture( _In_ UINT texture, _In_ RECT* prcTexture, _In_ DWORD defaultTextureColor = D3DCOLOR_ARGB( 255, 255, 255, 255 ) );
+    void SetFont( _In_ UINT font, _In_ DWORD defaultFontColor = D3DCOLOR_ARGB( 255, 255, 255, 255 ), DWORD textFormat = DT_CENTER | DT_VCENTER );
 
     void Refresh();
 
