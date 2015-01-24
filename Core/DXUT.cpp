@@ -788,7 +788,7 @@ void DXUTParseCommandLine(WCHAR* strCommandLine,
                 {
                     GetDXUTState().SetExitAfterScreenShot( true );
                     GetDXUTState().SetSaveScreenShot( true );
-                    swprintf_s( GetDXUTState().GetScreenShotName(), 256, L"%s.bmp", strFlag );
+                    swprintf_s( GetDXUTState().GetScreenShotName(), 256, L"%ls.bmp", strFlag );
                     continue;
                 }
             }
@@ -902,7 +902,7 @@ void DXUTParseCommandLine(WCHAR* strCommandLine,
             strSpace++;
         *strSpace = 0;
 
-        DXUTOutputDebugString( L"Unrecognized flag: %s", strFlag );
+        DXUTOutputDebugString( L"Unrecognized flag: %ls", strFlag );
         strCmdLine += wcslen( strFlag );
     }
 
@@ -4007,7 +4007,7 @@ void DXUTUpdateStaticFrameStats()
     swprintf_s( strMultiSample, 100, L" (MS%u, Q%u)", pDeviceSettings->d3d11.sd.SampleDesc.Count,
                         pDeviceSettings->d3d11.sd.SampleDesc.Quality );
     auto pstrStaticFrameStats = GetDXUTState().GetStaticFrameStats();
-    swprintf_s( pstrStaticFrameStats, 256, L"D3D11 %%sVsync %s (%ux%u), %s%s",
+    swprintf_s( pstrStaticFrameStats, 256, L"D3D11 %% Vsync %ls (%ux%u), %ls%ls",
                         ( pDeviceSettings->d3d11.SyncInterval == 0 ) ? L"off" : L"on",
                         pDeviceSettings->d3d11.sd.BufferDesc.Width, pDeviceSettings->d3d11.sd.BufferDesc.Height,
                         strFmt, strMultiSample );

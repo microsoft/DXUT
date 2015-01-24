@@ -582,7 +582,7 @@ void CDXUTIMEEditBox::RenderCandidateReadingWindow( bool bReading )
                     break;
 
                 WCHAR wszEntry[32];
-                swprintf_s( wszEntry, 32, L"%s ", ImeUi_GetCandidate( i ) );
+                swprintf_s( wszEntry, 32, L"%ls ", ImeUi_GetCandidate( i ) );
                 // If this is the selected entry, mark its char position.
                 if( ImeUi_GetCandidateSelection() == i )
                 {

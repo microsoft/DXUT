@@ -302,7 +302,7 @@ HRESULT WINAPI DXUTFindDXSDKMediaFileCch( WCHAR* strDestPath, int cchDest,
         return S_OK;
 
     // Typical directory search again, but also look in a subdir called "\media\" 
-    swprintf_s( strSearchFor, MAX_PATH, L"media\\%s", strFilename );
+    swprintf_s( strSearchFor, MAX_PATH, L"media\\%ls", strFilename );
     bFound = DXUTFindMediaSearchTypicalDirs( strDestPath, cchDest, strSearchFor, strExePath, strExeName );
     if( bFound )
         return S_OK;
@@ -324,7 +324,7 @@ HRESULT WINAPI DXUTFindDXSDKMediaFileCch( WCHAR* strDestPath, int cchDest,
         return S_OK;
 
     // Search all parent directories starting at .\ and using "media\strFilename" as the leaf name
-    swprintf_s( strLeafName, MAX_PATH, L"media\\%s", strFilename );
+    swprintf_s( strLeafName, MAX_PATH, L"media\\%ls", strFilename );
     bFound = DXUTFindMediaSearchParentDirs( strDestPath, cchDest, L".", strLeafName );
     if( bFound )
         return S_OK;
@@ -365,42 +365,42 @@ bool DXUTFindMediaSearchTypicalDirs( WCHAR* strSearchPath, int cchSearch, LPCWST
         return true;
 
     // Search in ..\  
-    swprintf_s( strSearchPath, cchSearch, L"..\\%s", strLeaf );
+    swprintf_s( strSearchPath, cchSearch, L"..\\%ls", strLeaf );
     if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
         return true;
 
     // Search in ..\..\ 
-    swprintf_s( strSearchPath, cchSearch, L"..\\..\\%s", strLeaf );
+    swprintf_s( strSearchPath, cchSearch, L"..\\..\\%ls", strLeaf );
     if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
         return true;
 
     // Search in ..\..\ 
-    swprintf_s( strSearchPath, cchSearch, L"..\\..\\%s", strLeaf );
+    swprintf_s( strSearchPath, cchSearch, L"..\\..\\%ls", strLeaf );
     if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
         return true;
 
     // Search in the %EXE_DIR%\ 
-    swprintf_s( strSearchPath, cchSearch, L"%s\\%s", strExePath, strLeaf );
+    swprintf_s( strSearchPath, cchSearch, L"%ls\\%ls", strExePath, strLeaf );
     if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
         return true;
 
     // Search in the %EXE_DIR%\..\ 
-    swprintf_s( strSearchPath, cchSearch, L"%s\\..\\%s", strExePath, strLeaf );
+    swprintf_s( strSearchPath, cchSearch, L"%ls\\..\\%ls", strExePath, strLeaf );
     if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
         return true;
 
     // Search in the %EXE_DIR%\..\..\ 
-    swprintf_s( strSearchPath, cchSearch, L"%s\\..\\..\\%s", strExePath, strLeaf );
+    swprintf_s( strSearchPath, cchSearch, L"%ls\\..\\..\\%ls", strExePath, strLeaf );
     if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
         return true;
 
     // Search in "%EXE_DIR%\..\%EXE_NAME%\".  This matches the DirectX SDK layout
-    swprintf_s( strSearchPath, cchSearch, L"%s\\..\\%s\\%s", strExePath, strExeName, strLeaf );
+    swprintf_s( strSearchPath, cchSearch, L"%ls\\..\\%ls\\%ls", strExePath, strExeName, strLeaf );
     if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
         return true;
 
     // Search in "%EXE_DIR%\..\..\%EXE_NAME%\".  This matches the DirectX SDK layout
-    swprintf_s( strSearchPath, cchSearch, L"%s\\..\\..\\%s\\%s", strExePath, strExeName, strLeaf );
+    swprintf_s( strSearchPath, cchSearch, L"%ls\\..\\..\\%ls\\%ls", strExePath, strExeName, strLeaf );
     if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
         return true;
 
@@ -408,7 +408,7 @@ bool DXUTFindMediaSearchTypicalDirs( WCHAR* strSearchPath, int cchSearch, LPCWST
     WCHAR* s_strSearchPath = DXUTMediaSearchPath();
     if( s_strSearchPath[0] != 0 )
     {
-        swprintf_s( strSearchPath, cchSearch, L"%s%s", s_strSearchPath, strLeaf );
+        swprintf_s( strSearchPath, cchSearch, L"%ls%ls", s_strSearchPath, strLeaf );
         if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
             return true;
     }
@@ -445,14 +445,14 @@ bool DXUTFindMediaSearchParentDirs( WCHAR* strSearchPath, int cchSearch, const W
 #pragma warning( disable : 6102 )
     while( strFilePart && *strFilePart != '\0' )
     {
-        swprintf_s( strFullFileName, MAX_PATH, L"%s\\%s", strFullPath, strLeafName );
+        swprintf_s( strFullFileName, MAX_PATH, L"%ls\\%ls", strFullPath, strLeafName );
         if( GetFileAttributes( strFullFileName ) != 0xFFFFFFFF )
         {
             wcscpy_s( strSearchPath, cchSearch, strFullFileName );
             return true;
         }
 
-        swprintf_s( strSearch, MAX_PATH, L"%s\\..", strFullPath );
+        swprintf_s( strSearch, MAX_PATH, L"%ls\\..", strFullPath );
         if ( !GetFullPathName( strSearch, MAX_PATH, strFullPath, &strFilePart ) )
             return false;
     }
