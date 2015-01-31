@@ -507,7 +507,7 @@ public:
             m_includeFiles[i].pMapData = nullptr;
         }
     }
-    ~CIncludeHandler()
+    virtual ~CIncludeHandler()
     {
         for ( size_t i = 0; i < m_nIncludes; ++i )
         {

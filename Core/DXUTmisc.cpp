@@ -422,13 +422,13 @@ static bool DXUT_EnsureD3D9APIs()
     if( s_hModD3D9 )
     {
         // TODO - Use 11.1 perf APIs instead?
-        s_DynamicD3DPERF_BeginEvent = reinterpret_cast<LPD3DPERF_BEGINEVENT>( GetProcAddress( s_hModD3D9, "D3DPERF_BeginEvent" ) );
-        s_DynamicD3DPERF_EndEvent = reinterpret_cast<LPD3DPERF_ENDEVENT>( GetProcAddress( s_hModD3D9, "D3DPERF_EndEvent" ) );
-        s_DynamicD3DPERF_SetMarker = reinterpret_cast<LPD3DPERF_SETMARKER>( GetProcAddress( s_hModD3D9, "D3DPERF_SetMarker" ) );
-        s_DynamicD3DPERF_SetRegion = reinterpret_cast<LPD3DPERF_SETREGION>( GetProcAddress( s_hModD3D9, "D3DPERF_SetRegion" ) );
-        s_DynamicD3DPERF_QueryRepeatFrame = reinterpret_cast<LPD3DPERF_QUERYREPEATFRAME>( GetProcAddress( s_hModD3D9, "D3DPERF_QueryRepeatFrame" ) );
-        s_DynamicD3DPERF_SetOptions = reinterpret_cast<LPD3DPERF_SETOPTIONS>( GetProcAddress( s_hModD3D9, "D3DPERF_SetOptions" ) );
-        s_DynamicD3DPERF_GetStatus = reinterpret_cast<LPD3DPERF_GETSTATUS>( GetProcAddress( s_hModD3D9, "D3DPERF_GetStatus" ) );
+        s_DynamicD3DPERF_BeginEvent = reinterpret_cast<LPD3DPERF_BEGINEVENT>( reinterpret_cast<void*>( GetProcAddress( s_hModD3D9, "D3DPERF_BeginEvent" ) ) );
+        s_DynamicD3DPERF_EndEvent = reinterpret_cast<LPD3DPERF_ENDEVENT>( reinterpret_cast<void*>( GetProcAddress( s_hModD3D9, "D3DPERF_EndEvent" ) ) );
+        s_DynamicD3DPERF_SetMarker = reinterpret_cast<LPD3DPERF_SETMARKER>( reinterpret_cast<void*>( GetProcAddress( s_hModD3D9, "D3DPERF_SetMarker" ) ) );
+        s_DynamicD3DPERF_SetRegion = reinterpret_cast<LPD3DPERF_SETREGION>( reinterpret_cast<void*>( GetProcAddress( s_hModD3D9, "D3DPERF_SetRegion" ) ) );
+        s_DynamicD3DPERF_QueryRepeatFrame = reinterpret_cast<LPD3DPERF_QUERYREPEATFRAME>( reinterpret_cast<void*>( GetProcAddress( s_hModD3D9, "D3DPERF_QueryRepeatFrame" ) ) );
+        s_DynamicD3DPERF_SetOptions = reinterpret_cast<LPD3DPERF_SETOPTIONS>( reinterpret_cast<void*>( GetProcAddress( s_hModD3D9, "D3DPERF_SetOptions" ) ) );
+        s_DynamicD3DPERF_GetStatus = reinterpret_cast<LPD3DPERF_GETSTATUS>( reinterpret_cast<void*>( GetProcAddress( s_hModD3D9, "D3DPERF_GetStatus" ) ) );
     }
 
     return s_hModD3D9 != nullptr;
@@ -445,7 +445,7 @@ bool DXUT_EnsureD3D11APIs()
     s_hModD3D11 = LoadLibraryEx( L"d3d11.dll", nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
     if( s_hModD3D11 )
     {
-        s_DynamicD3D11CreateDevice = reinterpret_cast<PFN_D3D11_CREATE_DEVICE>( GetProcAddress( s_hModD3D11, "D3D11CreateDevice" ) );
+        s_DynamicD3D11CreateDevice = reinterpret_cast<PFN_D3D11_CREATE_DEVICE>( reinterpret_cast<void*>( GetProcAddress( s_hModD3D11, "D3D11CreateDevice" ) ) );
     }
 
     if( !s_DynamicCreateDXGIFactory )
@@ -453,7 +453,7 @@ bool DXUT_EnsureD3D11APIs()
         s_hModDXGI = LoadLibraryEx( L"dxgi.dll", nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( s_hModDXGI )
         {
-            s_DynamicCreateDXGIFactory = reinterpret_cast<LPCREATEDXGIFACTORY>( GetProcAddress( s_hModDXGI, "CreateDXGIFactory1" ) );
+            s_DynamicCreateDXGIFactory = reinterpret_cast<LPCREATEDXGIFACTORY>( reinterpret_cast<void*>( GetProcAddress( s_hModDXGI, "CreateDXGIFactory1" ) ) );
         }
 
         if ( !s_DynamicDXGIGetDebugInterface )
@@ -461,7 +461,7 @@ bool DXUT_EnsureD3D11APIs()
             s_hModDXGIDebug = LoadLibraryEx( L"dxgidebug.dll", nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
             if ( s_hModDXGIDebug )
             {
-                s_DynamicDXGIGetDebugInterface = reinterpret_cast<LPDXGIGETDEBUGINTERFACE>( GetProcAddress( s_hModDXGIDebug, "DXGIGetDebugInterface" ) );
+                s_DynamicDXGIGetDebugInterface = reinterpret_cast<LPDXGIGETDEBUGINTERFACE>( reinterpret_cast<void*>( GetProcAddress( s_hModDXGIDebug, "DXGIGetDebugInterface" ) ) );
             }
         }
 
@@ -805,7 +805,7 @@ BOOL WINAPI DXUTGetMonitorInfo( HMONITOR hMonitor, LPMONITORINFO lpMonitorInfo )
         HMODULE hUser32 = GetModuleHandle( L"USER32" );
         if( hUser32 )
         {
-            s_pFnGetMonitorInfo = reinterpret_cast<LPGETMONITORINFO>( GetProcAddress( hUser32, "GetMonitorInfoW" ) );
+            s_pFnGetMonitorInfo = reinterpret_cast<LPGETMONITORINFO>( reinterpret_cast<void*>( GetProcAddress( hUser32, "GetMonitorInfoW" ) ) );
         }
     }
 
@@ -837,8 +837,8 @@ HMONITOR WINAPI DXUTMonitorFromWindow( HWND hWnd, DWORD dwFlags )
     {
         s_bInited = true;
         HMODULE hUser32 = GetModuleHandle( L"USER32" );
-        if( hUser32 ) s_pFnGetMonitorFromWindow = reinterpret_cast<LPMONITORFROMWINDOW>( GetProcAddress( hUser32,
-                                                                                         "MonitorFromWindow" ) );
+        if( hUser32 ) s_pFnGetMonitorFromWindow = reinterpret_cast<LPMONITORFROMWINDOW>( reinterpret_cast<void*>( GetProcAddress( hUser32,
+                                                                                         "MonitorFromWindow" ) ) );
     }
 
     if( s_pFnGetMonitorFromWindow )
@@ -857,7 +857,7 @@ HMONITOR WINAPI DXUTMonitorFromRect( LPCRECT lprcScreenCoords, DWORD dwFlags )
     {
         s_bInited = true;
         HMODULE hUser32 = GetModuleHandle( L"USER32" );
-        if( hUser32 ) s_pFnGetMonitorFromRect = reinterpret_cast<LPMONITORFROMRECT>( GetProcAddress( hUser32, "MonitorFromRect" ) );
+        if( hUser32 ) s_pFnGetMonitorFromRect = reinterpret_cast<LPMONITORFROMRECT>( reinterpret_cast<void*>( GetProcAddress( hUser32, "MonitorFromRect" ) ) );
     }
 
     if( s_pFnGetMonitorFromRect )
@@ -948,8 +948,8 @@ HRESULT DXUTGetGamepadState( DWORD dwPort, DXUT_GAMEPAD* pGamePad, bool bThumbst
         HINSTANCE hInst = LoadLibraryEx( XINPUT_DLL, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( hInst )
         {
-            s_pXInputGetState = reinterpret_cast<LPXINPUTGETSTATE>( GetProcAddress( hInst, "XInputGetState" ) );
-            s_pXInputGetCapabilities = reinterpret_cast<LPXINPUTGETCAPABILITIES>( GetProcAddress( hInst, "XInputGetCapabilities" ) );
+            s_pXInputGetState = reinterpret_cast<LPXINPUTGETSTATE>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputGetState" ) ) );
+            s_pXInputGetCapabilities = reinterpret_cast<LPXINPUTGETCAPABILITIES>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputGetCapabilities" ) ) );
         }
     }
     if( !s_pXInputGetState )
@@ -1054,7 +1054,7 @@ void DXUTEnableXInput( _In_ bool bEnable )
     {
         HINSTANCE hInst = LoadLibraryEx( XINPUT_DLL, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( hInst )
-            s_pXInputEnable = reinterpret_cast<LPXINPUTENABLE>( GetProcAddress( hInst, "XInputEnable" ) );
+            s_pXInputEnable = reinterpret_cast<LPXINPUTENABLE>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputEnable" ) ) );
     }
 
     if( s_pXInputEnable )
@@ -1073,7 +1073,7 @@ HRESULT DXUTStopRumbleOnAllControllers()
     {
         HINSTANCE hInst = LoadLibraryEx( XINPUT_DLL, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( hInst )
-            s_pXInputSetState = reinterpret_cast<LPXINPUTSETSTATE>( GetProcAddress( hInst, "XInputSetState" ) );
+            s_pXInputSetState = reinterpret_cast<LPXINPUTSETSTATE>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputSetState" ) ) );
     }
     if( !s_pXInputSetState )
         return E_FAIL;

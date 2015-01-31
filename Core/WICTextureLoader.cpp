@@ -36,8 +36,10 @@
 #pragma warning(push)
 #pragma warning(disable : 4005)
 #include <wincodec.h>
-#include <wrl.h>
+#include <intsafe.h>
 #pragma warning(pop)
+
+#include <wrl\client.h>
 
 #include <memory>
 
