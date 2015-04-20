@@ -4007,7 +4007,7 @@ void DXUTUpdateStaticFrameStats()
     swprintf_s( strMultiSample, 100, L" (MS%u, Q%u)", pDeviceSettings->d3d11.sd.SampleDesc.Count,
                         pDeviceSettings->d3d11.sd.SampleDesc.Quality );
     auto pstrStaticFrameStats = GetDXUTState().GetStaticFrameStats();
-    swprintf_s( pstrStaticFrameStats, 256, L"D3D11 %% Vsync %ls (%ux%u), %ls%ls",
+    swprintf_s( pstrStaticFrameStats, 256, L"D3D11 %%ls Vsync %ls (%ux%u), %ls%ls",
                         ( pDeviceSettings->d3d11.SyncInterval == 0 ) ? L"off" : L"on",
                         pDeviceSettings->d3d11.sd.BufferDesc.Width, pDeviceSettings->d3d11.sd.BufferDesc.Height,
                         strFmt, strMultiSample );
@@ -4052,7 +4052,8 @@ LPCWSTR WINAPI DXUTGetFrameStats( _In_ bool bShowFPS )
 {
     auto pstrFrameStats = GetDXUTState().GetFrameStats();
     WCHAR* pstrFPS = ( bShowFPS ) ? GetDXUTState().GetFPSStats() : L"";
-    swprintf_s( pstrFrameStats, 256, GetDXUTState().GetStaticFrameStats(), pstrFPS );
+    WCHAR* pstrStats = GetDXUTState().GetStaticFrameStats();
+    swprintf_s( pstrFrameStats, 256, pstrStats, pstrFPS );
     return pstrFrameStats;
 }
 
