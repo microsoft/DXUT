@@ -743,6 +743,15 @@ void DXUTParseCommandLine(WCHAR* strCommandLine,
             {
                 if( DXUTGetCmdParam( strCmdLine, strFlag, MAX_PATH ) )
                 {
+#ifdef USE_DIRECT3D11_3
+                    if (_wcsnicmp(strFlag, L"D3D_FEATURE_LEVEL_12_1", MAX_PATH) == 0) {
+                        GetDXUTState().SetOverrideForceFeatureLevel(D3D_FEATURE_LEVEL_12_1);
+                    }
+                    else if (_wcsnicmp(strFlag, L"D3D_FEATURE_LEVEL_12_0", MAX_PATH) == 0) {
+                        GetDXUTState().SetOverrideForceFeatureLevel(D3D_FEATURE_LEVEL_12_0);
+                    }
+                    else
+#endif
                     if (_wcsnicmp( strFlag, L"D3D_FEATURE_LEVEL_11_1", MAX_PATH) == 0 ) {
                         GetDXUTState().SetOverrideForceFeatureLevel(D3D_FEATURE_LEVEL_11_1);
                     }else if (_wcsnicmp( strFlag, L"D3D_FEATURE_LEVEL_11_0", MAX_PATH) == 0 ) {
@@ -2183,7 +2192,7 @@ HRESULT DXUTDelayLoadDXGI()
     auto pDXGIFactory = GetDXUTState().GetDXGIFactory();
     if( !pDXGIFactory )
     {
-        HRESULT hr = DXUT_Dynamic_CreateDXGIFactory1( __uuidof( IDXGIFactory1 ), ( LPVOID* )&pDXGIFactory );
+        HRESULT hr = DXUT_Dynamic_CreateDXGIFactory1( IID_PPV_ARGS(&pDXGIFactory) );
         if ( FAILED(hr) )
             return hr;
 
@@ -2302,7 +2311,7 @@ HRESULT DXUTCreateD3D11Views( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3
 
     // Get the back buffer and desc
     ID3D11Texture2D* pBackBuffer;
-    hr = pSwapChain->GetBuffer( 0, __uuidof( *pBackBuffer ), ( LPVOID* )&pBackBuffer );
+    hr = pSwapChain->GetBuffer( 0, IID_PPV_ARGS(&pBackBuffer) );
     if( FAILED( hr ) )
         return hr;
     D3D11_TEXTURE2D_DESC backBufferSurfaceDesc;
@@ -2411,16 +2420,16 @@ HRESULT DXUTCreate3DEnvironment11()
     if( SUCCEEDED( hr ) )
     {
         hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
-                                                ddt,
-                                                ( HMODULE )0,
-                                                pNewDeviceSettings->d3d11.CreateFlags,
-                                                &pNewDeviceSettings->d3d11.DeviceFeatureLevel,
-                                                1,
-                                                D3D11_SDK_VERSION,
-                                                &pd3d11Device,
-                                                &FeatureLevel,
-                                                &pd3dImmediateContext
-                                                );
+                                             ddt,
+                                             ( HMODULE )0,
+                                             pNewDeviceSettings->d3d11.CreateFlags,
+                                             &pNewDeviceSettings->d3d11.DeviceFeatureLevel,
+                                             1,
+                                             D3D11_SDK_VERSION,
+                                             &pd3d11Device,
+                                             &FeatureLevel,
+                                             &pd3dImmediateContext
+                                             );
             
         if ( FAILED( hr ) )
         {
@@ -2429,16 +2438,16 @@ HRESULT DXUTCreate3DEnvironment11()
             if ( ddt == D3D_DRIVER_TYPE_UNKNOWN )
             { 
                 hr = DXUT_Dynamic_D3D11CreateDevice( pAdapter,
-                                                        D3D_DRIVER_TYPE_HARDWARE,
-                                                        ( HMODULE )0,
-                                                        pNewDeviceSettings->d3d11.CreateFlags,
-                                                        &pNewDeviceSettings->d3d11.DeviceFeatureLevel,
-                                                        1,
-                                                        D3D11_SDK_VERSION,
-                                                        &pd3d11Device,
-                                                        &FeatureLevel,
-                                                        &pd3dImmediateContext
-                                                        );
+                                                     D3D_DRIVER_TYPE_HARDWARE,
+                                                     ( HMODULE )0,
+                                                     pNewDeviceSettings->d3d11.CreateFlags,
+                                                     &pNewDeviceSettings->d3d11.DeviceFeatureLevel,
+                                                     1,
+                                                     D3D11_SDK_VERSION,
+                                                     &pd3d11Device,
+                                                     &FeatureLevel,
+                                                     &pd3dImmediateContext
+                                                     );
             }
             if ( FAILED ( hr ) )
             {
@@ -2452,10 +2461,10 @@ HRESULT DXUTCreate3DEnvironment11()
     if( SUCCEEDED( hr ) )
     {
         ID3D11Debug * d3dDebug = nullptr;
-        if( SUCCEEDED( pd3d11Device->QueryInterface( __uuidof(ID3D11Debug), reinterpret_cast<void**>( &d3dDebug ) ) ) )
+        if( SUCCEEDED( pd3d11Device->QueryInterface(IID_PPV_ARGS(&d3dDebug) ) ) )
         {
             ID3D11InfoQueue* infoQueue = nullptr;
-            if( SUCCEEDED( d3dDebug->QueryInterface( __uuidof(ID3D11InfoQueue), reinterpret_cast<void**>( &infoQueue ) ) ) )
+            if( SUCCEEDED( d3dDebug->QueryInterface( IID_PPV_ARGS(&infoQueue) ) ) )
             {
                 // ignore some "expected" errors
                 D3D11_MESSAGE_ID denied [] =
@@ -2478,15 +2487,15 @@ HRESULT DXUTCreate3DEnvironment11()
     if( SUCCEEDED( hr ) )
     {
         IDXGIDevice1* pDXGIDev = nullptr;
-        hr = pd3d11Device->QueryInterface( __uuidof( IDXGIDevice1 ), ( LPVOID* )&pDXGIDev );
+        hr = pd3d11Device->QueryInterface( IID_PPV_ARGS(&pDXGIDev) );
         if( SUCCEEDED( hr ) && pDXGIDev )
         {
             if ( !pAdapter ) 
             {
                 IDXGIAdapter *pTempAdapter = nullptr;
                 V_RETURN( pDXGIDev->GetAdapter( &pTempAdapter ) );
-                V_RETURN( pTempAdapter->QueryInterface( __uuidof( IDXGIAdapter1 ), (LPVOID*) &pAdapter ) );
-                V_RETURN( pAdapter->GetParent( __uuidof( IDXGIFactory1 ), (LPVOID*) &pDXGIFactory ) );
+                V_RETURN( pTempAdapter->QueryInterface( IID_PPV_ARGS(&pAdapter) ) );
+                V_RETURN( pAdapter->GetParent( IID_PPV_ARGS(&pDXGIFactory) ) );
                 SAFE_RELEASE ( pTempAdapter );
                 if ( GetDXUTState().GetDXGIFactory() != pDXGIFactory )
                     GetDXUTState().GetDXGIFactory()->Release();
@@ -3063,7 +3072,7 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
         {
 #ifndef NDEBUG
             ID3D11Debug * d3dDebug = nullptr;
-            if( SUCCEEDED( pd3dDevice->QueryInterface( __uuidof(ID3D11Debug), reinterpret_cast<void**>( &d3dDebug ) ) ) )
+            if( SUCCEEDED( pd3dDevice->QueryInterface( IID_PPV_ARGS(&d3dDebug) ) ) )
             {
                 d3dDebug->ReportLiveDeviceObjects( D3D11_RLDO_SUMMARY | D3D11_RLDO_DETAIL );
                 d3dDebug->Release();
@@ -3988,7 +3997,7 @@ void DXUTUpdateBackBufferDesc()
     auto pSwapChain = GetDXUTState().GetDXGISwapChain();
     assert( pSwapChain );
     _Analysis_assume_( pSwapChain );
-    hr = pSwapChain->GetBuffer( 0, __uuidof( *pBackBuffer ), ( LPVOID* )&pBackBuffer );
+    hr = pSwapChain->GetBuffer( 0, IID_PPV_ARGS(&pBackBuffer) );
     auto pBBufferSurfaceDesc = GetDXUTState().GetBackBufferSurfaceDescDXGI();
     ZeroMemory( pBBufferSurfaceDesc, sizeof( DXGI_SURFACE_DESC ) );
     if( SUCCEEDED( hr ) )
@@ -4172,6 +4181,14 @@ void DXUTUpdateD3D11DeviceStats( D3D_DRIVER_TYPE DeviceType, D3D_FEATURE_LEVEL f
     case D3D_FEATURE_LEVEL_11_1:
         wcscat_s( pstrDeviceStats, 256, L" (FL 11.1)" );
         break;
+#ifdef USE_DIRECT3D11_3
+    case D3D_FEATURE_LEVEL_12_0:
+        wcscat_s(pstrDeviceStats, 256, L" (FL 12.0)");
+        break;
+    case D3D_FEATURE_LEVEL_12_1:
+        wcscat_s(pstrDeviceStats, 256, L" (FL 12.1)");
+        break;
+#endif
     }
 }
 
