@@ -103,6 +103,12 @@ protected:
         ID3D11DeviceContext2*	m_D3D11DeviceContext2;	   // the D3D11.2 immediate device context
 #endif
 
+#ifdef USE_DIRECT3D11_3
+                                                           // D3D11.3 specific
+        ID3D11Device3*          m_D3D11Device3;            // the D3D11.3 rendering device
+        ID3D11DeviceContext3*	m_D3D11DeviceContext3;	   // the D3D11.3 immediate device context
+#endif
+
         // General
         HWND  m_HWNDFocus;                  // the main app focus window
         HWND  m_HWNDDeviceFullScreen;       // the main app device window in fullscreen mode
@@ -310,6 +316,11 @@ public:
 #ifdef USE_DIRECT3D11_2
     GET_SET_ACCESSOR(ID3D11Device2*, D3D11Device2);
     GET_SET_ACCESSOR(ID3D11DeviceContext2*, D3D11DeviceContext2);
+#endif
+
+#ifdef USE_DIRECT3D11_3
+    GET_SET_ACCESSOR(ID3D11Device3*, D3D11Device3);
+    GET_SET_ACCESSOR(ID3D11DeviceContext3*, D3D11DeviceContext3);
 #endif
 
     GET_SET_ACCESSOR( HWND, HWNDFocus );
@@ -602,6 +613,11 @@ ID3D11DeviceContext1* WINAPI DXUTGetD3D11DeviceContext1()  { return GetDXUTState
 #ifdef USE_DIRECT3D11_2
 ID3D11Device2* WINAPI DXUTGetD3D11Device2()                { return GetDXUTState().GetD3D11Device2(); }
 ID3D11DeviceContext2* WINAPI DXUTGetD3D11DeviceContext2()  { return GetDXUTState().GetD3D11DeviceContext2(); }
+#endif
+
+#ifdef USE_DIRECT3D11_3
+ID3D11Device3* WINAPI DXUTGetD3D11Device3() { return GetDXUTState().GetD3D11Device3(); }
+ID3D11DeviceContext3* WINAPI DXUTGetD3D11DeviceContext3() { return GetDXUTState().GetD3D11DeviceContext3(); }
 #endif
 
 //--------------------------------------------------------------------------------------
@@ -2550,13 +2566,13 @@ HRESULT DXUTCreate3DEnvironment11()
     // Direct3D 11.1
     {
         ID3D11Device1* pd3d11Device1 = nullptr;
-        hr = pd3d11Device->QueryInterface( __uuidof( ID3D11Device1 ), ( LPVOID* )&pd3d11Device1 );
+        hr = pd3d11Device->QueryInterface(IID_PPV_ARGS(&pd3d11Device1));
         if( SUCCEEDED( hr ) && pd3d11Device1 )
         {
             GetDXUTState().SetD3D11Device1( pd3d11Device1 );
 
             ID3D11DeviceContext1* pd3dImmediateContext1 = nullptr;
-            hr = pd3dImmediateContext->QueryInterface( __uuidof( ID3D11DeviceContext1 ), ( LPVOID* )&pd3dImmediateContext1 );
+            hr = pd3dImmediateContext->QueryInterface(IID_PPV_ARGS(&pd3dImmediateContext1));
             if( SUCCEEDED( hr ) && pd3dImmediateContext1 )
             {
                 GetDXUTState().SetD3D11DeviceContext1( pd3dImmediateContext1 ); 
@@ -2568,16 +2584,35 @@ HRESULT DXUTCreate3DEnvironment11()
     // Direct3D 11.2
     {
         ID3D11Device2* pd3d11Device2 = nullptr;
-        hr = pd3d11Device->QueryInterface(__uuidof(ID3D11Device2), (LPVOID*) &pd3d11Device2);
+        hr = pd3d11Device->QueryInterface(IID_PPV_ARGS(&pd3d11Device2));
         if (SUCCEEDED(hr) && pd3d11Device2)
         {
             GetDXUTState().SetD3D11Device2(pd3d11Device2);
 
             ID3D11DeviceContext2* pd3dImmediateContext2 = nullptr;
-            hr = pd3dImmediateContext->QueryInterface(__uuidof(ID3D11DeviceContext2), (LPVOID*) &pd3dImmediateContext2);
+            hr = pd3dImmediateContext->QueryInterface(IID_PPV_ARGS(&pd3dImmediateContext2));
             if (SUCCEEDED(hr) && pd3dImmediateContext2)
             {
                 GetDXUTState().SetD3D11DeviceContext2(pd3dImmediateContext2);
+            }
+        }
+    }
+#endif
+
+#ifdef USE_DIRECT3D11_3
+    // Direct3D 11.3
+    {
+        ID3D11Device3* pd3d11Device3 = nullptr;
+        hr = pd3d11Device->QueryInterface( IID_PPV_ARGS(&pd3d11Device3) );
+        if (SUCCEEDED(hr) && pd3d11Device3)
+        {
+            GetDXUTState().SetD3D11Device3(pd3d11Device3);
+
+            ID3D11DeviceContext3* pd3dImmediateContext3 = nullptr;
+            hr = pd3dImmediateContext->QueryInterface(IID_PPV_ARGS(&pd3dImmediateContext3));
+            if (SUCCEEDED(hr) && pd3dImmediateContext3)
+            {
+                GetDXUTState().SetD3D11DeviceContext3(pd3dImmediateContext3);
             }
         }
     }
@@ -3017,6 +3052,12 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
         GetDXUTState().SetD3D11DeviceContext2(nullptr);
 #endif
 
+#ifdef USE_DIRECT3D11_3
+        auto pImmediateContext3 = DXUTGetD3D11DeviceContext3();
+        SAFE_RELEASE(pImmediateContext3);
+        GetDXUTState().SetD3D11DeviceContext3(nullptr);
+#endif
+
         // Report live objects
         if ( pd3dDevice )
         {
@@ -3037,6 +3078,12 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
             auto pd3dDevice2 = DXUTGetD3D11Device2();
             SAFE_RELEASE(pd3dDevice2);
             GetDXUTState().SetD3D11Device2(nullptr);
+#endif
+
+#ifdef USE_DIRECT3D11_3
+            auto pd3dDevice3 = DXUTGetD3D11Device3();
+            SAFE_RELEASE(pd3dDevice3);
+            GetDXUTState().SetD3D11Device3(nullptr);
 #endif
 
             // Release the D3D device and in debug configs, displays a message box if there 
