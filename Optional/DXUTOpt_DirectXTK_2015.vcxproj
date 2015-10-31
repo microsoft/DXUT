@@ -92,48 +92,48 @@
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <OutDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DXUTOpt</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <OutDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DXUTOpt</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <OutDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DXUTOpt</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <OutDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DXUTOpt</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <OutDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DXUTOpt</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|X64'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <OutDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>Bin\DirectXTK_2012\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>Bin\DirectXTK_2015\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>DXUTOpt</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
