@@ -2656,7 +2656,7 @@ HRESULT DXUTCreate3DEnvironment11()
             hr = pd3dImmediateContext->QueryInterface(IID_PPV_ARGS(&pd3dImmediateContext4));
             if (SUCCEEDED(hr) && pd3dImmediateContext4)
             {
-                GetDXUTState().SetD3D11DeviceContext3(pd3dImmediateContext4);
+                GetDXUTState().SetD3D11DeviceContext4(pd3dImmediateContext4);
             }
         }
     }
