@@ -31,6 +31,10 @@
 #define _WIN32_WINNT   0x0600
 #endif
 
+#if defined(USE_DIRECT3D11_4) && !defined(USE_DIRECT3D11_3)
+#define USE_DIRECT3D11_3
+#endif
+
 #if (_WIN32_WINNT >= 0x0A00) && !defined(USE_DIRECT3D11_3)
 #define USE_DIRECT3D11_3
 #endif
@@ -87,6 +91,10 @@
 
 #ifdef USE_DIRECT3D11_3
 #include <d3d11_3.h>
+#endif
+
+#ifdef USE_DIRECT3D11_4
+#include <d3d11_4.h>
 #endif
 
 // DirectXMath includes
@@ -298,6 +306,11 @@ ID3D11DeviceContext2*	 WINAPI DXUTGetD3D11DeviceContext2();
 #ifdef USE_DIRECT3D11_3
 ID3D11Device3*           WINAPI DXUTGetD3D11Device3();
 ID3D11DeviceContext3*	 WINAPI DXUTGetD3D11DeviceContext3();
+#endif
+
+#ifdef USE_DIRECT3D11_4
+ID3D11Device4*           WINAPI DXUTGetD3D11Device4();
+ID3D11DeviceContext4*	 WINAPI DXUTGetD3D11DeviceContext4();
 #endif
 
 // General
