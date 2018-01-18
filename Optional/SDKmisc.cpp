@@ -629,7 +629,7 @@ HRESULT WINAPI DXUTCompileFromFile( LPCWSTR pFileName,
     if ( !hFile )
         return HRESULT_FROM_WIN32( GetLastError() );
 
-    LARGE_INTEGER FileSize = { 0 };
+    LARGE_INTEGER FileSize = {};
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
     FILE_STANDARD_INFO fileInfo;

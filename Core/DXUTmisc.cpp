@@ -39,7 +39,7 @@ CDXUTTimer::CDXUTTimer()
     m_llBaseTime = 0;
 
     // Use QueryPerformanceFrequency to get the frequency of the counter
-    LARGE_INTEGER qwTicksPerSec = { 0 };
+    LARGE_INTEGER qwTicksPerSec = {};
     QueryPerformanceFrequency( &qwTicksPerSec );
     m_llQPFTicksPerSec = qwTicksPerSec.QuadPart;
 }
@@ -61,7 +61,7 @@ void CDXUTTimer::Reset()
 void CDXUTTimer::Start()
 {
     // Get the current time
-    LARGE_INTEGER qwTime = { 0 };
+    LARGE_INTEGER qwTime = {};
     QueryPerformanceCounter( &qwTime );
 
     if( m_bTimerStopped )
@@ -77,7 +77,7 @@ void CDXUTTimer::Stop()
 {
     if( !m_bTimerStopped )
     {
-        LARGE_INTEGER qwTime = { 0 };
+        LARGE_INTEGER qwTime = {};
         QueryPerformanceCounter( &qwTime );
         m_llStopTime = qwTime.QuadPart;
         m_llLastElapsedTime = qwTime.QuadPart;
@@ -96,7 +96,7 @@ void CDXUTTimer::Advance()
 //--------------------------------------------------------------------------------------
 double CDXUTTimer::GetAbsoluteTime() const
 {
-    LARGE_INTEGER qwTime = { 0 };
+    LARGE_INTEGER qwTime = {};
     QueryPerformanceCounter( &qwTime );
 
     double fTime = qwTime.QuadPart / ( double )m_llQPFTicksPerSec;
@@ -876,7 +876,7 @@ void WINAPI DXUTGetDesktopResolution( UINT AdapterOrdinal, UINT* pWidth, UINT* p
 {
     auto DeviceSettings = DXUTGetDeviceSettings();
 
-    WCHAR strDeviceName[256] = {0};
+    WCHAR strDeviceName[256] = {};
     DEVMODE devMode;
     ZeroMemory( &devMode, sizeof( DEVMODE ) );
     devMode.dmSize = sizeof( DEVMODE );
