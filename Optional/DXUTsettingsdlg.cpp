@@ -50,6 +50,9 @@ CD3DSettingsDlg::CD3DSettingsDlg() :
 #if defined(USE_DIRECT3D11_3) || defined(USE_DIRECT3D11_4) 
     m_Levels[7] = D3D_FEATURE_LEVEL_12_0;
     m_Levels[8] = D3D_FEATURE_LEVEL_12_1;
+#else
+    m_Levels[7] = static_cast<D3D_FEATURE_LEVEL>(0xc000);
+    m_Levels[8] = static_cast<D3D_FEATURE_LEVEL>(0xc100);
 #endif
 }
 
