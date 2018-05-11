@@ -31,7 +31,7 @@ class DXUTLock
 {
 public:
 #pragma prefast( suppress:26166, "g_bThreadSafe controls behavior" )
-    inline _Acquires_lock_(g_cs) DXUTLock()  { if( g_bThreadSafe ) EnterCriticalSection( &g_cs ); }
+    inline _Acquires_lock_(g_cs) DXUTLock() noexcept { if( g_bThreadSafe ) EnterCriticalSection( &g_cs ); }
 #pragma prefast( suppress:26165, "g_bThreadSafe controls behavior" )
     inline _Releases_lock_(g_cs) ~DXUTLock() { if( g_bThreadSafe ) LeaveCriticalSection( &g_cs ); }
 };
@@ -251,8 +251,15 @@ protected:
     STATE m_state;
 
 public:
-    DXUTState()  { Create(); }
-    ~DXUTState() { Destroy(); }
+    DXUTState() noexcept : m_state{}
+    {
+        Create();
+    }
+
+    ~DXUTState()
+    {
+        Destroy();
+    }
 
     void Create()
     {
@@ -486,7 +493,7 @@ void WINAPI DXUTDestroyState()
 class DXUTMemoryHelper
 {
 public:
-    DXUTMemoryHelper()  { DXUTCreateState(); }
+    DXUTMemoryHelper() noexcept { DXUTCreateState(); }
     ~DXUTMemoryHelper() { DXUTDestroyState(); }
 };
 
