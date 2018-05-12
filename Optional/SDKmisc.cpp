@@ -908,11 +908,15 @@ CDXUTTextHelper::CDXUTTextHelper( ID3D11Device* pd3d11Device, ID3D11DeviceContex
     m_clr(0, 0, 0, 0),
     m_pt{ 0, 0 },
     m_nLineHeight{},
-    m_pd3d11Device(pd3d11Device),
-    m_pd3d11DeviceContext(pd3d11DeviceContext),
-    m_pManager(pManager)
+    m_pd3d11Device(nullptr),
+    m_pd3d11DeviceContext(nullptr),
+    m_pManager(nullptr)
 {
     Init( nLineHeight );
+
+    m_pd3d11Device = pd3d11Device;
+    m_pd3d11DeviceContext = pd3d11DeviceContext;
+    m_pManager = pManager;
 }
 
 CDXUTTextHelper::~CDXUTTextHelper()
