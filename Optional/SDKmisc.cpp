@@ -469,7 +469,7 @@ struct handle_closer { void operator()(HANDLE h) { if (h) CloseHandle(h); } };
 
 typedef std::unique_ptr<void, handle_closer> ScopedHandle;
 
-inline HANDLE safe_handle( HANDLE h ) { return (h == INVALID_HANDLE_VALUE) ? 0 : h; }
+inline HANDLE safe_handle( HANDLE h ) { return (h == INVALID_HANDLE_VALUE) ? nullptr : h; }
 
 class CIncludeHandler : public ID3DInclude
     // Not as robust as D3D_COMPILE_STANDARD_FILE_INCLUDE, but it works in most cases
