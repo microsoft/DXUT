@@ -4,6 +4,9 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+### January 16, 2020 (11.23)
+* Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
+
 ### April 26, 2019 (11.22)
 * Added VS 2019 desktop projects
 * VS 2017 updated for Windows 10 October 2018 Update SDK (17763)
