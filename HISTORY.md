@@ -4,6 +4,10 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+### June 3, 2020
+* Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
+* Retired VS 2015 projects
+
 ### January 16, 2020 (11.23)
 * Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
 
