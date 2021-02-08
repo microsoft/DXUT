@@ -4,6 +4,11 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+## February 7, 2021
+* Added CMake project
+* Removed Windows Vista support
+* No code changes
+
 ### November 17, 2020 (11.25)
 * Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
 
