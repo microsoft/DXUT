@@ -4,7 +4,7 @@
 
 http://go.microsoft.com/fwlink/?LinkId=320437
 
-Copyright (c) Microsoft Corporation. All rights reserved.
+Copyright (c) Microsoft Corporation.
 
 **February 7, 2021**
 
