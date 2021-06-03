@@ -25,6 +25,7 @@
 
 #include <d3d11_1.h>
 
+#include <cstddef>
 #include <cstdint>
 
 namespace DirectX
@@ -41,6 +42,17 @@ namespace DirectX
         WIC_LOADER_MAKE_SQUARE  = 0x40,
         WIC_LOADER_FORCE_RGBA32 = 0x80,
     };
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-dynamic-exception-spec"
+#endif
+
+    DEFINE_ENUM_FLAG_OPERATORS(WIC_LOADER_FLAGS);
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 #endif
 
     // Standard version
