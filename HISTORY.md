@@ -4,6 +4,9 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+## December 2, 2021
+* Minor project update
+
 ## June 2, 2021 (11.26)
 * Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
 * Minor code review
