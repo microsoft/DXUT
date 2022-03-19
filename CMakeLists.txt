@@ -21,6 +21,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/CMake")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/CMake")
 
+if (DEFINED VCPKG_TARGET_ARCHITECTURE)
+    set(DIRECTX_ARCH ${VCPKG_TARGET_ARCHITECTURE})
+endif()
+
 #--- Core Library
 set(CORE_LIBRARY_HEADERS
     Core/DDSTextureLoader.h
@@ -144,17 +148,7 @@ if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /fp:fast)
     target_compile_options(${PROJECT_NAME}Opt PRIVATE /fp:fast)
 
-   if(ENABLE_CODE_ANALYSIS)
-      target_compile_options(${PROJECT_NAME} PRIVATE /analyze)
-      target_compile_options(${PROJECT_NAME}Opt PRIVATE /analyze)
-   endif()
-
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.26)
-        target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor /wd5104 /wd5105)
-        target_compile_options(${PROJECT_NAME}Opt PRIVATE /Zc:preprocessor /wd5104 /wd5105)
-    endif()
-
-    if (${CMAKE_SIZEOF_VOID_P} EQUAL "4")
+    if((${CMAKE_SIZEOF_VOID_P} EQUAL 4) AND (NOT ${DIRECTX_ARCH} MATCHES "arm"))
         target_compile_options(${PROJECT_NAME} PRIVATE /arch:SSE2)
         target_compile_options(${PROJECT_NAME}Opt PRIVATE /arch:SSE2)
     endif()
@@ -163,6 +157,16 @@ endif()
 if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
     target_compile_options(${PROJECT_NAME} PRIVATE /permissive- /JMC- /Zc:__cplusplus)
     target_compile_options(${PROJECT_NAME}Opt PRIVATE /permissive- /JMC- /Zc:__cplusplus)
+
+    if(ENABLE_CODE_ANALYSIS)
+      target_compile_options(${PROJECT_NAME} PRIVATE /analyze)
+      target_compile_options(${PROJECT_NAME}Opt PRIVATE /analyze)
+    endif()
+
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.26)
+        target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor /wd5104 /wd5105)
+        target_compile_options(${PROJECT_NAME}Opt PRIVATE /Zc:preprocessor /wd5104 /wd5105)
+    endif()
 endif()
 
 if(WIN32)
