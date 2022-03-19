@@ -163,6 +163,11 @@ if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
       target_compile_options(${PROJECT_NAME}Opt PRIVATE /analyze)
     endif()
 
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.24)
+        target_compile_options(${PROJECT_NAME} PRIVATE /ZH:SHA_256)
+        target_compile_options(${PROJECT_NAME}Opt PRIVATE /ZH:SHA_256)
+    endif()
+
     if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.26)
         target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor /wd5104 /wd5105)
         target_compile_options(${PROJECT_NAME}Opt PRIVATE /Zc:preprocessor /wd5104 /wd5105)
