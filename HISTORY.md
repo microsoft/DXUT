@@ -4,6 +4,13 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+## May 22, 2022 (11.27)
+* Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
+* Add VS 2022 projects, retired VS 2017 projects
+* Update build switches for SDL recommendations
+* CMake project cleanup, added CMakePresets.json
+* Minor code review
+
 ## December 2, 2021
 * Minor project update
 
