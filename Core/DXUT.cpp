@@ -37,6 +37,11 @@ public:
 #endif
 
     inline _Acquires_lock_(g_cs) DXUTLock() noexcept { if( g_bThreadSafe ) EnterCriticalSection( &g_cs ); }
+
+#ifdef _PREFAST_
+#pragma prefast( suppress:26165, "g_bThreadSafe controls behavior" )
+#endif
+
     inline _Releases_lock_(g_cs) ~DXUTLock() { if( g_bThreadSafe ) LeaveCriticalSection( &g_cs ); }
 
 #ifdef _PREFAST_
