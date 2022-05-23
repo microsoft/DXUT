@@ -14,7 +14,7 @@
 // http://go.microsoft.com/fwlink/?LinkId=248929
 //--------------------------------------------------------------------------------------
 
-#include "dxut.h"
+#include "DXUT.h"
 #include "DDSTextureLoader.h"
 
 #include <algorithm>

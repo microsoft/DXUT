@@ -664,7 +664,7 @@ public:
     void SetChecked( _In_ bool bChecked ) { SetCheckedInternal( bChecked, false ); }
 
 protected:
-    virtual void SetCheckedInternal( _In_ bool bChecked, _In_ bool bFromInput );
+    void SetCheckedInternal( _In_ bool bChecked, _In_ bool bFromInput );
 
     bool m_bChecked;
     RECT m_rcButton;
@@ -693,7 +693,7 @@ public:
     UINT GetButtonGroup() const { return m_nButtonGroup; }
 
 protected:
-    virtual void SetCheckedInternal( _In_ bool bChecked, _In_ bool bClearGroup, _In_ bool bFromInput );
+    void SetCheckedInternal( _In_ bool bChecked, _In_ bool bClearGroup, _In_ bool bFromInput );
     UINT m_nButtonGroup;
 };
 

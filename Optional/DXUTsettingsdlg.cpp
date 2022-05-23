@@ -10,7 +10,7 @@
 //--------------------------------------------------------------------------------------
 #include "DXUT.h"
 #include "DXUTgui.h"
-#include "DXUTsettingsDlg.h"
+#include "DXUTsettingsdlg.h"
 
 //--------------------------------------------------------------------------------------
 // Internal functions forward declarations
