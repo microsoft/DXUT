@@ -885,7 +885,7 @@ static void DrawCompositionString( _In_ bool bDrawCompAttr )
                 }
             }
             if( ( saveCandPos && candX == POSITION_UNINITIALIZED ) ||
-                ( IMEID_LANG( GetImeId() ) == LANG_CHS && i / ( 3 - sizeof( TCHAR ) ) == ( int )g_IMECursorChars ) )
+                ( IMEID_LANG( GetImeId() ) == LANG_CHS && static_cast<int>(i / ( 3 - sizeof( TCHAR ) )) == ( int )g_IMECursorChars ) )
             {
                 candX = bgX;
                 candY = bgY;

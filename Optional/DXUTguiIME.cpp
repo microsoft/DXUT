@@ -249,11 +249,8 @@ void CDXUTIMEEditBox::OnFocusOut()
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-bool CDXUTIMEEditBox::StaticMsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM)
+bool CDXUTIMEEditBox::StaticMsgProc( HWND, UINT uMsg, WPARAM, LPARAM)
 {
-    UNREFERENCED_PARAMETER(hWnd);
-    UNREFERENCED_PARAMETER(wParam);
-
     if( !ImeUi_IsEnabled() )
         return false;
 

@@ -165,7 +165,7 @@ if(MSVC)
 endif()
 
 if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
-    set(WarningsLib "-Wno-deprecated-declarations" "-Wno-unused-const-variable" "-Wno-switch")
+    set(WarningsLib "-Wno-deprecated-declarations" "-Wno-unused-const-variable" "-Wno-switch" "-Wno-ignored-attributes")
     target_compile_options(${PROJECT_NAME} PRIVATE ${WarningsLib})
     target_compile_options(${PROJECT_NAME}Opt PRIVATE ${WarningsLib})
 endif()
