@@ -8,10 +8,10 @@
 //--------------------------------------------------------------------------------------
 #include "DXUT.h"
 #include "DXUTgui.h"
-#include "DXUTsettingsDlg.h"
+#include "DXUTsettingsdlg.h"
 #include "DXUTres.h"
 
-#include "SDKMisc.h"
+#include "SDKmisc.h"
 
 #include "DDSTextureLoader.h"
 
@@ -609,10 +609,10 @@ HRESULT CDXUTDialog::OnRender( _In_ float fElapsedTime )
 
         DXUT_SCREEN_VERTEX_10 vertices[4] =
         {
-            Left,  Top,    0.5f, D3DCOLOR_TO_D3DCOLORVALUE( m_colorTopLeft ), 0.0f, 0.0f,
-            Right, Top,    0.5f, D3DCOLOR_TO_D3DCOLORVALUE( m_colorTopRight ), 1.0f, 0.0f,
-            Left,  Bottom, 0.5f, D3DCOLOR_TO_D3DCOLORVALUE( m_colorBottomLeft ), 0.0f, 1.0f,
-            Right, Bottom, 0.5f, D3DCOLOR_TO_D3DCOLORVALUE( m_colorBottomRight ), 1.0f, 1.0f,
+            { Left,  Top,    0.5f, D3DCOLOR_TO_D3DCOLORVALUE(m_colorTopLeft), 0.0f, 0.0f },
+            { Right, Top,    0.5f, D3DCOLOR_TO_D3DCOLORVALUE(m_colorTopRight), 1.0f, 0.0f },
+            { Left,  Bottom, 0.5f, D3DCOLOR_TO_D3DCOLORVALUE(m_colorBottomLeft), 0.0f, 1.0f },
+            { Right, Bottom, 0.5f, D3DCOLOR_TO_D3DCOLORVALUE(m_colorBottomRight), 1.0f, 1.0f },
         };
 
         //DXUT_SCREEN_VERTEX_10 *pVB;
@@ -4398,9 +4398,6 @@ void CDXUTSlider::Render( _In_ float fElapsedTime )
     if( m_bVisible == false )
         return;
 
-    int nOffsetX = 0;
-    int nOffsetY = 0;
-
     DXUT_CONTROL_STATE iState = DXUT_STATE_NORMAL;
 
     if( m_bVisible == false )
@@ -4414,16 +4411,10 @@ void CDXUTSlider::Render( _In_ float fElapsedTime )
     else if( m_bPressed )
     {
         iState = DXUT_STATE_PRESSED;
-
-        nOffsetX = 1;
-        nOffsetY = 2;
     }
     else if( m_bMouseOver )
     {
         iState = DXUT_STATE_MOUSEOVER;
-
-        nOffsetX = -1;
-        nOffsetY = -2;
     }
     else if( m_bHasFocus )
     {
@@ -6000,7 +5991,7 @@ bool CDXUTEditBox::MsgProc( UINT uMsg, WPARAM wParam, LPARAM lParam )
                 case 16:  // Ctrl P
                 case 27:  // Ctrl [
                 case 29:  // Ctrl ]
-                case 28:  // Ctrl \ 
+                case 28:  // Ctrl \ (backslash)
                     break;
 
                 default:

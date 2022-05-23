@@ -8,7 +8,7 @@
 //--------------------------------------------------------------------------------------
 #include "DXUT.h"
 #include "DXUTgui.h"
-#include "DXUTsettingsDlg.h"
+#include "DXUTsettingsdlg.h"
 #include "DXUTres.h"
 #include "DXUTgui.h"
 #include "DXUTguiIME.h"
@@ -249,7 +249,7 @@ void CDXUTIMEEditBox::OnFocusOut()
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-bool CDXUTIMEEditBox::StaticMsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+bool CDXUTIMEEditBox::StaticMsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM)
 {
     UNREFERENCED_PARAMETER(hWnd);
     UNREFERENCED_PARAMETER(wParam);
@@ -274,7 +274,6 @@ bool CDXUTIMEEditBox::StaticMsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
             //
             // We don't want anything to display, so we have to clear this
             //
-            lParam = 0;
             return false;
 
             // Handle WM_IME_STARTCOMPOSITION here since

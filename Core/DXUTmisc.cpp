@@ -8,7 +8,7 @@
 //
 // http://go.microsoft.com/fwlink/?LinkId=320437
 //--------------------------------------------------------------------------------------
-#include "dxut.h"
+#include "DXUT.h"
 #include <xinput.h>
 
 #include "ScreenGrab.h"
@@ -1246,7 +1246,7 @@ HRESULT DXUTSnapD3D11Screenshot( _In_z_ LPCWSTR szFileName, _In_ bool usedds )
     if (!pSwap)
         return E_FAIL;
     
-    ID3D11Texture2D* pBackBuffer;
+    ID3D11Texture2D* pBackBuffer = nullptr;
     HRESULT hr = pSwap->GetBuffer( 0, __uuidof( *pBackBuffer ), ( LPVOID* )&pBackBuffer );
     if (hr != S_OK)
         return hr;

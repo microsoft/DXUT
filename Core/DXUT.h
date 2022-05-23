@@ -51,16 +51,18 @@
 #define NOMINMAX
 #endif
 
-#include <windows.h>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <cstdio>
+#include <new>
+#include <tuple>
+
+#include <Windows.h>
 #include <initguid.h>
-#include <assert.h>
 #include <commctrl.h> // for InitCommonControls() 
 #include <shellapi.h> // for ExtractIcon()
-#include <new.h>      // for placement new
 #include <shlobj.h>
-#include <math.h>
-#include <limits.h>
-#include <stdio.h>
 
 // CRT's memory leak detection
 #if defined(DEBUG) || defined(_DEBUG)
