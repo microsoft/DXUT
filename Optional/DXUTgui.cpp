@@ -1108,9 +1108,8 @@ void CDXUTDialog::SetControlEnabled( _In_ int ID, _In_ bool bEnabled )
 
 
 //--------------------------------------------------------------------------------------
-void CDXUTDialog::OnMouseUp( _In_ const POINT& pt )
+void CDXUTDialog::OnMouseUp( _In_ const POINT& )
 {
-    UNREFERENCED_PARAMETER(pt);
     s_pControlPressed = nullptr;
     m_pControlMouseOver = nullptr;
 }
@@ -1596,10 +1595,8 @@ void CDXUTDialog::RequestFocus( _In_ CDXUTControl* pControl )
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-HRESULT CDXUTDialog::DrawRect( const RECT* pRect, DWORD color )
+HRESULT CDXUTDialog::DrawRect( const RECT*, DWORD )
 {
-    UNREFERENCED_PARAMETER(pRect);
-    UNREFERENCED_PARAMETER(color);
     // TODO -
     return E_FAIL;
 }
@@ -1691,15 +1688,12 @@ HRESULT CDXUTDialog::DrawSprite( CDXUTElement* pElement, const RECT* prcDest, fl
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-HRESULT CDXUTDialog::CalcTextRect( LPCWSTR strText, CDXUTElement* pElement, const RECT* prcDest, int nCount )
+HRESULT CDXUTDialog::CalcTextRect( LPCWSTR, CDXUTElement* pElement, const RECT*, int)
 {
     auto pFontNode = GetFont( pElement->iFont );
     if( !pFontNode )
         return E_FAIL;
 
-    UNREFERENCED_PARAMETER(strText);
-    UNREFERENCED_PARAMETER(prcDest);
-    UNREFERENCED_PARAMETER(nCount);
     // TODO -
 
     return S_OK;
@@ -2284,12 +2278,8 @@ CDXUTDialogResourceManager::~CDXUTDialogResourceManager()
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-bool CDXUTDialogResourceManager::MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+bool CDXUTDialogResourceManager::MsgProc( HWND, UINT, WPARAM, LPARAM )
 {
-    UNREFERENCED_PARAMETER(hWnd);
-    UNREFERENCED_PARAMETER(uMsg);
-    UNREFERENCED_PARAMETER(wParam);
-    UNREFERENCED_PARAMETER(lParam);
     return false;
 }
 
@@ -3053,11 +3043,8 @@ bool CDXUTButton::HandleKeyboard( UINT uMsg, WPARAM wParam, LPARAM lParam )
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-bool CDXUTButton::HandleMouse( UINT uMsg, const POINT& pt, WPARAM wParam, LPARAM lParam )
+bool CDXUTButton::HandleMouse( UINT uMsg, const POINT& pt, WPARAM, LPARAM)
 {
-    UNREFERENCED_PARAMETER(wParam);
-    UNREFERENCED_PARAMETER(lParam);
-
     if( !m_bEnabled || !m_bVisible )
         return false;
 
