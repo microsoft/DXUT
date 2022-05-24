@@ -13,7 +13,7 @@ project (DXUT
 
 option(ENABLE_CODE_ANALYSIS "Use Static Code Analysis on build" OFF)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -62,11 +62,9 @@ add_library(${PROJECT_NAME} STATIC ${CORE_LIBRARY_SOURCES} ${CORE_LIBRARY_HEADER
 set(OPT_LIBRARY_HEADERS
     Optional/DXUTcamera.h
     Optional/DXUTgui.h
-    Optional/DXUTguiIME.h
     Optional/DXUTLockFreePipe.h
     Optional/DXUTres.h
     Optional/DXUTsettingsdlg.h
-    Optional/ImeUi.h
     Optional/SDKmesh.h
     Optional/SDKmisc.h
 )
@@ -74,17 +72,29 @@ set(OPT_LIBRARY_HEADERS
 set(OPT_LIBRARY_SOURCES
     Optional/DXUTcamera.cpp
     Optional/DXUTgui.cpp
-    Optional/DXUTguiIME.cpp
     Optional/DXUTres.cpp
     Optional/DXUTsettingsdlg.cpp
-    Optional/ImeUi.cpp
     Optional/SDKmesh.cpp
     Optional/SDKmisc.cpp
 )
 
+if(NOT MINGW)
+    set(OPT_LIBRARY_HEADERS
+        ${OPT_LIBRARY_HEADERS}
+        Optional/DXUTguiIME.h
+        Optional/ImeUi.h
+    )
+
+    set(OPT_LIBRARY_SOURCES
+        ${OPT_LIBRARY_SOURCES}
+        Optional/DXUTguiIME.cpp
+        Optional/ImeUi.cpp
+    )
+endif()
+
 add_library(${PROJECT_NAME}Opt STATIC ${OPT_LIBRARY_SOURCES} ${OPT_CORE_LIBRARY_HEADERS})
 
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16")
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16" AND (NOT MINGW))
     target_precompile_headers(${PROJECT_NAME} PRIVATE Core/DXUT.h)
     target_precompile_headers(${PROJECT_NAME}Opt PRIVATE Core/DXUT.h)
 endif()
@@ -155,13 +165,26 @@ install(FILES
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME}/cmake/)
 
 if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /fp:fast)
-    target_compile_options(${PROJECT_NAME}Opt PRIVATE /fp:fast)
+    target_compile_options(${PROJECT_NAME} PRIVATE /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
+    target_compile_options(${PROJECT_NAME}Opt PRIVATE /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
+endif()
 
-    if((${CMAKE_SIZEOF_VOID_P} EQUAL 4) AND (NOT ${DIRECTX_ARCH} MATCHES "^arm"))
-        target_compile_options(${PROJECT_NAME} PRIVATE /arch:SSE2)
-        target_compile_options(${PROJECT_NAME}Opt PRIVATE /arch:SSE2)
+if (MINGW OR VCPKG_TOOLCHAIN)
+    message("INFO: Using VCPKG for DirectXMath.")
+    find_package(directxmath CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
+    target_link_libraries(${PROJECT_NAME}Opt PRIVATE Microsoft::DirectXMath)
+endif()
+
+if(NOT ${DIRECTX_ARCH} MATCHES "^arm")
+    if (${CMAKE_SIZEOF_VOID_P} EQUAL "4")
+        set(ARCH_SSE2 $<$<CXX_COMPILER_ID:MSVC>:/arch:SSE2> $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-msse2>)
+    else()
+        set(ARCH_SSE2 $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-msse2>)
     endif()
+
+    target_compile_options(${PROJECT_NAME} PRIVATE ${ARCH_SSE2})
+    target_compile_options(${PROJECT_NAME}Opt PRIVATE ${ARCH_SSE2})
 endif()
 
 if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
@@ -170,8 +193,8 @@ if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
     target_compile_options(${PROJECT_NAME}Opt PRIVATE ${WarningsLib})
 endif()
 if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
-    target_compile_options(${PROJECT_NAME} PRIVATE /permissive- /JMC- /Zc:__cplusplus)
-    target_compile_options(${PROJECT_NAME}Opt PRIVATE /permissive- /JMC- /Zc:__cplusplus)
+    target_compile_options(${PROJECT_NAME} PRIVATE /sdl /permissive- /JMC- /Zc:__cplusplus)
+    target_compile_options(${PROJECT_NAME}Opt PRIVATE /sdl /permissive- /JMC- /Zc:__cplusplus)
 
     if(ENABLE_CODE_ANALYSIS)
       target_compile_options(${PROJECT_NAME} PRIVATE /analyze)

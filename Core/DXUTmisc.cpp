@@ -11,6 +11,10 @@
 #include "DXUT.h"
 #include <xinput.h>
 
+#ifndef XINPUT_DLL_W
+#define XINPUT_DLL_W L"xinput9_1_0.dll"
+#endif
+
 #include "ScreenGrab.h"
 
 
@@ -938,7 +942,7 @@ HRESULT DXUTGetGamepadState( DWORD dwPort, DXUT_GAMEPAD* pGamePad, bool bThumbst
     static LPXINPUTGETCAPABILITIES s_pXInputGetCapabilities = nullptr;
     if( !s_pXInputGetState || !s_pXInputGetCapabilities )
     {
-        HINSTANCE hInst = LoadLibraryEx( XINPUT_DLL, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
+        HINSTANCE hInst = LoadLibraryExW( XINPUT_DLL_W, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( hInst )
         {
             s_pXInputGetState = reinterpret_cast<LPXINPUTGETSTATE>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputGetState" ) ) );
@@ -1045,7 +1049,7 @@ void DXUTEnableXInput( _In_ bool bEnable )
     static LPXINPUTENABLE s_pXInputEnable = nullptr;
     if( !s_pXInputEnable )
     {
-        HINSTANCE hInst = LoadLibraryEx( XINPUT_DLL, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
+        HINSTANCE hInst = LoadLibraryExW( XINPUT_DLL_W, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( hInst )
             s_pXInputEnable = reinterpret_cast<LPXINPUTENABLE>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputEnable" ) ) );
     }
@@ -1064,7 +1068,7 @@ HRESULT DXUTStopRumbleOnAllControllers()
     static LPXINPUTSETSTATE s_pXInputSetState = nullptr;
     if( !s_pXInputSetState )
     {
-        HINSTANCE hInst = LoadLibraryEx( XINPUT_DLL, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
+        HINSTANCE hInst = LoadLibraryExW( XINPUT_DLL_W, nullptr, 0x00000800 /* LOAD_LIBRARY_SEARCH_SYSTEM32 */ );
         if( hInst )
             s_pXInputSetState = reinterpret_cast<LPXINPUTSETSTATE>( reinterpret_cast<void*>( GetProcAddress( hInst, "XInputSetState" ) ) );
     }

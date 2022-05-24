@@ -3120,7 +3120,7 @@ void DXUTCleanup3DEnvironment( _In_ bool bReleaseSettings )
             ID3D11Debug * d3dDebug = nullptr;
             if( SUCCEEDED( pd3dDevice->QueryInterface( IID_PPV_ARGS(&d3dDebug) ) ) )
             {
-                d3dDebug->ReportLiveDeviceObjects( D3D11_RLDO_SUMMARY | D3D11_RLDO_DETAIL );
+                d3dDebug->ReportLiveDeviceObjects( static_cast<D3D11_RLDO_FLAGS>(D3D11_RLDO_SUMMARY | D3D11_RLDO_DETAIL) );
                 d3dDebug->Release();
             }
 #endif

@@ -524,11 +524,8 @@ public:
         }
     }
 
-    STDMETHOD(Open( D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes ) )
+    STDMETHOD(Open( D3D_INCLUDE_TYPE, LPCSTR pFileName, LPCVOID, LPCVOID *ppData, UINT *pBytes ) )
     {
-        UNREFERENCED_PARAMETER(IncludeType);
-        UNREFERENCED_PARAMETER(pParentData);
-
         size_t incIndex = m_nIncludes+1;
 
         // Make sure we have enough room for this include file
@@ -564,9 +561,8 @@ public:
         return S_OK;
     }
 
-    STDMETHOD(Close( LPCVOID pData ))
+    STDMETHOD(Close(LPCVOID))
     {
-        UNREFERENCED_PARAMETER(pData);
         // Defer Closure until the container destructor 
         return S_OK;
     }
