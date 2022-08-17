@@ -111,6 +111,9 @@ target_include_directories(${PROJECT_NAME}Opt PUBLIC
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
   PRIVATE Core/)
 
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
+target_compile_features(${PROJECT_NAME}Opt PUBLIC cxx_std_11)
+
 if(MSVC)
     # Use max Warning Level
     string(REPLACE "/W3 " "/W4 " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
@@ -118,6 +121,13 @@ if(MSVC)
     string(REPLACE "/W3 " "/W4 " CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 
     # Library needs /EHsc (Enable C++ exceptions)
+endif()
+
+if (MINGW OR VCPKG_TOOLCHAIN)
+    message("INFO: Using VCPKG for DirectXMath.")
+    find_package(directxmath CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
+    target_link_libraries(${PROJECT_NAME}Opt PRIVATE Microsoft::DirectXMath)
 endif()
 
 #--- Package
@@ -167,13 +177,12 @@ install(FILES
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
     target_compile_options(${PROJECT_NAME}Opt PRIVATE /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
-endif()
 
-if (MINGW OR VCPKG_TOOLCHAIN)
-    message("INFO: Using VCPKG for DirectXMath.")
-    find_package(directxmath CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
-    target_link_libraries(${PROJECT_NAME}Opt PRIVATE Microsoft::DirectXMath)
+    if((MSVC_VERSION GREATER_EQUAL 1928) AND (CMAKE_SIZEOF_VOID_P EQUAL 8)
+       AND ((NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang")) OR (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)))
+      target_compile_options(${PROJECT_NAME} PRIVATE "$<$<NOT:$<CONFIG:DEBUG>>:/guard:ehcont>")
+      target_compile_options(${PROJECT_NAME}Opt PRIVATE "$<$<NOT:$<CONFIG:DEBUG>>:/guard:ehcont>")
+    endif()
 endif()
 
 if(NOT ${DIRECTX_ARCH} MATCHES "^arm")
@@ -216,6 +225,6 @@ if(WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE _UNICODE UNICODE)
     target_compile_definitions(${PROJECT_NAME}Opt PRIVATE _UNICODE UNICODE)
 
-    target_compile_definitions(${PROJECT_NAME} PRIVATE _WIN32_WINNT=0x0601)
-    target_compile_definitions(${PROJECT_NAME}Opt PRIVATE _WIN32_WINNT=0x0601)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _WIN32_WINNT=0x0601 _WIN7_PLATFORM_UPDATE)
+    target_compile_definitions(${PROJECT_NAME}Opt PRIVATE _WIN32_WINNT=0x0601 _WIN7_PLATFORM_UPDATE)
 endif()
