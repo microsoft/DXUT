@@ -4,6 +4,10 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+## August 17, 2022 (11.28)
+* *breaking change* DDSTextureLoader ``Ex`` functions now use ``DDS_LOADER_FLAGS`` instead of ``bool forceSRGB`` parameter.
+* CMake and MSBuild project updates
+
 ## May 23, 2022 (11.27)
 * Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
 * Add VS 2022 projects, retired VS 2017 projects
