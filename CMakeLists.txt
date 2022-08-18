@@ -13,6 +13,8 @@ project (DXUT
 
 option(ENABLE_CODE_ANALYSIS "Use Static Code Analysis on build" OFF)
 
+option(DIRECTXTK_INTEGRATION "Support mixing with DirectX Tool Kit" OFF)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -37,24 +39,31 @@ include(GNUInstallDirs)
 
 #--- Core Library
 set(CORE_LIBRARY_HEADERS
-    Core/DDSTextureLoader.h
     Core/dxerr.h
     Core/DXUT.h
     Core/DXUTDevice11.h
     Core/DXUTmisc.h
-    Core/ScreenGrab.h
-    Core/WICTextureLoader.h
 )
 
 set(CORE_LIBRARY_SOURCES
-    Core/DDSTextureLoader.cpp
     Core/dxerr.cpp
     Core/DXUT.cpp
     Core/DXUTDevice11.cpp
     Core/DXUTmisc.cpp
-    Core/ScreenGrab.cpp
-    Core/WICTextureLoader.cpp
 )
+
+if (NOT DIRECTXTK_INTEGRATION)
+    list(APPEND CORE_LIBRARY_HEADERS
+      Core/DDSTextureLoader.h
+      Core/ScreenGrab.h
+      Core/WICTextureLoader.h
+    )
+    list(APPEND CORE_LIBRARY_SOURCES
+      Core/DDSTextureLoader.cpp
+      Core/ScreenGrab.cpp
+      Core/WICTextureLoader.cpp
+    )
+endif()
 
 add_library(${PROJECT_NAME} STATIC ${CORE_LIBRARY_SOURCES} ${CORE_LIBRARY_HEADERS})
 
@@ -110,6 +119,15 @@ target_include_directories(${PROJECT_NAME}Opt PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Optional>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
   PRIVATE Core/)
+
+if (DIRECTXTK_INTEGRATION)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DIRECTXTK)
+  target_compile_definitions(${PROJECT_NAME}Opt PRIVATE USE_DIRECTXTK)
+
+  find_package(directxtk REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXTK)
+  target_link_libraries(${PROJECT_NAME}Opt PRIVATE Microsoft::DirectXTK)
+endif()
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 target_compile_features(${PROJECT_NAME}Opt PUBLIC cxx_std_11)
