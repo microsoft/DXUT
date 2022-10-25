@@ -4,25 +4,28 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
-## August 17, 2022 (11.28)
+### October 24, 2022 (11.29)
+* Fix for build failure `-Wnarrowing` with MinGW GNU 12.2
+
+### August 17, 2022 (11.28)
 * *breaking change* DDSTextureLoader ``Ex`` functions now use ``DDS_LOADER_FLAGS`` instead of ``bool forceSRGB`` parameter.
 * CMake and MSBuild project updates
 
-## May 23, 2022 (11.27)
+### May 23, 2022 (11.27)
 * Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
 * Add VS 2022 projects, retired VS 2017 projects
 * Update build switches for SDL recommendations
 * CMake project cleanup, added CMakePresets.json
 * Minor code review
 
-## December 2, 2021
+### December 2, 2021
 * Minor project update
 
-## June 2, 2021 (11.26)
+### June 2, 2021 (11.26)
 * Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
 * Minor code review
 
-## February 7, 2021
+### February 7, 2021
 * Added CMake project
 * Removed Windows Vista support
 * No code changes
