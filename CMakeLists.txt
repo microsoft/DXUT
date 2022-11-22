@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-cmake_minimum_required (VERSION 3.13)
+cmake_minimum_required (VERSION 3.20)
 
 set(DXUT_VERSION 11.29)
 
@@ -103,7 +103,7 @@ endif()
 
 add_library(${PROJECT_NAME}Opt STATIC ${OPT_LIBRARY_SOURCES} ${OPT_CORE_LIBRARY_HEADERS})
 
-if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16" AND (NOT MINGW))
+if (NOT MINGW)
     target_precompile_headers(${PROJECT_NAME} PRIVATE Core/DXUT.h)
     target_precompile_headers(${PROJECT_NAME}Opt PRIVATE Core/DXUT.h)
 endif()
@@ -131,15 +131,6 @@ endif()
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 target_compile_features(${PROJECT_NAME}Opt PUBLIC cxx_std_11)
-
-if(MSVC)
-    # Use max Warning Level
-    string(REPLACE "/W3 " "/W4 " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-    string(REPLACE "/W3 " "/W4 " CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
-    string(REPLACE "/W3 " "/W4 " CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-
-    # Library needs /EHsc (Enable C++ exceptions)
-endif()
 
 if (MINGW OR VCPKG_TOOLCHAIN)
     message("INFO: Using VCPKG for DirectXMath.")
@@ -193,8 +184,8 @@ install(FILES
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME})
 
 if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
-    target_compile_options(${PROJECT_NAME}Opt PRIVATE /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4 /GR- /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
+    target_compile_options(${PROJECT_NAME}Opt PRIVATE /W4 /GR- /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
 
     if((MSVC_VERSION GREATER_EQUAL 1928) AND (CMAKE_SIZEOF_VOID_P EQUAL 8)
        AND ((NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang")) OR (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)))
@@ -237,12 +228,14 @@ if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
         target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor /wd5104 /wd5105)
         target_compile_options(${PROJECT_NAME}Opt PRIVATE /Zc:preprocessor /wd5104 /wd5105)
     endif()
+
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.34)
+        target_compile_options(${PROJECT_NAME} PRIVATE /wd5262)
+        target_compile_options(${PROJECT_NAME}Opt PRIVATE /wd5262)
+    endif()
 endif()
 
 if(WIN32)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE _UNICODE UNICODE)
-    target_compile_definitions(${PROJECT_NAME}Opt PRIVATE _UNICODE UNICODE)
-
-    target_compile_definitions(${PROJECT_NAME} PRIVATE _WIN32_WINNT=0x0601 _WIN7_PLATFORM_UPDATE)
-    target_compile_definitions(${PROJECT_NAME}Opt PRIVATE _WIN32_WINNT=0x0601 _WIN7_PLATFORM_UPDATE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _UNICODE UNICODE _WIN32_WINNT=0x0601 _WIN7_PLATFORM_UPDATE)
+    target_compile_definitions(${PROJECT_NAME}Opt PRIVATE _UNICODE UNICODE _WIN32_WINNT=0x0601 _WIN7_PLATFORM_UPDATE)
 endif()
