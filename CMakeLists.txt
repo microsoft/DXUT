@@ -23,7 +23,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/CMake")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/CMake")
 
-if (DEFINED VCPKG_TARGET_ARCHITECTURE)
+if(DEFINED VCPKG_TARGET_ARCHITECTURE)
     set(DIRECTX_ARCH ${VCPKG_TARGET_ARCHITECTURE})
 elseif(CMAKE_GENERATOR_PLATFORM MATCHES "^[Ww][Ii][Nn]32$")
     set(DIRECTX_ARCH x86)
@@ -52,7 +52,7 @@ set(CORE_LIBRARY_SOURCES
     Core/DXUTmisc.cpp
 )
 
-if (NOT DIRECTXTK_INTEGRATION)
+if(NOT DIRECTXTK_INTEGRATION)
     list(APPEND CORE_LIBRARY_HEADERS
       Core/DDSTextureLoader.h
       Core/ScreenGrab.h
@@ -103,7 +103,7 @@ endif()
 
 add_library(${PROJECT_NAME}Opt STATIC ${OPT_LIBRARY_SOURCES} ${OPT_CORE_LIBRARY_HEADERS})
 
-if (NOT MINGW)
+if(NOT MINGW)
     target_precompile_headers(${PROJECT_NAME} PRIVATE Core/DXUT.h)
     target_precompile_headers(${PROJECT_NAME}Opt PRIVATE Core/DXUT.h)
 endif()
@@ -120,7 +120,7 @@ target_include_directories(${PROJECT_NAME}Opt PUBLIC
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
   PRIVATE Core/)
 
-if (DIRECTXTK_INTEGRATION)
+if(DIRECTXTK_INTEGRATION)
   target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DIRECTXTK)
   target_compile_definitions(${PROJECT_NAME}Opt PRIVATE USE_DIRECTXTK)
 
@@ -132,7 +132,7 @@ endif()
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 target_compile_features(${PROJECT_NAME}Opt PUBLIC cxx_std_11)
 
-if (MINGW OR VCPKG_TOOLCHAIN)
+if(MINGW OR VCPKG_TOOLCHAIN)
     message("INFO: Using VCPKG for DirectXMath.")
     find_package(directxmath CONFIG REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
@@ -192,10 +192,13 @@ if(MSVC)
       target_compile_options(${PROJECT_NAME} PRIVATE "$<$<NOT:$<CONFIG:DEBUG>>:/guard:ehcont>")
       target_compile_options(${PROJECT_NAME}Opt PRIVATE "$<$<NOT:$<CONFIG:DEBUG>>:/guard:ehcont>")
     endif()
+else()
+    target_compile_definitions(${PROJECT_NAME} PRIVATE $<IF:$<CONFIG:DEBUG>,_DEBUG,NDEBUG>)
+    target_compile_definitions(${PROJECT_NAME}Opt PRIVATE $<IF:$<CONFIG:DEBUG>,_DEBUG,NDEBUG>)
 endif()
 
 if(NOT ${DIRECTX_ARCH} MATCHES "^arm")
-    if (${CMAKE_SIZEOF_VOID_P} EQUAL "4")
+    if(${CMAKE_SIZEOF_VOID_P} EQUAL "4")
         set(ARCH_SSE2 $<$<CXX_COMPILER_ID:MSVC>:/arch:SSE2> $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-msse2>)
     else()
         set(ARCH_SSE2 $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-msse2>)
@@ -205,11 +208,11 @@ if(NOT ${DIRECTX_ARCH} MATCHES "^arm")
     target_compile_options(${PROJECT_NAME}Opt PRIVATE ${ARCH_SSE2})
 endif()
 
-if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
+if( CMAKE_CXX_COMPILER_ID MATCHES "Clang" )
     set(WarningsLib "-Wno-deprecated-declarations" "-Wno-unused-const-variable" "-Wno-switch" "-Wno-ignored-attributes")
     target_compile_options(${PROJECT_NAME} PRIVATE ${WarningsLib})
     target_compile_options(${PROJECT_NAME}Opt PRIVATE ${WarningsLib})
-elseif ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+elseif( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
     target_compile_options(${PROJECT_NAME} PRIVATE /sdl /permissive- /JMC- /Zc:__cplusplus)
     target_compile_options(${PROJECT_NAME}Opt PRIVATE /sdl /permissive- /JMC- /Zc:__cplusplus)
 
@@ -218,17 +221,17 @@ elseif ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
       target_compile_options(${PROJECT_NAME}Opt PRIVATE /analyze)
     endif()
 
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.24)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.24)
         target_compile_options(${PROJECT_NAME} PRIVATE /ZH:SHA_256)
         target_compile_options(${PROJECT_NAME}Opt PRIVATE /ZH:SHA_256)
     endif()
 
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.26)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.26)
         target_compile_options(${PROJECT_NAME} PRIVATE /Zc:preprocessor /wd5104 /wd5105)
         target_compile_options(${PROJECT_NAME}Opt PRIVATE /Zc:preprocessor /wd5104 /wd5105)
     endif()
 
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.34)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.34)
         target_compile_options(${PROJECT_NAME} PRIVATE /wd5262)
         target_compile_options(${PROJECT_NAME}Opt PRIVATE /wd5262)
     endif()
