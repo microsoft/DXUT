@@ -11,6 +11,9 @@ project (DXUT
   HOMEPAGE_URL "http://go.microsoft.com/fwlink/?LinkId=320437"
   LANGUAGES CXX)
 
+# https://devblogs.microsoft.com/cppblog/spectre-mitigations-in-msvc/
+option(ENABLE_SPECTRE_MITIGATION "Build using /Qspectre for MSVC" OFF)
+
 option(ENABLE_CODE_ANALYSIS "Use Static Code Analysis on build" OFF)
 
 option(DIRECTXTK_INTEGRATION "Support mixing with DirectX Tool Kit" OFF)
@@ -133,7 +136,7 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 target_compile_features(${PROJECT_NAME}Opt PUBLIC cxx_std_11)
 
 if(MINGW OR VCPKG_TOOLCHAIN)
-    message("INFO: Using VCPKG for DirectXMath.")
+    message(STATUS "Using VCPKG for DirectXMath.")
     find_package(directxmath CONFIG REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
     target_link_libraries(${PROJECT_NAME}Opt PRIVATE Microsoft::DirectXMath)
@@ -161,7 +164,7 @@ install(TARGETS ${PROJECT_NAME}Opt
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}-config.cmake.in
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/build/${PROJECT_NAME}-config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}-config.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PACKAGE_NAME})
 
@@ -187,7 +190,16 @@ if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /W4 /GR- /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
     target_compile_options(${PROJECT_NAME}Opt PRIVATE /W4 /GR- /fp:fast "$<$<NOT:$<CONFIG:DEBUG>>:/guard:cf>")
 
-    if((MSVC_VERSION GREATER_EQUAL 1928) AND (CMAKE_SIZEOF_VOID_P EQUAL 8)
+    if(ENABLE_SPECTRE_MITIGATION
+       AND (MSVC_VERSION GREATER_EQUAL 1913)
+       AND (NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang")))
+      message(STATUS "Building Spectre-mitigated libraries.")
+      target_compile_options(${PROJECT_NAME} PRIVATE "/Qspectre")
+      target_compile_options(${PROJECT_NAME}Opt PRIVATE "/Qspectre")
+    endif()
+
+    if((MSVC_VERSION GREATER_EQUAL 1928)
+       AND (CMAKE_SIZEOF_VOID_P EQUAL 8)
        AND ((NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang")) OR (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)))
       target_compile_options(${PROJECT_NAME} PRIVATE "$<$<NOT:$<CONFIG:DEBUG>>:/guard:ehcont>")
       target_compile_options(${PROJECT_NAME}Opt PRIVATE "$<$<NOT:$<CONFIG:DEBUG>>:/guard:ehcont>")
