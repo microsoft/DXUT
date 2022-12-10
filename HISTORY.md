@@ -4,6 +4,12 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+### December 10, 2022 (11.30)
+* CMake project updated to require 3.20 or later
+* Fixed MinGW compat issue in DXERR.H
+* Minor code review
+* Added Azure Dev Ops Pipeline YAML files
+
 ### October 24, 2022 (11.29)
 * Fix for build failure `-Wnarrowing` with MinGW GNU 12.2
 

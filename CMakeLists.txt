@@ -3,7 +3,7 @@
 
 cmake_minimum_required (VERSION 3.20)
 
-set(DXUT_VERSION 11.29)
+set(DXUT_VERSION 11.30)
 
 project (DXUT
   VERSION ${DXUT_VERSION}
