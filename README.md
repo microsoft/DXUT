@@ -47,7 +47,7 @@ For the latest version of DXUT for Direct3D 11, please visit the project site on
 
 For questions, consider using [Stack Overflow](https://stackoverflow.com/questions/tagged/dxut) with the *dxut* tag.
 
-## Contributing
+## Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
