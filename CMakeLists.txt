@@ -137,11 +137,16 @@ endif()
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 target_compile_features(${PROJECT_NAME}Opt PUBLIC cxx_std_11)
 
-if(MINGW OR VCPKG_TOOLCHAIN)
-    message(STATUS "Using VCPKG for DirectXMath.")
+if(MINGW)
     find_package(directxmath CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
-    target_link_libraries(${PROJECT_NAME}Opt PRIVATE Microsoft::DirectXMath)
+else()
+    find_package(directxmath CONFIG QUIET)
+endif()
+
+if(directxmath_FOUND)
+    message(STATUS "Using DirectXMath package")
+    target_link_libraries(${PROJECT_NAME} PUBLIC Microsoft::DirectXMath)
+    target_link_libraries(${PROJECT_NAME}Opt PUBLIC Microsoft::DirectXMath)
 endif()
 
 #--- Package
