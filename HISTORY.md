@@ -4,6 +4,10 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+### February 12, 2023 (11.31)
+* Additional checks added to DDSTextureLoader for planar video formats.
+* CMake project update
+
 ### December 10, 2022 (11.30)
 * CMake project updated to require 3.20 or later
 * Fixed MinGW compat issue in DXERR.H
@@ -73,7 +77,7 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ### October 13, 2017 (11.16)
 * Updated DDSTextureLoader, WICTextureLoader, and ScreenGrab
-* Updated for VS 2017 update 15.1 - 15.3 and Windows 10 SDK (15063)    
+* Updated for VS 2017 update 15.1 - 15.3 and Windows 10 SDK (15063)
 
 ### March 10, 2017 (11.15)
 * Add VS 2017 projects
