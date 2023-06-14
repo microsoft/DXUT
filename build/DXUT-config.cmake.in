@@ -2,5 +2,10 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@-targets.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Opt-targets.cmake)
+include(CMakeFindDependencyMacro)
+
+if(MINGW)
+    find_dependency(directxmath CONFIG)
+endif()
 
 check_required_components("@PROJECT_NAME@")
