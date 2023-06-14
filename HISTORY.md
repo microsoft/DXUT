@@ -4,6 +4,9 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+### June 13, 2023
+* CMake project updates
+
 ### February 12, 2023 (11.31)
 * Additional checks added to DDSTextureLoader for planar video formats.
 * CMake project update
