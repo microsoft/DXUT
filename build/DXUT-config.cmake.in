@@ -5,7 +5,9 @@ include(${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Opt-targets.cmake)
 include(CMakeFindDependencyMacro)
 
 if(MINGW)
-    find_dependency(directxmath CONFIG)
+    find_dependency(directxmath)
+else()
+    find_package(directxmath CONFIG QUIET)
 endif()
 
 check_required_components("@PROJECT_NAME@")
