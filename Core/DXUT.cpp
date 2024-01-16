@@ -4158,7 +4158,7 @@ LPCWSTR WINAPI DXUTGetFrameStats( _In_ bool bShowFPS )
 {
     auto pstrFrameStats = GetDXUTState().GetFrameStats();
     const WCHAR* pstrFPS = ( bShowFPS ) ? GetDXUTState().GetFPSStats() : L"";
-    WCHAR* pstrStats = GetDXUTState().GetStaticFrameStats();
+    const WCHAR* pstrStats = GetDXUTState().GetStaticFrameStats();
     swprintf_s( pstrFrameStats, 256, pstrStats, pstrFPS );
     return pstrFrameStats;
 }
