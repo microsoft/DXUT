@@ -394,7 +394,7 @@ protected:
     static DWORD m_dwOpenModeSinkCookie;
     static DWORD m_dwConvModeSinkCookie;
     static CUIElementSink* m_TsfSink;
-    static int m_nCandidateRefCount;	// Some IME shows multiple candidate lists but the Library doesn't support multiple candidate list. 
+    static int m_nCandidateRefCount;	// Some IME shows multiple candidate lists but the Library doesn't support multiple candidate list.
     // So track open / close events to make sure the candidate list opened last is shown.
     CTsfUiLessMode() = default; // this class can't be instanciated
 
@@ -523,11 +523,11 @@ static void CancelCompString( HWND hwnd, bool bUseBackSpace = true, int iNewStrL
     if( bUseBackSpace || g_bInsertMode )
         iNewStrLen = 0;
 
-    // The caller sets bUseBackSpace to false if there's possibility of sending 
+    // The caller sets bUseBackSpace to false if there's possibility of sending
     // new composition string to the app right after this function call.
-    // 
-    // If the app is in overwriting mode and new comp string is 
-    // shorter than current one, delete previous comp string 
+    //
+    // If the app is in overwriting mode and new comp string is
+    // shorter than current one, delete previous comp string
     // till it's same long as the new one. Then move caret to the beginning of comp string.
     // New comp string will overwrite old one.
     if( iNewStrLen < cc )
@@ -723,7 +723,7 @@ static void DrawImeIndicator()
 #ifdef DS2
         // revert the height.
         g_CaretInfo.pFont->SetHeight( _h );
-        
+
         // Double-check: Confirm match by testing a range of font heights to find best fit
         DWORD _h2;
         g_CaretInfo.pFont->GetTextExtent( TEXT(" "), &_w, &_h2 );
@@ -819,7 +819,7 @@ static void DrawCompositionString( _In_ bool bDrawCompAttr )
                     bgColor = gSkinCompStr.colorTargetConv;
                     if( IMEID_LANG( GetImeId() ) != LANG_CHS )
                         saveCandPos = true;
-                    break;						
+                    break;
                 case ATTR_CONVERTED:
                     bgColor = gSkinCompStr.colorConverted;
                     break;
@@ -855,7 +855,7 @@ static void DrawCompositionString( _In_ bool bDrawCompAttr )
             }
             else if( g_dwIMELevel == 2 )
             {
-                // make sure enough buffer space (possible space, NUL for current line, possible DBCS, 2 more NUL) 
+                // make sure enough buffer space (possible space, NUL for current line, possible DBCS, 2 more NUL)
                 // are available in multiline composition string buffer
                 bool bWrite = (pszMlcs - g_szMultiLineCompString <
                     static_cast<ptrdiff_t>(COUNTOF(g_szMultiLineCompString) - 5 * (3 - sizeof(TCHAR))));
@@ -950,7 +950,7 @@ static void DrawCandidateList()
     // If position of candidate list is not initialized yet, set it here.
     if( candX == POSITION_UNINITIALIZED )
     {
-        // CHT IME in Vista doesn't have ATTR_TARGET_CONVERTED attribute while typing, 
+        // CHT IME in Vista doesn't have ATTR_TARGET_CONVERTED attribute while typing,
         // so display the candidate list near the caret in the composition string
         if( GETLANG() == LANG_CHT && GetImeId() != 0 && g_dwCaretX != POSITION_UNINITIALIZED )
         {
@@ -1078,7 +1078,7 @@ static void DrawCandidateList()
     }
     else if( g_bVerticalCand )
     {
-        // uDigitWidth is the max width of all digits. 
+        // uDigitWidth is the max width of all digits.
         if( !g_bReadingWindow )
         {
             seperateLineX = left + dwMarginX + uDigitWidth + uSpaceWidth / 2;
@@ -1178,7 +1178,7 @@ static void DrawCandidateList()
 
                     int dx = candX + ( seperateLineX - candX - uDigitWidthList[nOneDigit] ) / 2;
                     int dy = candY + largest.cy * i;
-                    
+
                     g_CaretInfo.pFont->SetPosition( dx, dy );
                     g_CaretInfo.pFont->DrawText( szOneDigit );
                     g_CaretInfo.pFont->SetPosition( seperateLineX + dwMarginX, dy );
@@ -1385,7 +1385,7 @@ LPARAM ImeUi_ProcessMessage( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM& lParam
                         break;
                     CheckToggleState();
                     break;
-            
+
                 case IMN_OPENCANDIDATE:
                 case IMN_CHANGECANDIDATE:
                     if( g_bUILessMode )
@@ -1398,7 +1398,7 @@ LPARAM ImeUi_ProcessMessage( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM& lParam
                         himc = _ImmGetContext( hWnd );
                         if( !himc )
                             break;
-                    
+
                         LPCANDIDATELIST lpCandList;
                         DWORD dwIndex, dwBufLen;
 
@@ -1468,7 +1468,7 @@ LPARAM ImeUi_ProcessMessage( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM& lParam
                         }
                         break;
                     }
-            
+
                 case IMN_CLOSECANDIDATE:
                     if( g_bUILessMode )
                     {
@@ -1520,7 +1520,7 @@ LPARAM ImeUi_ProcessMessage( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM& lParam
             }
             break;
 
-            // fix for #15386 - When Text Service Framework is installed in Win2K, Alt+Shift and Ctrl+Shift combination (to switch 
+            // fix for #15386 - When Text Service Framework is installed in Win2K, Alt+Shift and Ctrl+Shift combination (to switch
             // input locale / keyboard layout) doesn't send WM_KEYUP message for the key that is released first. We need to check
             // if these keys are actually up whenever we receive key up message for other keys.
         case WM_KEYUP:
@@ -1528,7 +1528,7 @@ LPARAM ImeUi_ProcessMessage( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM& lParam
             if( !( lAlt & 0x80000000 ) && wParam != VK_MENU && ( GetAsyncKeyState( VK_MENU ) & 0x8000 ) == 0 )
             {
                 PostMessageA( GetFocus(), WM_KEYUP, ( WPARAM )VK_MENU, ( lAlt & 0x01ff0000 ) | 0xC0000001 );
-            }	
+            }
             else if( !( lCtrl & 0x80000000 ) && wParam != VK_CONTROL &&
                      ( GetAsyncKeyState( VK_CONTROL ) & 0x8000 ) == 0 )
             {
@@ -1715,7 +1715,7 @@ bool ImeUi_Initialize(_In_  HWND hwnd, _In_ bool bDisable )
     _SendCompString = SendCompString;
     _SendMessage = SendMessageW;
 
-    // turn init flag on so that subsequent calls to ImeUi functions work. 
+    // turn init flag on so that subsequent calls to ImeUi functions work.
     g_bInitialized = true;
 
     ImeUi_SetWindow( g_hwndMain );
@@ -1792,7 +1792,7 @@ void ImeUi_Uninitialize()
 
 //
 //	GetImeId( UINT uIndex )
-//		returns 
+//		returns
 //	returned value:
 //	0: In the following cases
 //		- Non Chinese IME input locale
@@ -1808,7 +1808,7 @@ void ImeUi_Uninitialize()
 //			pVerFixedInfo->dwFileVersionLS
 //
 //	Use IMEID_VER and IMEID_LANG macro to extract version and language information.
-//	
+//
 static DWORD GetImeId( _In_ UINT uIndex )
 {
     static HKL hklPrev = 0;
@@ -1816,7 +1816,7 @@ static DWORD GetImeId( _In_ UINT uIndex )
     {
         0, 0
     };
-    
+
     DWORD dwVerSize;
     DWORD dwVerHandle;
     LPVOID lpVerBuffer;
@@ -1848,7 +1848,7 @@ static DWORD GetImeId( _In_ UINT uIndex )
     {
         goto error;
     }
-    
+
     if( _ImmGetIMEFileNameA( kl, szTmp, sizeof( szTmp ) - 1 ) <= 0 )
     {
         goto error;
@@ -1928,7 +1928,7 @@ static void GetReadingString( _In_ HWND hWnd )
     {
         return;
     }
-    
+
     HIMC himc;
     himc = _ImmGetContext( hWnd );
     if( !himc )
@@ -1961,35 +1961,35 @@ static void GetReadingString( _In_ HWND hWnd )
     else //	IMEs that doesn't implement Reading String API
     {
         lpIMC = _ImmLockIMC( himc );
-        
+
         // *** hacking code from Michael Yang ***
-        
+
         LPBYTE p = 0;
-        
+
         switch( dwId )
         {
-        
+
             case IMEID_CHT_VER42: // New(Phonetic/ChanJie)IME98  : 4.2.x.x // Win98
             case IMEID_CHT_VER43: // New(Phonetic/ChanJie)IME98a : 4.3.x.x // WinMe, Win2k
             case IMEID_CHT_VER44: // New ChanJie IME98b          : 4.4.x.x // WinXP
-            
+
                 p = *( LPBYTE* )( ( LPBYTE )_ImmLockIMCC( lpIMC->hPrivate ) + 24 );
                 if( !p ) break;
-                dwlen = *( DWORD* )( p + 7 * 4 + 32 * 4 );	//m_dwInputReadStrLen
-                dwerr = *( DWORD* )( p + 8 * 4 + 32 * 4 );	//m_dwErrorReadStrStart
-                wstr = ( WCHAR* )( p + 56 );
+                dwlen = *( DWORD* )( p + 7 * 4 + 32 * 4 );
+                dwerr = *( DWORD* )( p + 8 * 4 + 32 * 4 );
+                wstr = ( WCHAR* )( p + 56 ); // CodeQL [CodeQL.SM02986] This code is working with individual Unicode bytecodes so needs to use this cast
                 unicode = TRUE;
                 break;
-        
+
             case IMEID_CHT_VER50: // 5.0.x.x // WinME
-            
+
                 p = *( LPBYTE* )( ( LPBYTE )_ImmLockIMCC( lpIMC->hPrivate ) + 3 * 4 ); // PCKeyCtrlManager
                 if( !p ) break;
                 p = *( LPBYTE* )( ( LPBYTE )p + 1 * 4 + 5 * 4 + 4 * 2 ); // = PCReading = &STypingInfo
                 if( !p ) break;
-                dwlen = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 );		//m_dwDisplayStringLength;
-                dwerr = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 + 1 * 4 );	//m_dwDisplayErrorStart;
-                wstr = ( WCHAR* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 );
+                dwlen = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 );
+                dwerr = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 + 1 * 4 );
+                wstr = ( WCHAR* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 ); // CodeQL [CodeQL.SM02986] This code is working with individual Unicode bytecodes so needs to use this cast
                 unicode = FALSE;
                 break;
 
@@ -2001,9 +2001,9 @@ static void GetReadingString( _In_ HWND hWnd )
                 if( !p ) break;
                 p = *( LPBYTE* )( ( LPBYTE )p + 1 * 4 + 5 * 4 );                       // = PCReading = &STypingInfo
                 if( !p ) break;
-                dwlen = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 * 2 );		//m_dwDisplayStringLength;
-                dwerr = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 * 2 + 1 * 4 );	//m_dwDisplayErrorStart;
-                wstr = ( WCHAR* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 );
+                dwlen = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 * 2 );
+                dwerr = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 * 2 + 1 * 4 );
+                wstr = ( WCHAR* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 ); // CodeQL [CodeQL.SM02986] This code is working with individual Unicode bytecodes so needs to use this cast
                 unicode = TRUE;
                 break;
 
@@ -2018,7 +2018,7 @@ static void GetReadingString( _In_ HWND hWnd )
                 dwlen = *( DWORD* )( p + 7 * 4 + 16 * 2 * 4 );
                 dwerr = *( DWORD* )( p + 8 * 4 + 16 * 2 * 4 );
                 dwerr = std::min( dwerr, dwlen );
-                wstr = ( WCHAR* )( p + 6 * 4 + 16 * 2 * 1 );
+                wstr = ( WCHAR* )( p + 6 * 4 + 16 * 2 * 1 ); // CodeQL [CodeQL.SM02986] This code is working with individual Unicode bytecodes so needs to use this cast
                 unicode = TRUE;
                 break;
             }
@@ -2028,18 +2028,18 @@ static void GetReadingString( _In_ HWND hWnd )
                 int nTcharSize = IsNT() ? sizeof( WCHAR ) : sizeof( char );
                 p = *( LPBYTE* )( ( LPBYTE )_ImmLockIMCC( lpIMC->hPrivate ) + 1 * 4 + 1 * 4 + 6 * 4 ); // = PCReading = &STypintInfo
                 if( !p ) break;
-                dwlen = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 * nTcharSize );		//m_dwDisplayStringLength;
-                dwerr = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 * nTcharSize + 1 * 4 );	//m_dwDisplayErrorStart;
-                wstr = ( WCHAR* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 );                 //m_tszDisplayString
+                dwlen = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 * nTcharSize );
+                dwerr = *( DWORD* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 + 16 * nTcharSize + 1 * 4 );
+                wstr = ( WCHAR* )( p + 1 * 4 + ( 16 * 2 + 2 * 4 ) + 5 * 4 ); // CodeQL [CodeQL.SM02986] This code is working with individual Unicode bytecodes so needs to use this cast
                 unicode = IsNT() ? TRUE : FALSE;
             }
         }	// switch
-        
+
         g_szCandidate[0][0] = 0;
         g_szCandidate[1][0] = 0;
         g_szCandidate[2][0] = 0;
         g_szCandidate[3][0] = 0;
-    }	
+    }
     g_dwCount = dwlen;
     g_dwSelection = ( DWORD )-1; // do not select any char
     if( unicode )
@@ -2188,7 +2188,7 @@ void ImeUi_FinalizeString( _In_ bool bSend )
     static bool bProcessing = false; // to avoid infinite recursion
     if( !g_bInitialized || bProcessing )
         return;
-        
+
     himc = _ImmGetContext( g_hwndCurr );
     if ( !himc )
         return;
@@ -2217,7 +2217,7 @@ void ImeUi_FinalizeString( _In_ bool bSend )
         ImmSetCompositionString( himc, SCS_SETSTR, const_cast<wchar_t*>(L""), sizeof(wchar_t), const_cast<char*>(""), sizeof(wchar_t) );
     }
     // the following line is necessary as Korean IME doesn't close cand list when comp string is cancelled.
-    _ImmNotifyIME( himc, NI_CLOSECANDIDATE, 0, 0 );	
+    _ImmNotifyIME( himc, NI_CLOSECANDIDATE, 0, 0 );
     _ImmReleaseContext( g_hwndCurr, himc );
     // Zooty2 RAID #4759: Sometimes application doesn't receive IMN_CLOSECANDIDATE on Alt+Tab
     // So the same code for IMN_CLOSECANDIDATE is replicated here.
@@ -2295,7 +2295,7 @@ static void CheckToggleState()
     CheckInputLocale();
 
     // In Vista, we have to use TSF since few IMM functions don't work as expected.
-    // WARNING: Because of timing, g_dwState and g_bChineseIME may not be updated 
+    // WARNING: Because of timing, g_dwState and g_bChineseIME may not be updated
     // immediately after the change on IME states by user.
     if( g_bUILessMode )
     {
@@ -2553,7 +2553,7 @@ static void CheckInputLocale()
         case LANG_JAPANESE:
             g_pszIndicatior = g_aszIndicator[INDICATOR_JAPANESE];
             g_bVerticalCand = true;
-            break;		
+            break;
         default:
             g_pszIndicatior = g_aszIndicator[INDICATOR_NON_IME];
     }
@@ -2671,7 +2671,7 @@ void CTsfUiLessMode::ReleaseSinks()
         m_tm->Deactivate();
         SAFE_RELEASE( m_tm );
         SAFE_RELEASE( m_TsfSink );
-    }	
+    }
 }
 
 CTsfUiLessMode::CUIElementSink::CUIElementSink() noexcept : _cRef(1)
@@ -3039,7 +3039,7 @@ BOOL CTsfUiLessMode::CurrentInputLocaleIsIme()
     return ret;
 }
 
-// Sets up or removes sink for UI element. 
+// Sets up or removes sink for UI element.
 // UI element sink should be removed when IME is disabled,
 // otherwise the sink can be triggered when a game has multiple instances of IME UI library.
 void CTsfUiLessMode::EnableUiUpdates( bool bEnable )
@@ -3170,7 +3170,7 @@ BOOL CTsfUiLessMode::SetupCompartmentSinks( BOOL bRemoveOnly, ITfCompartment* pT
 
 
 WORD ImeUi_GetPrimaryLanguage()
-{	
+{
     return GETPRIMLANG();
 };
 
