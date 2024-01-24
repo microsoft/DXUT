@@ -16,15 +16,15 @@
 #define STRICT
 #endif
 
-// If app hasn't choosen, set to work with Windows Vista and beyond
+// If app hasn't choosen, set to work with Windows 7 and beyond
 #ifndef WINVER
-#define WINVER         0x0600
+#define WINVER         0x0601
 #endif
 #ifndef _WIN32_WINDOWS
-#define _WIN32_WINDOWS 0x0600
+#define _WIN32_WINDOWS 0x0601
 #endif
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT   0x0600
+#define _WIN32_WINNT   0x0601
 #endif
 
 #if defined(USE_DIRECT3D11_4) && !defined(USE_DIRECT3D11_3)
