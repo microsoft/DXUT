@@ -52,7 +52,11 @@
 #include <new>
 #include <tuple>
 
+#pragma warning(push)
+#pragma warning(disable : 6553)
 #include <Windows.h>
+#pragma warning(pop)
+
 #include <initguid.h>
 #include <commctrl.h> // for InitCommonControls() 
 #include <shellapi.h> // for ExtractIcon()

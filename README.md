@@ -39,6 +39,10 @@ For the latest version of DXUT for Direct3D 11, please visit the project site on
 
 ## Release Notes
 
+FOR SECURITY ADVISORIES, see [GitHub](https://github.com/microsoft/DXUT/security/advisories).
+
+For a full change history, see [CHANGELOG.md](https://github.com/microsoft/DXUT/blob/main/CHANGELOG.md).
+
 * Starting with the July 2022 release, the ``bool forceSRGB`` parameter for DDSTextureLoader ``Ex`` functions is now a ``DDS_LOADER_FLAGS`` typed enum bitmask flag parameter. This may have a *breaking change* impact to client code. Replace ``true`` with ``DDS_LOADER_FORCE_SRGB`` and ``false`` with ``DDS_LOADER_DEFAULT``.
 
 * There are known codegen issues when mixing the library built with Visual C++ and the sample built with recent builds of clang/LLVM for Windows. Building both the library and the sample using the same complier avoids the issue.
