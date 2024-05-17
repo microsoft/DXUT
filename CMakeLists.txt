@@ -250,7 +250,7 @@ elseif( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
     target_compile_options(${PROJECT_NAME}Opt PRIVATE /sdl /permissive- /JMC- /Zc:__cplusplus /Zc:inline)
 
     if(ENABLE_CODE_ANALYSIS)
-      target_compile_options(${PROJECT_NAME} PRIVATE /analyze)
+      target_compile_options(${PROJECT_NAME} PRIVATE /analyze /WX)
       target_compile_options(${PROJECT_NAME}Opt PRIVATE /analyze)
     endif()
 

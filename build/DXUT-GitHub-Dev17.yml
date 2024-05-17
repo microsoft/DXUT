@@ -5,15 +5,28 @@
 
 # Builds the library for Windows Desktop.
 
-trigger: none
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - '*.md'
+    - LICENSE
+    - CMake*
+    - build/*.in
 
 pr:
   branches:
     include:
     - main
   paths:
-    include:
-    - build/DXUT-GitHub-Dev17.yml
+    exclude:
+    - '*.md'
+    - LICENSE
+    - CMake*
+    - build/*.in
+  drafts: false
 
 resources:
   repositories:
