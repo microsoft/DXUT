@@ -42,13 +42,6 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: cmake -B out -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
 
-      - name: 'Build Shaders'
-        shell: cmd
-        working-directory: ./Src/Shaders
-        run: CompileShaders.cmd dxil
-        env:
-          CompileShadersOutput: ${{ github.workspace }}/out/Shaders/Compiled
-
       - name: Initialize MSVC Code Analysis
         uses: microsoft/msvc-code-analysis-action@v0.1.1
         id: run-analysis
