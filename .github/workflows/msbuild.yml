@@ -10,6 +10,11 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - '*.md'
+      - LICENSE
+      - '.nuget/*'
+      - build/*.yml
 
 permissions:
   contents: read
