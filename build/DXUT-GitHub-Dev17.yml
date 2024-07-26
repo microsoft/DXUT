@@ -14,6 +14,8 @@ trigger:
     - '*.md'
     - LICENSE
     - CMake*
+    - '.github/*'
+    - build/*.cmake
     - build/*.in
 
 pr:
@@ -25,6 +27,8 @@ pr:
     - '*.md'
     - LICENSE
     - CMake*
+    - '.github/*'
+    - build/*.cmake
     - build/*.in
   drafts: false
 
