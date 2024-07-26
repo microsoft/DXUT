@@ -218,6 +218,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
        AND (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.13))
         message(STATUS "Building Spectre-mitigated libraries")
         target_compile_options(${PROJECT_NAME} PRIVATE "/Qspectre")
+        target_compile_options(${PROJECT_NAME}Opt PRIVATE "/Qspectre")
     endif()
 endif()
 
