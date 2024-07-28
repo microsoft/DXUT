@@ -3,7 +3,7 @@
 #
 # http://go.microsoft.com/fwlink/?LinkId=320437
 
-# Builds the library using CMake.
+# Builds the library using CMake with VS Generator (GitHub Actions covers Ninja).
 
 trigger:
   branches:

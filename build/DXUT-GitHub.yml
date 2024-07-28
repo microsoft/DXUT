@@ -5,32 +5,22 @@
 
 # Builds the library for Windows Desktop.
 
-trigger:
+schedules:
+- cron: "30 5 * * *"
+  displayName: 'Nightly build'
   branches:
     include:
     - main
-  paths:
-    exclude:
-    - '*.md'
-    - LICENSE
-    - CMake*
-    - '.github/*'
-    - build/*.cmake
-    - build/*.in
 
+# GitHub Actions handles MSBuild for CI/PR
+trigger: none
 pr:
   branches:
     include:
     - main
   paths:
-    exclude:
-    - '*.md'
-    - LICENSE
-    - CMake*
-    - '.github/*'
-    - build/*.cmake
-    - build/*.in
-  drafts: false
+    include:
+    - build/DXUT-GitHub.yml
 
 resources:
   repositories:
