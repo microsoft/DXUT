@@ -357,6 +357,13 @@ bool CDXUTIMEEditBox::HandleMouse( UINT uMsg, const POINT& pt, WPARAM wParam, LP
                             }
 
                             // Not converted case. Fall thru to Chinese case.
+                            #if (__cplusplus >= 201703L)
+                                [[fallthrough]];
+                            #elif defined(__clang__)
+                                [[clang::fallthrough]];
+                            #elif defined(_MSC_VER)
+                                __fallthrough;
+                            #endif
 
                         case LANG_CHINESE:
                         {
