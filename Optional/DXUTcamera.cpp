@@ -310,7 +310,7 @@ LRESULT CBaseCamera::HandleMessages( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
             D3DUtil_CameraKeys mappedKey = MapKey( ( UINT )wParam );
             if( mappedKey != CAM_UNKNOWN )
             {
-                _Analysis_assume_( mappedKey < CAM_MAX_KEYS );
+                _Analysis_assume_( mappedKey >= 0 && mappedKey < CAM_MAX_KEYS );
                 if( FALSE == IsKeyDown( m_aKeys[mappedKey] ) )
                 {
                     m_aKeys[ mappedKey ] = KEY_WAS_DOWN_MASK | KEY_IS_DOWN_MASK;

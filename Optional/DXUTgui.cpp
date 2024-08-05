@@ -3021,6 +3021,7 @@ bool CDXUTButton::HandleKeyboard( UINT uMsg, WPARAM wParam, LPARAM lParam )
                     m_bPressed = true;
                     return true;
             }
+            break;
         }
 
         case WM_KEYUP:
@@ -3035,6 +3036,7 @@ bool CDXUTButton::HandleKeyboard( UINT uMsg, WPARAM wParam, LPARAM lParam )
                     }
                     return true;
             }
+            break;
         }
     }
     return false;
@@ -3192,6 +3194,7 @@ bool CDXUTCheckBox::HandleKeyboard( UINT uMsg, WPARAM wParam, LPARAM lParam )
                     m_bPressed = true;
                     return true;
             }
+            break;
         }
 
         case WM_KEYUP:
@@ -3206,6 +3209,7 @@ bool CDXUTCheckBox::HandleKeyboard( UINT uMsg, WPARAM wParam, LPARAM lParam )
                     }
                     return true;
             }
+            break;
         }
     }
     return false;
@@ -3365,6 +3369,7 @@ bool CDXUTRadioButton::HandleKeyboard( UINT uMsg, WPARAM wParam, LPARAM lParam )
                     m_bPressed = true;
                     return true;
             }
+            break;
         }
 
         case WM_KEYUP:
@@ -3383,6 +3388,7 @@ bool CDXUTRadioButton::HandleKeyboard( UINT uMsg, WPARAM wParam, LPARAM lParam )
                     }
                     return true;
             }
+            break;
         }
     }
     return false;
