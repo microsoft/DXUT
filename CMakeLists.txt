@@ -3,7 +3,7 @@
 
 cmake_minimum_required (VERSION 3.20)
 
-set(DXUT_VERSION 11.31)
+set(DXUT_VERSION 11.32)
 
 if(WINDOWS_STORE OR (DEFINED XBOX_CONSOLE_TARGET))
    message(FATAL "DXUT does not support UWP or Xbox")
