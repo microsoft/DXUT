@@ -4,6 +4,12 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 ## Release History
 
+### August 14, 2024 (11.32)
+* Added missing Win32 messages to DXUTTraceWindowsMessage
+* Minor code cleanup
+* CMake project updates, refactor, and added ARM64EC support
+* Added GitHub Action Pipeline YAML files
+
 ### June 13, 2023
 * CMake project updates
 
