@@ -867,7 +867,7 @@ static void DrawCompositionString( _In_ bool bDrawCompAttr )
                     pszCurrentCompLine = g_szCompositionString + i;
                     if( bWrite )
                     {
-                        if( pszMlcs == g_szMultiLineCompString || pszMlcs[-1] == 0 )
+                        if( pszMlcs == g_szMultiLineCompString || pszMlcs[-1] == 0 ) // CodeQL [CodeQL.SM01947] This code relies on short-cut evaluation to avoid the overflow
                             *pszMlcs++ = ' ';	// to avoid zero length line
                         *pszMlcs++ = 0;
                     }
