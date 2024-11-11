@@ -137,8 +137,8 @@ endif()
 
 if(directxmath_FOUND)
     message(STATUS "Using DirectXMath package")
-    target_link_libraries(${PROJECT_NAME} PUBLIC Microsoft::DirectXMath)
-    target_link_libraries(${PROJECT_NAME}Opt PUBLIC Microsoft::DirectXMath)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Microsoft::DirectXMath)
+    target_link_libraries(${PROJECT_NAME}Opt PRIVATE Microsoft::DirectXMath)
 endif()
 
 #--- Package
