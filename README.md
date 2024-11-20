@@ -35,7 +35,7 @@ All content and source code for this package are subject to the terms of the [MI
 
 For the latest version of DXUT for Direct3D 11, please visit the project site on [GitHub](https://github.com/microsoft/DXUT).
 
-> The legacy versions of **DXUT for DX11/DX9** and **DXUT for DX10/DX9** version are on [GitHub](https://github.com/walbourn/directx-sdk-legacy-samples). These both require using [Microsoft.DXSDK.D3DX](https://www.nuget.org/packages/Microsoft.DXSDK.D3DX).
+> The legacy versions of **DXUT for DX11/DX9** and **DXUT for DX10/DX9** version are on [GitHub](https://github.com/microsoft/DirectX-SDK-Samples). These both require using [Microsoft.DXSDK.D3DX](https://www.nuget.org/packages/Microsoft.DXSDK.D3DX).
 
 ## Release Notes
 
@@ -69,4 +69,4 @@ The DXUT library is the work of Shanon Drone, Jason Sandlin, and David Tuft with
 * BasicHLSL11, EmptyProject11, SimpleSample11
 * DXUT+DirectXTK Simple Sample
 
-These are hosted on [GitHub](https://github.com/walbourn/directx-sdk-samples)
+These are hosted on [GitHub](https://github.com/microsoft/DirectX-SDK-Samples)
