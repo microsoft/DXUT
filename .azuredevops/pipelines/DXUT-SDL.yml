@@ -21,7 +21,7 @@ pr:
     - main
   paths:
     include:
-    - build/DXUT-SDL.yml
+    - '.azuredevops/pipelines/DXUT-SDL.yml'
 
 resources:
   repositories:
