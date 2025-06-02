@@ -155,7 +155,7 @@ const UINT              g_uUIEffectFileSize = sizeof( g_strUIEffectFile );
 
 // DXUT_MAX_EDITBOXLENGTH is the maximum string length allowed in edit boxes,
 // including the nul terminator.
-// 
+//
 // Uniscribe does not support strings having bigger-than-16-bits length.
 // This means that the string must be less than 65536 characters long,
 // including the nul terminator.
@@ -214,7 +214,7 @@ HRESULT InitFont11( _In_ ID3D11Device* pd3d11Device, _In_ ID3D11InputLayout* pIn
     HRESULT hr = S_OK;
     WCHAR str[MAX_PATH];
     V_RETURN( DXUTFindDXSDKMediaFileCch( str, MAX_PATH, L"UI\\Font.dds" ) );
-    
+
     V_RETURN( CreateDDSTextureFromFile( pd3d11Device, str, nullptr, &g_pFont11 ) );
 
     g_pInputLayout11 = pInputLayout;
@@ -265,7 +265,7 @@ void DrawText11DXUT( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3d11Device
         fRectBottom = fRectBottom * 2.0f - 1.0f;
         float fcenterx = ((fRectRight - fRectLeft) - (float)NumChars*fGlyphSizeX) *0.5f;
         float fcentery = ((fRectTop - fRectBottom) - (float)1*fGlyphSizeY) *0.5f;
-        fRectLeft += fcenterx ;    
+        fRectLeft += fcenterx ;
         fRectTop -= fcentery;
     }
     float fOriginalLeft = fRectLeft;
@@ -373,7 +373,7 @@ void EndText11( ID3D11Device* pd3dDevice, ID3D11DeviceContext* pd3d11DeviceConte
     destRegion.back = 1;
     D3D11_MAPPED_SUBRESOURCE MappedResource;
     if ( S_OK == pd3d11DeviceContext->Map( g_pFontBuffer11, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource ) )
-    { 
+    {
         memcpy( MappedResource.pData, (void*)&g_FontVertices[0], FontDataBytes );
         pd3d11DeviceContext->Unmap(g_pFontBuffer11, 0);
     }
@@ -493,8 +493,8 @@ _Use_decl_annotations_
 void CDXUTDialog::SetCallback( PCALLBACKDXUTGUIEVENT pCallback, void* pUserContext )
 {
     // If this assert triggers, you need to call CDXUTDialog::Init() first.  This change
-    // was made so that the DXUT's GUI could become seperate and optional from DXUT's core.  The 
-    // creation and interfacing with CDXUTDialogResourceManager is now the responsibility 
+    // was made so that the DXUT's GUI could become seperate and optional from DXUT's core.  The
+    // creation and interfacing with CDXUTDialogResourceManager is now the responsibility
     // of the application if it wishes to use DXUT's GUI.
     assert( m_pManager && L"To fix call CDXUTDialog::Init() first.  See comments for details." );
 
@@ -712,8 +712,8 @@ _Use_decl_annotations_
 HRESULT CDXUTDialog::SetFont( UINT index, LPCWSTR strFaceName, LONG height, LONG weight )
 {
     // If this assert triggers, you need to call CDXUTDialog::Init() first.  This change
-    // was made so that the DXUT's GUI could become seperate and optional from DXUT's core.  The 
-    // creation and interfacing with CDXUTDialogResourceManager is now the responsibility 
+    // was made so that the DXUT's GUI could become seperate and optional from DXUT's core.  The
+    // creation and interfacing with CDXUTDialogResourceManager is now the responsibility
     // of the application if it wishes to use DXUT's GUI.
     assert( m_pManager && L"To fix call CDXUTDialog::Init() first.  See comments for details." );
     _Analysis_assume_( m_pManager );
@@ -745,8 +745,8 @@ _Use_decl_annotations_
 HRESULT CDXUTDialog::SetTexture( UINT index, LPCWSTR strFilename )
 {
     // If this assert triggers, you need to call CDXUTDialog::Init() first.  This change
-    // was made so that the DXUT's GUI could become seperate and optional from DXUT's core.  The 
-    // creation and interfacing with CDXUTDialogResourceManager is now the responsibility 
+    // was made so that the DXUT's GUI could become seperate and optional from DXUT's core.  The
+    // creation and interfacing with CDXUTDialogResourceManager is now the responsibility
     // of the application if it wishes to use DXUT's GUI.
     assert( m_pManager && L"To fix this, call CDXUTDialog::Init() first.  See comments for details." );
     _Analysis_assume_( m_pManager );
@@ -769,8 +769,8 @@ _Use_decl_annotations_
 HRESULT CDXUTDialog::SetTexture( UINT index, LPCWSTR strResourceName, HMODULE hResourceModule )
 {
     // If this assert triggers, you need to call CDXUTDialog::Init() first.  This change
-    // was made so that the DXUT's GUI could become seperate and optional from DXUT's core.  The 
-    // creation and interfacing with CDXUTDialogResourceManager is now the responsibility 
+    // was made so that the DXUT's GUI could become seperate and optional from DXUT's core.  The
+    // creation and interfacing with CDXUTDialogResourceManager is now the responsibility
     // of the application if it wishes to use DXUT's GUI.
     assert( m_pManager && L"To fix this, call CDXUTDialog::Init() first.  See comments for details." );
     _Analysis_assume_( m_pManager );
@@ -984,7 +984,7 @@ bool CDXUTDialog::MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
         case WM_XBUTTONDBLCLK:
         case WM_MOUSEWHEEL:
             {
-                // If not accepting mouse input, return false to indicate the message should still 
+                // If not accepting mouse input, return false to indicate the message should still
                 // be handled by the application (usually to move the camera).
                 if( !m_bMouseInput )
                     return false;
@@ -1637,7 +1637,7 @@ HRESULT CDXUTDialog::DrawSprite( CDXUTElement* pElement, const RECT* prcDest, fl
     fRectTop = fRectTop * 2.0f - 1.0f;
     fRectRight = fRectRight * 2.0f - 1.0f;
     fRectBottom = fRectBottom * 2.0f - 1.0f;
-    
+
     float fTexLeft = rcTexture.left / fTexWidth;
     float fTexTop = rcTexture.top / fTexHeight;
     float fTexRight = rcTexture.right / fTexWidth;
@@ -2296,11 +2296,11 @@ HRESULT CDXUTDialogResourceManager::OnD3D11CreateDevice( ID3D11Device* pd3dDevic
     ID3DBlob* pVSBlob = nullptr;
     ID3DBlob* pPSBlob = nullptr;
     ID3DBlob* pPSUntexBlob = nullptr;
-    V_RETURN( D3DCompile( g_strUIEffectFile, g_uUIEffectFileSize, "none", nullptr, nullptr, "VS", "vs_4_0_level_9_1", 
+    V_RETURN( D3DCompile( g_strUIEffectFile, g_uUIEffectFileSize, "none", nullptr, nullptr, "VS", "vs_4_0_level_9_1",
          D3D10_SHADER_ENABLE_BACKWARDS_COMPATIBILITY, 0, &pVSBlob, nullptr ) );
-    V_RETURN( D3DCompile( g_strUIEffectFile, g_uUIEffectFileSize, "none", nullptr, nullptr, "PS", "ps_4_0_level_9_1", 
+    V_RETURN( D3DCompile( g_strUIEffectFile, g_uUIEffectFileSize, "none", nullptr, nullptr, "PS", "ps_4_0_level_9_1",
          D3D10_SHADER_ENABLE_BACKWARDS_COMPATIBILITY, 0, &pPSBlob, nullptr ) );
-    V_RETURN( D3DCompile( g_strUIEffectFile, g_uUIEffectFileSize, "none", nullptr, nullptr, "PSUntex", "ps_4_0_level_9_1", 
+    V_RETURN( D3DCompile( g_strUIEffectFile, g_uUIEffectFileSize, "none", nullptr, nullptr, "PSUntex", "ps_4_0_level_9_1",
          D3D10_SHADER_ENABLE_BACKWARDS_COMPATIBILITY, 0, &pPSUntexBlob, nullptr ) );
 
     // Create Shaders
@@ -2312,7 +2312,7 @@ HRESULT CDXUTDialogResourceManager::OnD3D11CreateDevice( ID3D11Device* pd3dDevic
 
     V_RETURN( pd3dDevice->CreatePixelShader( pPSUntexBlob->GetBufferPointer(), pPSUntexBlob->GetBufferSize(), nullptr, &m_pPSRenderUIUntex11 ) );
     DXUT_SetDebugName( m_pPSRenderUIUntex11, "CDXUTDialogResourceManager" );
-    
+
     // States
     D3D11_DEPTH_STENCIL_DESC DSDesc = {};
     DSDesc.DepthEnable = FALSE;
@@ -2575,7 +2575,7 @@ void CDXUTDialogResourceManager::EndSprites11( ID3D11Device* pd3dDevice, ID3D11D
     destRegion.back = 1;
     D3D11_MAPPED_SUBRESOURCE MappedResource;
     if ( S_OK == pd3dImmediateContext->Map( m_pSpriteBuffer11, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource ) )
-    { 
+    {
         memcpy( MappedResource.pData, (const void*)&m_SpriteVertices[0], SpriteDataBytes );
         pd3dImmediateContext->Unmap(m_pSpriteBuffer11, 0);
     }
@@ -2656,7 +2656,7 @@ void CDXUTDialogResourceManager::EnableKeyboardInputForAllDialogs()
 
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-int CDXUTDialogResourceManager::AddFont( LPCWSTR strFaceName, LONG height, LONG weight ) 
+int CDXUTDialogResourceManager::AddFont( LPCWSTR strFaceName, LONG height, LONG weight )
 {
     // See if this font already exists
     for( size_t i = 0; i < m_FontCache.size(); ++i )
@@ -2829,7 +2829,7 @@ CDXUTControl::CDXUTControl( _In_opt_ CDXUTDialog* pDialog ) noexcept
     m_Type = DXUT_CONTROL_BUTTON;
     m_pDialog = pDialog;
     m_ID = 0;
-    m_nHotkey = 0; 
+    m_nHotkey = 0;
     m_Index = 0;
     m_pUserData = nullptr;
 
@@ -3480,7 +3480,7 @@ CDXUTComboBox::CDXUTComboBox( _In_opt_ CDXUTDialog* pDialog ) noexcept :
     m_rcDropdownText{}
 {
     m_Type = DXUT_CONTROL_COMBOBOX;
-    m_pDialog = pDialog; 
+    m_pDialog = pDialog;
 }
 
 
@@ -3870,7 +3870,7 @@ void CDXUTComboBox::Render( _In_ float fElapsedTime )
     {
         int curY = m_rcDropdownText.top;
         int nRemainingHeight = RectHeight( m_rcDropdownText );
-        
+
         for( size_t i = m_ScrollBar.GetTrackPos(); i < m_Items.size(); i++ )
         {
             auto pItem = m_Items[ i ];
@@ -5892,7 +5892,7 @@ bool CDXUTEditBox::MsgProc( UINT uMsg, WPARAM wParam, LPARAM lParam )
 
     switch( uMsg )
     {
-            // Make sure that while editing, the keyup and keydown messages associated with 
+            // Make sure that while editing, the keyup and keydown messages associated with
             // WM_CHAR messages don't go to any non-focused controls or cameras
         case WM_KEYUP:
         case WM_KEYDOWN:

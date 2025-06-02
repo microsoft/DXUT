@@ -45,14 +45,14 @@ CDXUTResourceCache& WINAPI DXUTGetGlobalResourceCache()
 //--------------------------------------------------------------------------------------
 // Internal functions forward declarations
 //--------------------------------------------------------------------------------------
-bool DXUTFindMediaSearchTypicalDirs( _Out_writes_(cchSearch) WCHAR* strSearchPath, 
-                                     _In_ int cchSearch, 
-                                     _In_ LPCWSTR strLeaf, 
+bool DXUTFindMediaSearchTypicalDirs( _Out_writes_(cchSearch) WCHAR* strSearchPath,
+                                     _In_ int cchSearch,
+                                     _In_ LPCWSTR strLeaf,
                                      _In_ const WCHAR* strExePath,
                                      _In_ const WCHAR* strExeName );
-bool DXUTFindMediaSearchParentDirs( _Out_writes_(cchSearch) WCHAR* strSearchPath, 
-                                    _In_ int cchSearch, 
-                                    _In_ const WCHAR* strStartAt, 
+bool DXUTFindMediaSearchParentDirs( _Out_writes_(cchSearch) WCHAR* strSearchPath,
+                                    _In_ int cchSearch,
+                                    _In_ const WCHAR* strStartAt,
                                     _In_ const WCHAR* strLeafName );
 
 INT_PTR CALLBACK DisplaySwitchToREFWarningProc( _In_ HWND hDlg, _In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam );
@@ -85,7 +85,7 @@ void WINAPI DXUTDisplaySwitchingToREFWarning()
         {
             // Compact code to create a custom dialog box without using a template in a resource file.
             // If this dialog were in a .rc file, this would be a lot simpler but every sample calling this function would
-            // need a copy of the dialog in its own .rc file. Also MessageBox API could be used here instead, but 
+            // need a copy of the dialog in its own .rc file. Also MessageBox API could be used here instead, but
             // the MessageBox API is simpler to call but it can't provide a "Don't show again" checkbox
             typedef struct
             {
@@ -243,11 +243,11 @@ HRESULT WINAPI DXUTSetMediaSearchPath( _In_z_ LPCWSTR strPath )
 
 //--------------------------------------------------------------------------------------
 // Tries to find the location of a SDK media file
-//       cchDest is the size in WCHARs of strDestPath.  Be careful not to 
+//       cchDest is the size in WCHARs of strDestPath.  Be careful not to
 //       pass in sizeof(strDest) on UNICODE builds.
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-HRESULT WINAPI DXUTFindDXSDKMediaFileCch( WCHAR* strDestPath, int cchDest, 
+HRESULT WINAPI DXUTFindDXSDKMediaFileCch( WCHAR* strDestPath, int cchDest,
                                           LPCWSTR strFilename )
 {
     bool bFound;
@@ -297,7 +297,7 @@ HRESULT WINAPI DXUTFindDXSDKMediaFileCch( WCHAR* strDestPath, int cchDest,
     if( bFound )
         return S_OK;
 
-    // Typical directory search again, but also look in a subdir called "\media\" 
+    // Typical directory search again, but also look in a subdir called "\media\"
     swprintf_s( strSearchFor, MAX_PATH, L"media\\%ls", strFilename );
     bFound = DXUTFindMediaSearchTypicalDirs( strDestPath, cchDest, strSearchFor, strExePath, strExeName );
     if( bFound )
@@ -341,7 +341,7 @@ HRESULT WINAPI DXUTFindDXSDKMediaFileCch( WCHAR* strDestPath, int cchDest,
 // Search a set of typical directories
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-bool DXUTFindMediaSearchTypicalDirs( WCHAR* strSearchPath, int cchSearch, LPCWSTR strLeaf, 
+bool DXUTFindMediaSearchTypicalDirs( WCHAR* strSearchPath, int cchSearch, LPCWSTR strLeaf,
                                      const WCHAR* strExePath, const WCHAR* strExeName )
 {
     // Typical directories:
@@ -400,7 +400,7 @@ bool DXUTFindMediaSearchTypicalDirs( WCHAR* strSearchPath, int cchSearch, LPCWST
     if( GetFileAttributes( strSearchPath ) != 0xFFFFFFFF )
         return true;
 
-    // Search in media search dir 
+    // Search in media search dir
     WCHAR* s_strSearchPath = DXUTMediaSearchPath();
     if( s_strSearchPath[0] != 0 )
     {
@@ -418,7 +418,7 @@ bool DXUTFindMediaSearchTypicalDirs( WCHAR* strSearchPath, int cchSearch, LPCWST
 // at each parent directory.  It stops at the root directory.
 //--------------------------------------------------------------------------------------
 _Use_decl_annotations_
-bool DXUTFindMediaSearchParentDirs( WCHAR* strSearchPath, int cchSearch, const WCHAR* strStartAt, 
+bool DXUTFindMediaSearchParentDirs( WCHAR* strSearchPath, int cchSearch, const WCHAR* strStartAt,
                                     const WCHAR* strLeafName )
 {
     WCHAR strFullPath[MAX_PATH] =
@@ -563,7 +563,7 @@ public:
 
     STDMETHOD(Close(LPCVOID))
     {
-        // Defer Closure until the container destructor 
+        // Defer Closure until the container destructor
         return S_OK;
     }
 
@@ -600,8 +600,8 @@ HRESULT WINAPI DXUTCompileFromFile( LPCWSTR pFileName,
 
 #if defined( DEBUG ) || defined( _DEBUG )
     // Set the D3DCOMPILE_DEBUG flag to embed debug information in the shaders.
-    // Setting this flag improves the shader debugging experience, but still allows 
-    // the shaders to be optimized and to run exactly the way they will run in 
+    // Setting this flag improves the shader debugging experience, but still allows
+    // the shaders to be optimized and to run exactly the way they will run in
     // the release configuration of this program.
     Flags1 |= D3DCOMPILE_DEBUG;
 #endif
@@ -646,7 +646,7 @@ HRESULT WINAPI DXUTCompileFromFile( LPCWSTR pFileName,
     int result = WideCharToMultiByte( CP_ACP, WC_NO_BEST_FIT_CHARS, str, -1, pSrcName, MAX_PATH, nullptr, FALSE );
     if ( !result )
         return E_FAIL;
-    
+
     const CHAR* pstrName = strrchr( pSrcName, '\\' );
     if (!pstrName)
     {
@@ -772,7 +772,7 @@ XMMATRIX WINAPI DXUTGetCubeMapViewMatrix( _In_ DWORD dwFace )
         { { { 0.0f, 0.0f, -1.0f, 0.0f } } },
     };
 
-    static const XMVECTORF32 s_vUpDir[] = 
+    static const XMVECTORF32 s_vUpDir[] =
     {
         { { { 0.0f, 1.0f, 0.0f, 0.0f } } },
         { { { 0.0f, 1.0f, 0.0f, 0.0f } } },
@@ -925,7 +925,7 @@ void CDXUTTextHelper::Init( _In_ int nLineHeight )
     m_nLineHeight = nLineHeight;
     m_pd3d11Device = nullptr;
     m_pd3d11DeviceContext = nullptr;
-    m_pManager = nullptr; 
+    m_pManager = nullptr;
 
     // Create a blend state if a sprite is passed in
 }

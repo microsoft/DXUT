@@ -1,10 +1,10 @@
 //--------------------------------------------------------------------------------------
 // File: SDKMesh.h
 //
-// Disclaimer:  
-//   The SDK Mesh format (.sdkmesh) is not a recommended file format for shipping titles.  
-//   It was designed to meet the specific needs of the SDK samples.  Any real-world 
-//   applications should avoid this file format in favor of a destination format that 
+// Disclaimer:
+//   The SDK Mesh format (.sdkmesh) is not a recommended file format for shipping titles.
+//   It was designed to meet the specific needs of the SDK samples.  Any real-world
+//   applications should avoid this file format in favor of a destination format that
 //   meets the specific needs of the application.
 //
 // Copyright (c) Microsoft Corporation.
@@ -403,7 +403,7 @@ public:
     DXGI_FORMAT GetIBFormat11( _In_ UINT iMesh ) const;
     ID3D11Buffer* GetVB11( _In_ UINT iMesh, _In_ UINT iVB ) const;
     ID3D11Buffer* GetIB11( _In_ UINT iMesh ) const;
-    SDKMESH_INDEX_TYPE GetIndexType( _In_ UINT iMesh ) const; 
+    SDKMESH_INDEX_TYPE GetIndexType( _In_ UINT iMesh ) const;
 
     ID3D11Buffer* GetAdjIB11( _In_ UINT iMesh ) const;
 
@@ -427,7 +427,7 @@ public:
     SDKMESH_SUBSET*   GetSubset( _In_ UINT iMesh, _In_ UINT iSubset ) const;
     UINT              GetVertexStride( _In_ UINT iMesh, _In_ UINT iVB ) const;
     UINT              GetNumFrames() const;
-    SDKMESH_FRAME*    GetFrame( _In_ UINT iFrame ) const; 
+    SDKMESH_FRAME*    GetFrame( _In_ UINT iFrame ) const;
     SDKMESH_FRAME*    FindFrame( _In_z_ const char* pszName ) const;
     UINT64            GetNumVertices( _In_ UINT iMesh, _In_ UINT iVB ) const;
     UINT64            GetNumIndices( _In_ UINT iMesh ) const;

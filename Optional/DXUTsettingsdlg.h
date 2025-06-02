@@ -50,7 +50,7 @@
 #define TOTAL_FEATURE_LEVELS                            9
 
 //--------------------------------------------------------------------------------------
-// Dialog for selection of device settings 
+// Dialog for selection of device settings
 // Use DXUTGetD3DSettingsDialog() to access global instance
 // To control the contents of the dialog, use the CD3D11Enumeration class.
 //--------------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ protected:
 
     DWORD               GetSelectedD3D11PresentInterval() const;
     bool                GetSelectedDebugDeviceValue() const;
-    
+
     HRESULT             OnD3D11ResolutionChanged ();
     HRESULT             OnFeatureLevelChanged();
     HRESULT             OnAdapterChanged();

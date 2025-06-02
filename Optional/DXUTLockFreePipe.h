@@ -35,8 +35,8 @@ extern "C" void _ReadWriteBarrier();
 
 //
 // Pipe class designed for use by at most two threads: one reader, one writer.
-// Access by more than two threads isn't guaranteed to be safe. 
-// 
+// Access by more than two threads isn't guaranteed to be safe.
+//
 // In order to provide efficient access the size of the buffer is passed
 // as a template parameter and restricted to powers of two less than 31.
 //
@@ -63,7 +63,7 @@ public:
     {
         // Store the read and write offsets into local variables--this is
         // essentially a snapshot of their values so that they stay constant
-        // for the duration of the function (and so we don't end up with cache 
+        // for the duration of the function (and so we don't end up with cache
         // misses due to false sharing).
         DWORD readOffset = m_readOffset;
         DWORD writeOffset = m_writeOffset;
@@ -71,7 +71,7 @@ public:
         // Compare the two offsets to see if we have anything to read.
         // Note that we don't do anything to synchronize the offsets here.
         // Really there's not much we *can* do unless we're willing to completely
-        // synchronize access to the entire object. We have to assume that as we 
+        // synchronize access to the entire object. We have to assume that as we
         // read, someone else may be writing, and the write offset we have now
         // may be out of date by the time we read it. Fortunately that's not a
         // very big deal. We might miss reading some data that was just written.
@@ -80,7 +80,7 @@ public:
         //
         // Note that this comparison works because we're careful to constrain
         // the total buffer size to be a power of 2, which means it will divide
-        // evenly into ULONG_MAX+1. That, and the fact that the offsets are 
+        // evenly into ULONG_MAX+1. That, and the fact that the offsets are
         // unsigned, means that the calculation returns correct results even
         // when the values wrap around.
         DWORD cbAvailable = writeOffset - readOffset;
@@ -137,7 +137,7 @@ public:
         // reader, only one thread updates this value and so the only operation that
         // must be atomic is the store. That's lucky, because 32-bit aligned stores are
         // atomic on all modern processors.
-        // 
+        //
         readOffset += cbDest;
         m_readOffset = readOffset;
 
@@ -147,7 +147,7 @@ public:
     bool __forceinline          Write( _In_reads_(cbSrc) const void* pvSrc, _In_ unsigned long cbSrc )
     {
         // Reading the read offset here has the same caveats as reading
-        // the write offset had in the Read() function above. 
+        // the write offset had in the Read() function above.
         DWORD readOffset = m_readOffset;
         DWORD writeOffset = m_writeOffset;
 
@@ -173,7 +173,7 @@ public:
         unsigned long actualWriteOffset = writeOffset & c_sizeMask;
         unsigned long bytesLeft = cbSrc;
 
-        // See the explanation in the Read() function as to why we don't 
+        // See the explanation in the Read() function as to why we don't
         // explicitly check against the read offset here.
         unsigned long cbTailBytes = std::min( bytesLeft, c_cbBufferSize - actualWriteOffset );
         memcpy( m_pbBuffer + actualWriteOffset, pbSrc, cbTailBytes );
@@ -185,7 +185,7 @@ public:
         }
 
         // Now it's time to update the write offset, but since the updated position
-        // of the write offset will imply that there's data to be read, we need to 
+        // of the write offset will imply that there's data to be read, we need to
         // make sure that the data all actually gets written before the update to
         // the write offset. The writes could be reordered by the compiler (on any
         // platform) or by the CPU (on Xbox 360). We need a barrier which prevents

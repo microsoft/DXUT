@@ -1,9 +1,9 @@
 //--------------------------------------------------------------------------------------
 // File: SDKMesh.cpp
 //
-// The SDK Mesh format (.sdkmesh) is not a recommended file format for games.  
-// It was designed to meet the specific needs of the SDK samples.  Any real-world 
-// applications should avoid this file format in favor of a destination format that 
+// The SDK Mesh format (.sdkmesh) is not a recommended file format for games.
+// It was designed to meet the specific needs of the SDK samples.  Any real-world
+// applications should avoid this file format in favor of a destination format that
 // meets the specific needs of the application.
 //
 // Copyright (c) Microsoft Corporation.
@@ -234,9 +234,9 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
                                         bool bCopyStatic,
                                         SDKMESH_CALLBACKS11* pLoaderCallbacks11 )
 {
-    XMFLOAT3 lower; 
-    XMFLOAT3 upper; 
-    
+    XMFLOAT3 lower;
+    XMFLOAT3 upper;
+
     m_pDev11 = pDev11;
 
     if ( DataBytes < sizeof(SDKMESH_HEADER) )
@@ -360,7 +360,7 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
     SDKMESH_SUBSET* pSubset = nullptr;
     D3D11_PRIMITIVE_TOPOLOGY PrimType;
 
-    // update bounding volume 
+    // update bounding volume
     SDKMESH_MESH* currentMesh = &m_pMeshArray[0];
     for (UINT meshi=0; meshi < m_pMeshHeader->NumMeshes; ++meshi) {
         lower.x = FLT_MAX; lower.y = FLT_MAX; lower.z = FLT_MAX;
@@ -370,7 +370,7 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
         if (m_pIndexBufferArray[currentMesh->IndexBuffer].IndexType == IT_16BIT ) {
             indsize = 2;
         }else {
-            indsize = 4;        
+            indsize = 4;
         }
 
         for( UINT subset = 0; subset < currentMesh->NumSubsets; subset++ )
@@ -388,7 +388,7 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
                 IndexCount *= 2;
                 IndexStart *= 2;
             }*/
-     
+
         //BYTE* pIndices = nullptr;
             //m_ppIndices[i]
             UINT *ind = ( UINT * )m_ppIndices[currentMesh->IndexBuffer];
@@ -446,8 +446,8 @@ HRESULT CDXUTSDKMesh::CreateFromMemory( ID3D11Device* pDev11,
         currentMesh->BoundingBoxExtents = half;
 
     }
-    // Update 
-        
+    // Update
+
     return S_OK;
 }
 
@@ -688,12 +688,12 @@ void CDXUTSDKMesh::RenderFrame( UINT iFrame,
 
     // Render our children
     if( m_pFrameArray[iFrame].ChildFrame != INVALID_FRAME )
-        RenderFrame( m_pFrameArray[iFrame].ChildFrame, bAdjacent, pd3dDeviceContext, iDiffuseSlot, 
+        RenderFrame( m_pFrameArray[iFrame].ChildFrame, bAdjacent, pd3dDeviceContext, iDiffuseSlot,
                      iNormalSlot, iSpecularSlot );
 
     // Render our siblings
     if( m_pFrameArray[iFrame].SiblingFrame != INVALID_FRAME )
-        RenderFrame( m_pFrameArray[iFrame].SiblingFrame, bAdjacent, pd3dDeviceContext, iDiffuseSlot, 
+        RenderFrame( m_pFrameArray[iFrame].SiblingFrame, bAdjacent, pd3dDeviceContext, iDiffuseSlot,
                      iNormalSlot, iSpecularSlot );
 }
 
