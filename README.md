@@ -6,7 +6,7 @@ http://go.microsoft.com/fwlink/?LinkId=320437
 
 Copyright (c) Microsoft Corporation.
 
-**August 14, 2024**
+# August 14, 2024
 
 DXUT is a "GLUT"-like framework for Direct3D 11.x Win32 desktop applications; primarily samples, demos, and prototypes.
 
@@ -14,7 +14,7 @@ This code is designed to build with Visual Studio 2019 (16.11) or Visual Studio 
 
 These components are designed to work without requiring any content from the legacy DirectX SDK. For details, see [Where is the DirectX SDK?](https://aka.ms/dxsdk).
 
-*This project is 'archived'. It is still available for use for legacy projects or when using older developer education materials, but use of it for new projects is not recommended.*
+_This project is 'archived'. It is still available for use for legacy projects or when using older developer education materials, but use of it for new projects is not recommended._
 
 ## Disclaimer
 
@@ -43,13 +43,13 @@ FOR SECURITY ADVISORIES, see [GitHub](https://github.com/microsoft/DXUT/security
 
 For a full change history, see [CHANGELOG.md](https://github.com/microsoft/DXUT/blob/main/CHANGELOG.md).
 
-* Starting with the July 2022 release, the ``bool forceSRGB`` parameter for DDSTextureLoader ``Ex`` functions is now a ``DDS_LOADER_FLAGS`` typed enum bitmask flag parameter. This may have a *breaking change* impact to client code. Replace ``true`` with ``DDS_LOADER_FORCE_SRGB`` and ``false`` with ``DDS_LOADER_DEFAULT``.
+* Starting with the July 2022 release, the ``bool forceSRGB`` parameter for DDSTextureLoader ``Ex`` functions is now a ``DDS_LOADER_FLAGS`` typed enum bitmask flag parameter. This may have a _breaking change_ impact to client code. Replace ``true`` with ``DDS_LOADER_FORCE_SRGB`` and ``false`` with ``DDS_LOADER_DEFAULT``.
 
 * There are known codegen issues when mixing the library built with Visual C++ and the sample built with recent builds of clang/LLVM for Windows. Building both the library and the sample using the same complier avoids the issue.
 
 ## Support
 
-For questions, consider using [Stack Overflow](https://stackoverflow.com/questions/tagged/dxut) with the *dxut* tag.
+For questions, consider using [Stack Overflow](https://stackoverflow.com/questions/tagged/dxut) with the _dxut_ tag.
 
 ## Code of Conduct
 

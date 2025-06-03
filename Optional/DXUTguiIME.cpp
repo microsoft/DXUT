@@ -172,7 +172,7 @@ void CDXUTIMEEditBox::UpdateRects()
 
 //--------------------------------------------------------------------------------------
 //  GetImeId( UINT uIndex )
-//      returns 
+//      returns
 //  returned value:
 //  0: In the following cases
 //      - Non Chinese IME input locale
@@ -188,7 +188,7 @@ void CDXUTIMEEditBox::UpdateRects()
 //          pVerFixedInfo->dwFileVersionLS
 //
 //  Use IMEID_VER and IMEID_LANG macro to extract version and language information.
-//  
+//
 
 // We define the locale-invariant ID ourselves since it doesn't exist prior to WinXP
 // For more information, see the CompareString() reference.
@@ -302,7 +302,7 @@ bool CDXUTIMEEditBox::HandleMouse( UINT uMsg, const POINT& pt, WPARAM wParam, LP
 {
     if( !m_bEnabled || !m_bVisible )
         return false;
-	
+
     switch( uMsg )
     {
         case WM_LBUTTONDOWN:
@@ -481,7 +481,7 @@ bool CDXUTIMEEditBox::MsgProc( UINT uMsg, WPARAM wParam, LPARAM lParam )
 
 #if defined(DEBUG) || defined(_DEBUG)
     // DXUT.cpp used to call CDXUTIMEEditBox::StaticMsgProc() so that, but now
-    // this is the application's responsiblity.  To do this, call 
+    // this is the application's responsiblity.  To do this, call
     // CDXUTDialogResourceManager::MsgProc() before calling this function.
     assert( m_bIMEStaticMsgProcCalled && L"To fix, call CDXUTDialogResourceManager::MsgProc() first" );
 #endif
@@ -490,7 +490,7 @@ bool CDXUTIMEEditBox::MsgProc( UINT uMsg, WPARAM wParam, LPARAM lParam )
         case WM_DESTROY:
             ImeUi_Uninitialize();
             break;
-    }	
+    }
 
     bool trappedData;
     bool* trapped = &trappedData;
@@ -593,7 +593,7 @@ void CDXUTIMEEditBox::RenderCandidateReadingWindow( bool bReading )
             }
             wszCand[wcslen( wszCand ) - 1] = L'\0';  // Remove the last space
             s_CandList.HoriCand.SetText( wszCand );
-			
+
             m_pDialog->CalcTextRect( s_CandList.HoriCand.GetBuffer(), m_Elements[ 1 ], &rc );
         }
         nWidthRequired = rc.right - rc.left;
@@ -722,7 +722,7 @@ void CDXUTIMEEditBox::RenderCandidateReadingWindow( bool bReading )
 //--------------------------------------------------------------------------------------
 void CDXUTIMEEditBox::RenderComposition()
 {
-	
+
     s_CompString.SetText( ImeUi_GetCompositionString() );
 
     RECT rcCaret =
@@ -955,7 +955,7 @@ void CDXUTIMEEditBox::Render( _In_ float fElapsedTime )
 
     ImeUi_RenderUI();
 
-    if( m_bHasFocus )	
+    if( m_bHasFocus )
     {
         // Render the input locale indicator
         RenderIndicator( fElapsedTime );
@@ -994,7 +994,7 @@ void CDXUTIMEEditBox::Initialize( _In_ HWND hWnd )
     ImeUiCallback_DrawFans = nullptr;
 
     ImeUi_Initialize( hWnd );
-	
+
     s_CompString.SetBufferSize( MAX_COMPSTRING_SIZE );
     ImeUi_EnableIme( true );
 }

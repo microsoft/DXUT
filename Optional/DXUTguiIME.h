@@ -111,8 +111,8 @@ protected:
     static DWORD            s_adwCompStringClause[MAX_COMPSTRING_SIZE];
     static CCandList s_CandList;          // Data relevant to the candidate list
     static WCHAR            s_wszReadingString[32];// Used only with horizontal reading window (why?)
-    static bool s_bImeFlag;			  // Is ime enabled 
-	
+    static bool s_bImeFlag;			  // Is ime enabled
+
     // Color of various IME elements
     DWORD m_ReadingColor;        // Reading string color
     DWORD m_ReadingWinColor;     // Reading window color

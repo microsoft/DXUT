@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------------
 // File: DXUTSettingsDlg.cpp
 //
-// Dialog for selection of device settings 
+// Dialog for selection of device settings
 //
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
@@ -51,7 +51,7 @@ CD3DSettingsDlg::CD3DSettingsDlg() noexcept :
     m_Levels[4] = D3D_FEATURE_LEVEL_10_1;
     m_Levels[5] = D3D_FEATURE_LEVEL_11_0;
     m_Levels[6] = D3D_FEATURE_LEVEL_11_1;
-#if defined(USE_DIRECT3D11_3) || defined(USE_DIRECT3D11_4) 
+#if defined(USE_DIRECT3D11_3) || defined(USE_DIRECT3D11_4)
     m_Levels[7] = D3D_FEATURE_LEVEL_12_0;
     m_Levels[8] = D3D_FEATURE_LEVEL_12_1;
 #else
@@ -146,7 +146,7 @@ void CD3DSettingsDlg::CreateControls()
     m_Dialog.AddComboBox( DXUTSETTINGSDLG_DEVICE_TYPE, 200, 110, 400, 23 );
 
     // DXUTSETTINGSDLG_WINDOWED, DXUTSETTINGSDLG_FULLSCREEN
-    m_Dialog.AddRadioButton( DXUTSETTINGSDLG_WINDOWED, DXUTSETTINGSDLG_WINDOWED_GROUP, L"Windowed", 
+    m_Dialog.AddRadioButton( DXUTSETTINGSDLG_WINDOWED, DXUTSETTINGSDLG_WINDOWED_GROUP, L"Windowed",
                           360, 157, 100, 16 );
     m_Dialog.AddRadioButton( DXUTSETTINGSDLG_FULLSCREEN, DXUTSETTINGSDLG_WINDOWED_GROUP, L"Full Screen",
                           220, 157, 100, 16 );
@@ -248,7 +248,7 @@ HRESULT CD3DSettingsDlg::Refresh()
     SetWindowed( FALSE != g_DeviceSettings.d3d11.sd.Windowed );
     auto pOutputInfo = GetCurrentD3D11OutputInfo();
     AddD3D11AdapterOutput( pOutputInfo->Desc.DeviceName, g_DeviceSettings.d3d11.Output );
-            
+
     AddD3D11Resolution( g_DeviceSettings.d3d11.sd.BufferDesc.Width,
                         g_DeviceSettings.d3d11.sd.BufferDesc.Height );
     AddD3D11RefreshRate( g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate );
@@ -276,14 +276,14 @@ HRESULT CD3DSettingsDlg::Refresh()
 
     for (int fli = 0; fli < TOTAL_FEATURE_LEVELS; fli++)
     {
-        if (m_Levels[fli] >= g_DeviceSettings.MinimumFeatureLevel 
+        if (m_Levels[fli] >= g_DeviceSettings.MinimumFeatureLevel
             && m_Levels[fli] <= clampFL)
         {
             AddD3D11FeatureLevel( m_Levels[fli] );
         }
-    } 
+    }
     pFeatureLevelBox->SetSelectedByData( ULongToPtr( g_DeviceSettings.d3d11.DeviceFeatureLevel ) );
-          
+
     // Get the adapters list from CD3D11Enumeration object
     auto pAdapterInfoList = pD3DEnum->GetAdapterInfoList();
 
@@ -438,7 +438,7 @@ HRESULT CD3DSettingsDlg::OnD3D11CreateDevice( _In_ ID3D11Device* pd3dDevice )
     if( !pd3dDevice )
         return DXUT_ERR_MSGBOX( L"CD3DSettingsDlg::OnCreatedDevice", E_INVALIDARG );
 
-    // Create the fonts/textures 
+    // Create the fonts/textures
     m_Dialog.SetCallback( StaticOnEvent, ( void* )this );
     m_RevertModeDialog.SetCallback( StaticOnEvent, ( void* )this );
 
@@ -588,9 +588,9 @@ void CD3DSettingsDlg::OnEvent( UINT, int nControlID, CDXUTControl* )
                 // settings.  These will get set to the user-defined settings once the
                 // user accepts the mode change
                 DXUTDeviceSettings tSettings = g_DeviceSettings;
-                    g_DeviceSettings.d3d11.sd.BufferDesc.Width = 
+                    g_DeviceSettings.d3d11.sd.BufferDesc.Width =
                         currentSettings.d3d11.sd.BufferDesc.Width;
-                    g_DeviceSettings.d3d11.sd.BufferDesc.Height = 
+                    g_DeviceSettings.d3d11.sd.BufferDesc.Height =
                         currentSettings.d3d11.sd.BufferDesc.Height;
                     g_DeviceSettings.d3d11.sd.BufferDesc.RefreshRate.Denominator =
                         currentSettings.d3d11.sd.BufferDesc.RefreshRate.Denominator;
@@ -763,7 +763,7 @@ HRESULT CD3DSettingsDlg::OnFeatureLevelChanged ()
     hr = OnAdapterChanged();
     if( FAILED( hr ) )
         return hr;
-    
+
     return hr;
 }
 
@@ -840,17 +840,17 @@ HRESULT CD3DSettingsDlg::OnDeviceTypeChanged()
     {
         g_DeviceSettings.d3d11.DeviceFeatureLevel = std::min<D3D_FEATURE_LEVEL>( g_DeviceSettings.d3d11.DeviceFeatureLevel,
                                                                                  clampFL );
-                
+
         CDXUTComboBox *pFeatureLevelBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
         pFeatureLevelBox->RemoveAllItems();
         for (int fli = 0; fli < TOTAL_FEATURE_LEVELS; fli++)
         {
-            if (m_Levels[fli] >= g_DeviceSettings.MinimumFeatureLevel 
+            if (m_Levels[fli] >= g_DeviceSettings.MinimumFeatureLevel
                 && m_Levels[fli] <= clampFL)
             {
                 AddD3D11FeatureLevel( m_Levels[fli] );
             }
-        } 
+        }
         pFeatureLevelBox->SetSelectedByData( ULongToPtr( g_DeviceSettings.d3d11.DeviceFeatureLevel ) );
 
         hr = OnFeatureLevelChanged();
@@ -1231,49 +1231,49 @@ void CD3DSettingsDlg::AddD3D11FeatureLevel( _In_ D3D_FEATURE_LEVEL fl)
     auto pComboBox = m_Dialog.GetComboBox( DXUTSETTINGSDLG_D3D11_FEATURE_LEVEL );
     switch( fl )
     {
-    case D3D_FEATURE_LEVEL_9_1: 
+    case D3D_FEATURE_LEVEL_9_1:
         {
             if( !pComboBox->ContainsItem( L"D3D_FEATURE_LEVEL_9_1" ) )
-                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_9_1", ULongToPtr( D3D_FEATURE_LEVEL_9_1 ) ); 
+                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_9_1", ULongToPtr( D3D_FEATURE_LEVEL_9_1 ) );
         }
         break;
-    case D3D_FEATURE_LEVEL_9_2: 
+    case D3D_FEATURE_LEVEL_9_2:
         {
             if( !pComboBox->ContainsItem( L"D3D_FEATURE_LEVEL_9_2" ) )
-                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_9_2", ULongToPtr( D3D_FEATURE_LEVEL_9_2 ) ); 
+                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_9_2", ULongToPtr( D3D_FEATURE_LEVEL_9_2 ) );
         }
         break;
-    case D3D_FEATURE_LEVEL_9_3: 
+    case D3D_FEATURE_LEVEL_9_3:
         {
             if( !pComboBox->ContainsItem( L"D3D_FEATURE_LEVEL_9_3" ) )
-                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_9_3", ULongToPtr( D3D_FEATURE_LEVEL_9_3 ) ); 
+                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_9_3", ULongToPtr( D3D_FEATURE_LEVEL_9_3 ) );
         }
         break;
-    case D3D_FEATURE_LEVEL_10_0: 
+    case D3D_FEATURE_LEVEL_10_0:
         {
             if( !pComboBox->ContainsItem( L"D3D_FEATURE_LEVEL_10_0" ) )
-                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_10_0", ULongToPtr( D3D_FEATURE_LEVEL_10_0 ) ); 
+                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_10_0", ULongToPtr( D3D_FEATURE_LEVEL_10_0 ) );
         }
         break;
-    case D3D_FEATURE_LEVEL_10_1: 
+    case D3D_FEATURE_LEVEL_10_1:
         {
             if( !pComboBox->ContainsItem( L"D3D_FEATURE_LEVEL_10_1" ) )
-                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_10_1", ULongToPtr( D3D_FEATURE_LEVEL_10_1 ) ); 
+                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_10_1", ULongToPtr( D3D_FEATURE_LEVEL_10_1 ) );
         }
         break;
-    case D3D_FEATURE_LEVEL_11_0: 
+    case D3D_FEATURE_LEVEL_11_0:
         {
             if( !pComboBox->ContainsItem( L"D3D_FEATURE_LEVEL_11_0" ) )
-                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_11_0", ULongToPtr( D3D_FEATURE_LEVEL_11_0 ) ); 
+                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_11_0", ULongToPtr( D3D_FEATURE_LEVEL_11_0 ) );
         }
         break;
-    case D3D_FEATURE_LEVEL_11_1: 
+    case D3D_FEATURE_LEVEL_11_1:
         {
             if( !pComboBox->ContainsItem( L"D3D_FEATURE_LEVEL_11_1" ) )
-                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_11_1", ULongToPtr( D3D_FEATURE_LEVEL_11_1 ) ); 
+                pComboBox->AddItem( L"D3D_FEATURE_LEVEL_11_1", ULongToPtr( D3D_FEATURE_LEVEL_11_1 ) );
         }
         break;
-#if defined(USE_DIRECT3D11_3) || defined(USE_DIRECT3D11_4) 
+#if defined(USE_DIRECT3D11_3) || defined(USE_DIRECT3D11_4)
         case D3D_FEATURE_LEVEL_12_0:
         {
             if (!pComboBox->ContainsItem(L"D3D_FEATURE_LEVEL_12_0"))

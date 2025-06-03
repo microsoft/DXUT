@@ -83,7 +83,7 @@ void CD3DArcBall::OnMove( _In_ int nX, _In_ int nY )
 {
     if( m_bDrag )
     {
-        XMVECTOR curr = ScreenToVector( ( float )nX, ( float )nY ); 
+        XMVECTOR curr = ScreenToVector( ( float )nX, ( float )nY );
         XMStoreFloat3( &m_vCurrentPt, curr );
 
         XMVECTOR down = XMLoadFloat3( &m_vDownPt );
@@ -242,7 +242,7 @@ CBaseCamera::CBaseCamera() noexcept :
     SetProjParams( XM_PI / 4, 1.0f, 1.0f, 1000.0f );
 
     GetCursorPos( &m_ptLastMousePosition );
-    
+
     SetRect( &m_rcDrag, LONG_MIN, LONG_MIN, LONG_MAX, LONG_MAX );
 }
 
@@ -265,7 +265,7 @@ void CBaseCamera::SetViewParams( CXMVECTOR vEyePt, CXMVECTOR vLookatPt )
 
     XMMATRIX mInvView = XMMatrixInverse( nullptr, mView );
 
-    // The axis basis vectors and camera position are stored inside the 
+    // The axis basis vectors and camera position are stored inside the
     // position matrix in the 4 rows of the camera's world matrix.
     // To figure out the yaw/pitch of the camera, we just need the Z basis vector
     XMFLOAT3 zBasis;
@@ -360,7 +360,7 @@ LRESULT CBaseCamera::HandleMessages( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
                     m_bMouseRButtonDown = true; m_nCurrentButtonMask |= MOUSE_RIGHT_BUTTON;
                 }
 
-                // Capture the mouse, so if the mouse button is 
+                // Capture the mouse, so if the mouse button is
                 // released outside the window, we'll get the WM_LBUTTONUP message
                 SetCapture( hWnd );
                 GetCursorPos( &m_ptLastMousePosition );
@@ -523,10 +523,10 @@ void CBaseCamera::UpdateMouseDelta()
 
     if( m_bResetCursorAfterMove && DXUTIsActive() )
     {
-        // Set position of camera to center of desktop, 
+        // Set position of camera to center of desktop,
         // so it always has room to move.  This is very useful
-        // if the cursor is hidden.  If this isn't done and cursor is hidden, 
-        // then invisible cursor will hit the edge of the screen 
+        // if the cursor is hidden.  If this isn't done and cursor is hidden,
+        // then invisible cursor will hit the edge of the screen
         // and the user can't tell what happened
         POINT ptCenter;
 
@@ -540,7 +540,7 @@ void CBaseCamera::UpdateMouseDelta()
         m_ptLastMousePosition = ptCenter;
     }
 
-    // Smooth the relative mouse data over a few frames so it isn't 
+    // Smooth the relative mouse data over a few frames so it isn't
     // jerky when moving slowly at low frame rates.
     float fPercentOfNew = 1.0f / m_fFramesToSmoothMouseData;
     float fPercentOfOld = 1.0f - fPercentOfNew;
@@ -563,12 +563,12 @@ void CBaseCamera::UpdateVelocity( _In_ float fElapsedTime )
     XMVECTOR vRotVelocity = vMouseDelta * m_fRotationScaler + vGamePadRightThumb * 0.02f;
 
     XMStoreFloat2( &m_vRotVelocity, vRotVelocity );
-    
+
     XMVECTOR vKeyboardDirection = XMLoadFloat3( &m_vKeyboardDirection );
     XMVECTOR vGamePadLeftThumb = XMLoadFloat3( &m_vGamePadLeftThumb );
     XMVECTOR vAccel = vKeyboardDirection + vGamePadLeftThumb;
 
-    // Normalize vector so if moving 2 dirs (left & forward), 
+    // Normalize vector so if moving 2 dirs (left & forward),
     // the camera doesn't move faster than if moving in 1 dir
     vAccel = XMVector3Normalize( vAccel );
 
@@ -581,13 +581,13 @@ void CBaseCamera::UpdateVelocity( _In_ float fElapsedTime )
         if( XMVectorGetX( XMVector3LengthSq( vAccel ) ) > 0 )
         {
             // If so, then this means the user has pressed a movement key
-            // so change the velocity immediately to acceleration 
+            // so change the velocity immediately to acceleration
             // upon keyboard input.  This isn't normal physics
             // but it will give a quick response to keyboard input
             XMStoreFloat3( &m_vVelocity, vAccel );
 
             m_fDragTimer = m_fTotalDragTimeToZero;
-            
+
             XMStoreFloat3( &m_vVelocityDrag, vAccel / m_fDragTimer );
         }
         else
@@ -625,7 +625,7 @@ void CBaseCamera::UpdateVelocity( _In_ float fElapsedTime )
 //--------------------------------------------------------------------------------------
 D3DUtil_CameraKeys CBaseCamera::MapKey( _In_ UINT nKey )
 {
-    // This could be upgraded to a method that's user-definable but for 
+    // This could be upgraded to a method that's user-definable but for
     // simplicity, we'll use a hardcoded mapping.
     switch( nKey )
     {
@@ -734,7 +734,7 @@ void CFirstPersonCamera::FrameMove( _In_ float fElapsedTime )
     XMVECTOR vVelocity = XMLoadFloat3( &m_vVelocity );
     XMVECTOR vPosDelta = vVelocity * fElapsedTime;
 
-    // If rotating the camera 
+    // If rotating the camera
     if( ( m_nActiveButtonMask & m_nCurrentButtonMask )
         || m_bRotateWithoutButtonDown
         || m_vGamePadRightThumb.x != 0
@@ -763,7 +763,7 @@ void CFirstPersonCamera::FrameMove( _In_ float fElapsedTime )
     XMVECTOR vWorldUp = XMVector3TransformCoord( g_XMIdentityR1, mCameraRot );
     XMVECTOR vWorldAhead = XMVector3TransformCoord( g_XMIdentityR2, mCameraRot );
 
-    // Transform the position delta by the camera's rotation 
+    // Transform the position delta by the camera's rotation
     if( !m_bEnableYAxisMovement )
     {
         // If restricting Y movement, do not include pitch
@@ -772,7 +772,7 @@ void CFirstPersonCamera::FrameMove( _In_ float fElapsedTime )
     }
     XMVECTOR vPosDeltaWorld = XMVector3TransformCoord( vPosDelta, mCameraRot );
 
-    // Move the eye position 
+    // Move the eye position
     XMVECTOR vEye = XMLoadFloat3( &m_vEye );
     vEye += vPosDeltaWorld;
     if( m_bClipToBoundary )
@@ -835,7 +835,7 @@ CModelViewerCamera::CModelViewerCamera() noexcept :
 
 
 //--------------------------------------------------------------------------------------
-// Update the view matrix & the model's world matrix based 
+// Update the view matrix & the model's world matrix based
 //       on user input & elapsed time
 //--------------------------------------------------------------------------------------
 void CModelViewerCamera::FrameMove( _In_ float fElapsedTime )
@@ -850,9 +850,9 @@ void CModelViewerCamera::FrameMove( _In_ float fElapsedTime )
 
     m_bDragSinceLastUpdate = false;
 
-    //// If no mouse button is held down, 
+    //// If no mouse button is held down,
     //// Get the mouse movement (if any) if the mouse button are down
-    //if( m_nCurrentButtonMask != 0 ) 
+    //if( m_nCurrentButtonMask != 0 )
     //    UpdateMouseDelta( fElapsedTime );
 
     GetInput( m_bEnablePositionMovement, m_nCurrentButtonMask != 0, true );
@@ -877,10 +877,10 @@ void CModelViewerCamera::FrameMove( _In_ float fElapsedTime )
     XMVECTOR vWorldUp = XMVector3TransformCoord( g_XMIdentityR1, mCameraRot );
     XMVECTOR vWorldAhead = XMVector3TransformCoord( g_XMIdentityR2, mCameraRot );
 
-    // Transform the position delta by the camera's rotation 
+    // Transform the position delta by the camera's rotation
     XMVECTOR vPosDeltaWorld = XMVector3TransformCoord( vPosDelta, mCameraRot );
 
-    // Move the lookAt position 
+    // Move the lookAt position
     XMVECTOR vLookAt = XMLoadFloat3( &m_vLookAt );
     vLookAt += vPosDeltaWorld;
     if( m_bClipToBoundary )
@@ -919,7 +919,7 @@ void CModelViewerCamera::FrameMove( _In_ float fElapsedTime )
     XMStoreFloat4x4( &m_mModelLastRot, mModelRot0 );
     XMStoreFloat4x4( &m_mCameraRotLast, mCameraRot );
 
-    // Since we're accumulating delta rotations, we need to orthonormalize 
+    // Since we're accumulating delta rotations, we need to orthonormalize
     // the matrix to prevent eventual matrix skew
     XMVECTOR xBasis = XMVector3Normalize( mModelRot.r[0] );
     XMVECTOR yBasis = XMVector3Cross( mModelRot.r[2], xBasis );
@@ -932,7 +932,7 @@ void CModelViewerCamera::FrameMove( _In_ float fElapsedTime )
 
     // Translate the rotation matrix to the same position as the lookAt position
     mModelRot.r[3] = XMVectorSelect( mModelRot.r[3], vLookAt, g_XMSelect1110 );
-    
+
     XMStoreFloat4x4( &m_mModelRot, mModelRot );
 
     // Translate world matrix so its at the center of the model
@@ -1193,7 +1193,7 @@ HRESULT CDXUTDirectionWidget::UpdateLightDir()
     XMMATRIX mRot = XMLoadFloat4x4( &m_mRot );
     mRot *= mView * mLastRotInv * mRot0 * mInvView;
 
-    // Since we're accumulating delta rotations, we need to orthonormalize 
+    // Since we're accumulating delta rotations, we need to orthonormalize
     // the matrix to prevent eventual matrix skew
     XMVECTOR xBasis = XMVector3Normalize( mRot.r[0] );
     XMVECTOR yBasis = XMVector3Cross( mRot.r[2], xBasis );
@@ -1217,7 +1217,7 @@ HRESULT CDXUTDirectionWidget::UpdateLightDir()
 _Use_decl_annotations_
 HRESULT CDXUTDirectionWidget::OnRender(CXMVECTOR, CXMMATRIX, CXMMATRIX, CXMVECTOR)
 {
-    // TODO - 
+    // TODO -
     return S_OK;
 }
 

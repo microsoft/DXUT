@@ -11,7 +11,7 @@
 #pragma once
 
 //-----------------------------------------------------------------------------
-// Resource cache for textures, fonts, meshs, and effects.  
+// Resource cache for textures, fonts, meshs, and effects.
 // Use DXUTGetGlobalResourceCache() to access the global cache
 //-----------------------------------------------------------------------------
 
@@ -52,7 +52,7 @@ protected:
 
     std::vector<DXUTCache_Texture> m_TextureCache;
 };
-   
+
 CDXUTResourceCache& WINAPI DXUTGetGlobalResourceCache();
 
 
@@ -88,7 +88,7 @@ protected:
     POINT m_pt;
     int m_nLineHeight;
 
-    // D3D11 font 
+    // D3D11 font
     ID3D11Device* m_pd3d11Device;
     ID3D11DeviceContext* m_pd3d11DeviceContext;
     CDXUTDialogResourceManager* m_pManager;
@@ -104,7 +104,7 @@ void WINAPI DXUTDisplaySwitchingToREFWarning();
 // Tries to finds a media file by searching in common locations
 //--------------------------------------------------------------------------------------
 HRESULT WINAPI DXUTFindDXSDKMediaFileCch( _Out_writes_(cchDest) WCHAR* strDestPath,
-                                          _In_ int cchDest, 
+                                          _In_ int cchDest,
                                           _In_z_ LPCWSTR strFilename );
 HRESULT WINAPI DXUTSetMediaSearchPath( _In_z_ LPCWSTR strPath );
 LPCWSTR WINAPI DXUTGetMediaSearchPath();
