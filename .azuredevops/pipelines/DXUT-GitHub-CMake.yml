@@ -36,12 +36,12 @@ name: $(Year:yyyy).$(Month).$(DayOfMonth)$(Rev:.r)
 
 variables:
   Codeql.Enabled: false
-  VS_GENERATOR: 'Visual Studio 16 2019'
+  VS_GENERATOR: 'Visual Studio 17 2022'
   WIN10_SDK: '10.0.19041.0'
   WIN11_SDK: '10.0.22000.0'
 
 pool:
-  vmImage: windows-2019
+  vmImage: windows-2022
 
 jobs:
   - job: CMAKE_BUILD
@@ -55,7 +55,7 @@ jobs:
         inputs:
           cwd: '$(Build.SourcesDirectory)'
           cmakeArgs: >
-            -G "$(VS_GENERATOR)" -A x64 -B out -DCMAKE_SYSTEM_VERSION=$(WIN10_SDK)
+            -G "$(VS_GENERATOR)" -T v142 -A x64 -B out -DCMAKE_SYSTEM_VERSION=$(WIN10_SDK)
       - task: CMake@1
         displayName: 'CMake (MSVC): Build x64 Debug'
         inputs:
@@ -71,7 +71,7 @@ jobs:
         inputs:
           cwd: '$(Build.SourcesDirectory)'
           cmakeArgs: >
-            -G "$(VS_GENERATOR)" -A Win32 -B out2 -DCMAKE_SYSTEM_VERSION=$(WIN10_SDK)
+            -G "$(VS_GENERATOR)" -T v142 -A Win32 -B out2 -DCMAKE_SYSTEM_VERSION=$(WIN10_SDK)
       - task: CMake@1
         displayName: 'CMake (MSVC): Build x86 Debug'
         inputs:
@@ -87,7 +87,7 @@ jobs:
         inputs:
           cwd: '$(Build.SourcesDirectory)'
           cmakeArgs: >
-            -G "$(VS_GENERATOR)" -A ARM64 -B out3 -DCMAKE_SYSTEM_VERSION=$(WIN11_SDK)
+            -G "$(VS_GENERATOR)" -T v142 -A ARM64 -B out3 -DCMAKE_SYSTEM_VERSION=$(WIN11_SDK)
       - task: CMake@1
         displayName: 'CMake (MSVC): Build ARM64 Debug'
         inputs:
@@ -98,51 +98,3 @@ jobs:
         inputs:
           cwd: '$(Build.SourcesDirectory)'
           cmakeArgs: --build out3 -v --config RelWithDebInfo
-      - task: CMake@1
-        displayName: 'CMake (ClangCl): Config x64'
-        inputs:
-          cwd: '$(Build.SourcesDirectory)'
-          cmakeArgs: >
-            -G "$(VS_GENERATOR)" -A x64 -T clangcl -B out4 -DCMAKE_SYSTEM_VERSION=$(WIN10_SDK)
-      - task: CMake@1
-        displayName: 'CMake (ClangCl): Build x64 Debug'
-        inputs:
-          cwd: '$(Build.SourcesDirectory)'
-          cmakeArgs: --build out4 -v --config Debug
-      - task: CMake@1
-        displayName: 'CMake (ClangCl): Build x64 Release'
-        inputs:
-          cwd: '$(Build.SourcesDirectory)'
-          cmakeArgs: --build out4 -v --config RelWithDebInfo
-      - task: CMake@1
-        displayName: 'CMake (MSVC Spectre): Config x64'
-        inputs:
-          cwd: '$(Build.SourcesDirectory)'
-          cmakeArgs: >
-            -G "$(VS_GENERATOR)" -A x64 -B out5 -DENABLE_SPECTRE_MITIGATION=ON -DCMAKE_SYSTEM_VERSION=$(WIN10_SDK)
-      - task: CMake@1
-        displayName: 'CMake (MSVC Spectre): Build x64 Debug'
-        inputs:
-          cwd: '$(Build.SourcesDirectory)'
-          cmakeArgs: --build out5 -v --config Debug
-      - task: CMake@1
-        displayName: 'CMake (MSVC Spectre): Build x64 Release'
-        inputs:
-          cwd: '$(Build.SourcesDirectory)'
-          cmakeArgs: --build out5 -v --config RelWithDebInfo
-      - task: CMake@1
-        displayName: 'CMake (MSVC Spectre): Config ARM64'
-        inputs:
-          cwd: '$(Build.SourcesDirectory)'
-          cmakeArgs: >
-            -G "$(VS_GENERATOR)" -A ARM64 -B out6 -DENABLE_SPECTRE_MITIGATION=ON -DCMAKE_SYSTEM_VERSION=$(WIN11_SDK)
-      - task: CMake@1
-        displayName: 'CMake (MSVC Spectre): Build ARM64 Debug'
-        inputs:
-          cwd: '$(Build.SourcesDirectory)'
-          cmakeArgs: --build out6 -v --config Debug
-      - task: CMake@1
-        displayName: 'CMake (MSVC Spectre): Build ARM64 Release'
-        inputs:
-          cwd: '$(Build.SourcesDirectory)'
-          cmakeArgs: --build out6 -v --config RelWithDebInfo
