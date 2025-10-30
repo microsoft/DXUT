@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <memory>
 #include <new>
@@ -62,7 +63,7 @@ namespace
 {
 #pragma pack(push,1)
 
-#define DDS_MAGIC 0x20534444 // "DDS "
+    constexpr uint32_t DDS_MAGIC = 0x20534444; // "DDS "
 
     struct DDS_PIXELFORMAT
     {
@@ -119,6 +120,14 @@ namespace
     };
 
 #pragma pack(pop)
+
+    static_assert(sizeof(DDS_PIXELFORMAT) == 32, "DDS pixel format size mismatch");
+    static_assert(sizeof(DDS_HEADER) == 124, "DDS Header size mismatch");
+    static_assert(sizeof(DDS_HEADER_DXT10) == 20, "DDS DX10 Extended Header size mismatch");
+
+    constexpr size_t DDS_MIN_HEADER_SIZE = sizeof(uint32_t) + sizeof(DDS_HEADER);
+    constexpr size_t DDS_DX10_HEADER_SIZE = sizeof(uint32_t) + sizeof(DDS_HEADER) + sizeof(DDS_HEADER_DXT10);
+    static_assert(DDS_DX10_HEADER_SIZE > DDS_MIN_HEADER_SIZE, "DDS DX10 Header should be larger than standard header");
 
     const DDS_PIXELFORMAT DDSPF_DXT1 =
     { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('D','X','T','1'), 0, 0, 0, 0, 0 };
@@ -807,13 +816,13 @@ HRESULT DirectX::SaveDDSTextureToFile(
     auto_delete_file delonfail(hFile.get());
 
     // Setup header
-    constexpr size_t MAX_HEADER_SIZE = sizeof(uint32_t) + sizeof(DDS_HEADER) + sizeof(DDS_HEADER_DXT10);
-    uint8_t fileHeader[MAX_HEADER_SIZE] = {};
+    uint8_t fileHeader[DDS_DX10_HEADER_SIZE] = {};
+
 
     *reinterpret_cast<uint32_t*>(&fileHeader[0]) = DDS_MAGIC;
 
     auto header = reinterpret_cast<DDS_HEADER*>(&fileHeader[0] + sizeof(uint32_t));
-    size_t headerSize = sizeof(uint32_t) + sizeof(DDS_HEADER);
+    size_t headerSize = DDS_MIN_HEADER_SIZE;
     header->size = sizeof(DDS_HEADER);
     header->flags = DDS_HEADER_FLAGS_TEXTURE | DDS_HEADER_FLAGS_MIPMAP;
     header->height = desc.Height;
@@ -870,7 +879,7 @@ HRESULT DirectX::SaveDDSTextureToFile(
         memcpy_s(&header->ddspf, sizeof(header->ddspf), &DDSPF_DX10, sizeof(DDS_PIXELFORMAT));
 
         headerSize += sizeof(DDS_HEADER_DXT10);
-        extHeader = reinterpret_cast<DDS_HEADER_DXT10*>(fileHeader + sizeof(uint32_t) + sizeof(DDS_HEADER));
+        extHeader = reinterpret_cast<DDS_HEADER_DXT10*>(fileHeader + DDS_MIN_HEADER_SIZE);
         extHeader->dxgiFormat = desc.Format;
         extHeader->resourceDimension = D3D11_RESOURCE_DIMENSION_TEXTURE2D;
         extHeader->arraySize = 1;

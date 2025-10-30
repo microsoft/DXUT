@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstdint>
 #include <memory>
 #include <new>
 
@@ -43,6 +44,8 @@ using namespace DirectX;
 //
 // See DDS.h in the 'Texconv' sample and the 'DirectXTex' library
 //--------------------------------------------------------------------------------------
+namespace
+{
 #pragma pack(push,1)
 
 constexpr uint32_t DDS_MAGIC = 0x20534444; // "DDS "
@@ -116,9 +119,15 @@ struct DDS_HEADER_DXT10
 
 #pragma pack(pop)
 
+    static_assert(sizeof(DDS_PIXELFORMAT) == 32, "DDS pixel format size mismatch");
+    static_assert(sizeof(DDS_HEADER) == 124, "DDS Header size mismatch");
+    static_assert(sizeof(DDS_HEADER_DXT10) == 20, "DDS DX10 Extended Header size mismatch");
+
+    constexpr size_t DDS_MIN_HEADER_SIZE = sizeof(uint32_t) + sizeof(DDS_HEADER);
+    constexpr size_t DDS_DX10_HEADER_SIZE = sizeof(uint32_t) + sizeof(DDS_HEADER) + sizeof(DDS_HEADER_DXT10);
+    static_assert(DDS_DX10_HEADER_SIZE > DDS_MIN_HEADER_SIZE, "DDS DX10 Header should be larger than standard header");
+
 //--------------------------------------------------------------------------------------
-namespace
-{
     struct handle_closer { void operator()(HANDLE h) noexcept { if (h) CloseHandle(h); } };
 
     using ScopedHandle = std::unique_ptr<void, handle_closer>;
@@ -134,8 +143,7 @@ namespace
     #else
     template<UINT TNameLength>
     inline void SetDebugObjectName(_In_ ID3D11DeviceChild*, _In_ const char(&)[TNameLength]) noexcept
-    {
-    }
+    {}
     #endif
 
     //--------------------------------------------------------------------------------------
@@ -158,13 +166,13 @@ namespace
             return E_FAIL;
         }
 
-        if (ddsDataSize < (sizeof(uint32_t) + sizeof(DDS_HEADER)))
+        if (ddsDataSize < DDS_MIN_HEADER_SIZE)
         {
             return E_FAIL;
         }
 
         // DDS files always start with the same magic number ("DDS ")
-        auto const dwMagicNumber = *reinterpret_cast<const uint32_t*>(ddsData);
+        const auto dwMagicNumber = *reinterpret_cast<const uint32_t*>(ddsData);
         if (dwMagicNumber != DDS_MAGIC)
         {
             return E_FAIL;
@@ -185,7 +193,7 @@ namespace
             (MAKEFOURCC('D', 'X', '1', '0') == hdr->ddspf.fourCC))
         {
             // Must be long enough for both headers and magic value
-            if (ddsDataSize < (sizeof(uint32_t) + sizeof(DDS_HEADER) + sizeof(DDS_HEADER_DXT10)))
+            if (ddsDataSize < DDS_DX10_HEADER_SIZE)
             {
                 return E_FAIL;
             }
@@ -195,8 +203,7 @@ namespace
 
         // setup the pointers in the process request
         *header = hdr;
-        auto offset = sizeof(uint32_t)
-            + sizeof(DDS_HEADER)
+        auto offset = DDS_MIN_HEADER_SIZE
             + (bDXT10Header ? sizeof(DDS_HEADER_DXT10) : 0u);
         *bitData = ddsData + offset;
         *bitSize = ddsDataSize - offset;
@@ -254,7 +261,7 @@ namespace
         }
 
         // Need at least enough data to fill the header and magic number to be a valid DDS
-        if (fileInfo.EndOfFile.LowPart < (sizeof(uint32_t) + sizeof(DDS_HEADER)))
+        if (fileInfo.EndOfFile.LowPart < DDS_MIN_HEADER_SIZE)
         {
             return E_FAIL;
         }
@@ -286,7 +293,7 @@ namespace
         }
 
         // DDS files always start with the same magic number ("DDS ")
-        auto const dwMagicNumber = *reinterpret_cast<const uint32_t*>(ddsData.get());
+        const auto dwMagicNumber = *reinterpret_cast<const uint32_t*>(ddsData.get());
         if (dwMagicNumber != DDS_MAGIC)
         {
             ddsData.reset();
@@ -309,7 +316,7 @@ namespace
             (MAKEFOURCC('D', 'X', '1', '0') == hdr->ddspf.fourCC))
         {
             // Must be long enough for both headers and magic value
-            if (fileInfo.EndOfFile.LowPart < (sizeof(uint32_t) + sizeof(DDS_HEADER) + sizeof(DDS_HEADER_DXT10)))
+            if (fileInfo.EndOfFile.LowPart < DDS_DX10_HEADER_SIZE)
             {
                 ddsData.reset();
                 return E_FAIL;
@@ -320,7 +327,7 @@ namespace
 
         // setup the pointers in the process request
         *header = hdr;
-        auto offset = sizeof(uint32_t) + sizeof(DDS_HEADER)
+        auto offset = DDS_MIN_HEADER_SIZE
             + (bDXT10Header ? sizeof(DDS_HEADER_DXT10) : 0u);
         *bitData = ddsData.get() + offset;
         *bitSize = fileInfo.EndOfFile.LowPart - offset;
@@ -484,7 +491,7 @@ namespace
         _In_ size_t width,
         _In_ size_t height,
         _In_ DXGI_FORMAT fmt,
-        size_t* outNumBytes,
+        _Out_opt_ size_t* outNumBytes,
         _Out_opt_ size_t* outRowBytes,
         _Out_opt_ size_t* outNumRows) noexcept
     {
@@ -498,6 +505,9 @@ namespace
         size_t bpe = 0;
         switch (fmt)
         {
+        case DXGI_FORMAT_UNKNOWN:
+            return E_INVALIDARG;
+
         case DXGI_FORMAT_BC1_TYPELESS:
         case DXGI_FORMAT_BC1_UNORM:
         case DXGI_FORMAT_BC1_UNORM_SRGB:
@@ -550,6 +560,15 @@ namespace
             planar = true;
             bpe = 2;
             break;
+
+        #if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+
+        case DXGI_FORMAT_P208:
+            planar = true;
+            bpe = 2;
+            break;
+
+        #endif
 
         case DXGI_FORMAT_P010:
         case DXGI_FORMAT_P016:
@@ -1731,7 +1750,7 @@ namespace
             if (MAKEFOURCC('D', 'X', '1', '0') == header->ddspf.fourCC)
             {
                 auto d3d10ext = reinterpret_cast<const DDS_HEADER_DXT10*>(reinterpret_cast<const uint8_t*>(header) + sizeof(DDS_HEADER));
-                auto const mode = static_cast<DDS_ALPHA_MODE>(d3d10ext->miscFlags2 & DDS_MISC_FLAGS2_ALPHA_MODE_MASK);
+                const auto mode = static_cast<DDS_ALPHA_MODE>(d3d10ext->miscFlags2 & DDS_MISC_FLAGS2_ALPHA_MODE_MASK);
                 switch (mode)
                 {
                 case DDS_ALPHA_MODE_STRAIGHT:
