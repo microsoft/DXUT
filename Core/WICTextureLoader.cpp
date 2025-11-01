@@ -64,8 +64,7 @@ namespace
     #else
     template<UINT TNameLength>
     inline void SetDebugObjectName(_In_ ID3D11DeviceChild*, _In_ const char(&)[TNameLength]) noexcept
-    {
-    }
+    {}
     #endif
 
     //-------------------------------------------------------------------------------------
@@ -78,7 +77,8 @@ namespace
 
         constexpr WICTranslate(const GUID& wg, DXGI_FORMAT fmt) noexcept :
             wic(wg),
-            format(fmt) {}
+            format(fmt)
+        {}
     };
 
     constexpr WICTranslate g_WICFormats[] =
@@ -116,7 +116,8 @@ namespace
 
         constexpr WICConvert(const GUID& src, const GUID& tgt) noexcept :
             source(src),
-            target(tgt) {}
+            target(tgt)
+        {}
     };
 
     constexpr WICConvert g_WICConvert[] =
@@ -594,8 +595,8 @@ namespace
         if (rowBytes > UINT32_MAX || numBytes > UINT32_MAX)
             return HRESULT_FROM_WIN32(ERROR_ARITHMETIC_OVERFLOW);
 
-        auto const rowPitch = static_cast<size_t>(rowBytes);
-        auto const imageSize = static_cast<size_t>(numBytes);
+        const auto rowPitch = static_cast<size_t>(rowBytes);
+        const auto imageSize = static_cast<size_t>(numBytes);
 
         std::unique_ptr<uint8_t[]> temp(new (std::nothrow) uint8_t[imageSize]);
         if (!temp)
